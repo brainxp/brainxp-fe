@@ -4,7 +4,6 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import android.os.SystemClock
 import com.example.brainxp.MainActivity
 import com.example.brainxp.core.detect.ForegroundAppDetector
 import com.example.brainxp.core.detect.ScreenState
@@ -103,9 +102,7 @@ class BlockingService : Service() {
 
     private suspend fun observeUnlockForWarning() {
         unlocks.state.collect { unlock ->
-            if (unlock is UnlockState.Active) {
-                expiryWarning.schedule(unlock, settings.settings.first().warningLeadSeconds)
-            } else {
+            if (unlock !is UnlockState.Active) {
                 expiryWarning.cancel()
                 warnedForUnlock = null
             }
@@ -126,15 +123,14 @@ class BlockingService : Service() {
 
     private suspend fun tick() {
         permissions.refresh()
-        val unlock = unlocks.evaluate()
-        maybeWarn(unlock)
         val snapshot = protection.snapshot.value
         val current = foregroundPackage.value
         val ours = current != null && current == packageName
-        val shouldBlock =
-            current != null &&
-                !ours &&
-                RestrictionPolicy.isBlocked(current, snapshot.restriction, SystemClock.elapsedRealtime())
+        val unlock = unlocks.meter(current?.takeUnless { ours })
+        maybeWarn(unlock)
+
+        val restriction = snapshot.restriction.copy(unlock = unlock)
+        val shouldBlock = current != null && !ours && RestrictionPolicy.isBlocked(current, restriction)
 
         if (shouldBlock) {
             clearTicks = 0
@@ -144,9 +140,7 @@ class BlockingService : Service() {
                 blockedPackage = blockedPackage,
                 appLabel = appLabels[blockedPackage] ?: blockedPackage,
                 balanceSeconds = rewards.state.value.balanceSeconds,
-                capReached =
-                    snapshot.restriction.unlock !is UnlockState.Active &&
-                        rewards.state.value.balanceSeconds > 0,
+                capReached = unlock !is UnlockState.Active && rewards.state.value.balanceSeconds > 0,
             ) { launchEarnTime(it) }
         } else {
             clearTicks++
@@ -172,7 +166,7 @@ class BlockingService : Service() {
         notification.build(
             snapshot = protection.snapshot.value,
             blocked = blocked.value,
-            now = SystemClock.elapsedRealtime(),
+            remaining = unlocks.remaining(),
         )
 
     companion object {
