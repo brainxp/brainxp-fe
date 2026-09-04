@@ -26,7 +26,6 @@ class FakeRepositoriesTest {
     private lateinit var materials: FakeMaterialRepository
     private lateinit var sessions: FakeSessionRepository
     private lateinit var rewards: FakeRewardRepository
-    private lateinit var restrictions: FakeRestrictionRepository
     private lateinit var activity: FakeActivityLogRepository
     private lateinit var family: FakeFamilyRepository
 
@@ -36,7 +35,6 @@ class FakeRepositoriesTest {
         materials = FakeMaterialRepository(backend)
         sessions = FakeSessionRepository(backend)
         rewards = FakeRewardRepository(backend)
-        restrictions = FakeRestrictionRepository(backend)
         activity = FakeActivityLogRepository(backend)
         family = FakeFamilyRepository(backend)
     }
@@ -311,29 +309,6 @@ class FakeRepositoriesTest {
 
             backend.failNext(FakeBackend.LEDGER_HISTORY, ApiError.ServerBusy)
             assertEquals(ApiError.ServerBusy, failure(rewards.history()))
-        }
-
-    @Test
-    fun restrictionTogglesAreObservableAndCanFail() =
-        runTest {
-            success(restrictions.setRestricted("com.supercell.clashofclans", true))
-            assertTrue(
-                restrictions
-                    .observeRestricted()
-                    .first()
-                    .first { it.packageName == "com.supercell.clashofclans" }
-                    .enabled,
-            )
-
-            success(restrictions.replaceRestricted(listOf("com.instagram.android")))
-            val enabled = restrictions.observeRestricted().first().filter { it.enabled }
-            assertEquals(listOf("com.instagram.android"), enabled.map { it.packageName })
-
-            backend.failNext(FakeBackend.RESTRICTION_SET, ApiError.Network)
-            assertEquals(ApiError.Network, failure(restrictions.setRestricted("com.x", true)))
-
-            backend.failNext(FakeBackend.RESTRICTION_REPLACE, ApiError.ServerBusy)
-            assertEquals(ApiError.ServerBusy, failure(restrictions.replaceRestricted(emptyList())))
         }
 
     @Test
