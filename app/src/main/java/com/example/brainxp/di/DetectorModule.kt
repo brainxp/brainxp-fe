@@ -50,7 +50,7 @@ object DetectorModule {
     fun provideForegroundAppDetector(
         usageStats: UsageStatsDetector,
         accessibility: AccessibilityDetector,
-        choice: StateFlow<DetectorChoice>,
+        choice: @JvmSuppressWildcards StateFlow<DetectorChoice>,
     ): ForegroundAppDetector =
         SelectableForegroundAppDetector(
             usageStats = usageStats,
