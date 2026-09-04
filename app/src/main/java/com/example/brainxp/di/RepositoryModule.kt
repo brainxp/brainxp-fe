@@ -1,9 +1,11 @@
 package com.example.brainxp.di
 
 import com.example.brainxp.data.repo.ActivityLogRepository
+import com.example.brainxp.data.repo.ConsumptionReporter
 import com.example.brainxp.data.repo.FamilyRepository
 import com.example.brainxp.data.repo.MaterialRepository
 import com.example.brainxp.data.repo.RestrictionRepository
+import com.example.brainxp.data.repo.RewardReconciler
 import com.example.brainxp.data.repo.RewardRepository
 import com.example.brainxp.data.repo.RoomRestrictionRepository
 import com.example.brainxp.data.repo.RoomUnlockRepository
@@ -42,4 +44,7 @@ interface RepositoryModule {
 
     @Binds
     fun bindUnlockRepository(impl: RoomUnlockRepository): UnlockRepository
+
+    @Binds
+    fun bindConsumptionReporter(impl: RewardReconciler): ConsumptionReporter
 }

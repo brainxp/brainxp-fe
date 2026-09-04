@@ -32,6 +32,10 @@ data class ReconciledBalance(
     val spendable: Boolean get() = source != BalanceSource.NONE && balanceSeconds > 0
 }
 
+interface ConsumptionReporter {
+    suspend fun report(secondsByPackage: Map<String, Int>): AppResult<ReconciledBalance>
+}
+
 @Singleton
 class RewardReconciler
     @Inject
@@ -39,7 +43,7 @@ class RewardReconciler
         private val rewards: RewardRepository,
         private val cache: RewardCache,
         private val clock: AppClock,
-    ) {
+    ) : ConsumptionReporter {
         private val mutableState = MutableStateFlow(ReconciledBalance())
 
         val state: StateFlow<ReconciledBalance> = mutableState.asStateFlow()
@@ -54,18 +58,20 @@ class RewardReconciler
             return reconciled
         }
 
-        suspend fun spend(
-            seconds: Int,
-            appLabel: String,
-        ): AppResult<ReconciledBalance> {
-            val entry =
-                ConsumptionEntry(
-                    clientEventId = UUID.randomUUID().toString(),
-                    appLabel = appLabel,
-                    seconds = seconds,
-                    occurredAtWallClock = clock.wallClock(),
-                )
-            return when (val result = rewards.reportConsumption(listOf(entry))) {
+        override suspend fun report(secondsByPackage: Map<String, Int>): AppResult<ReconciledBalance> {
+            val entries =
+                secondsByPackage.filterValues { it > 0 }.map { (packageName, seconds) ->
+                    ConsumptionEntry(
+                        clientEventId = UUID.randomUUID().toString(),
+                        appLabel = packageName,
+                        seconds = seconds,
+                        occurredAtWallClock = clock.wallClock(),
+                    )
+                }
+            if (entries.isEmpty()) {
+                return AppResult.Success(mutableState.value)
+            }
+            return when (val result = rewards.reportConsumption(entries)) {
                 is AppResult.Success -> {
                     val reconciled = fromServer(result.value)
                     mutableState.value = reconciled
@@ -73,9 +79,23 @@ class RewardReconciler
                 }
 
                 is AppResult.Failure -> {
+                    mutableState.value = deductLocally(entries.sumOf { it.seconds }, result.error)
                     AppResult.Failure(result.error)
                 }
             }
+        }
+
+        private suspend fun deductLocally(
+            seconds: Int,
+            error: ApiError,
+        ): ReconciledBalance {
+            val remaining = (mutableState.value.balanceSeconds - seconds).coerceAtLeast(0)
+            cache.write(CachedBalance(remaining, clock.wallClock()))
+            return mutableState.value.copy(
+                balanceSeconds = remaining,
+                source = BalanceSource.CACHE,
+                error = error,
+            )
         }
 
         private suspend fun fromServer(standing: Standing): ReconciledBalance {
