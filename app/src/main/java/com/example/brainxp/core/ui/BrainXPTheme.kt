@@ -11,8 +11,12 @@ fun BrainXPTheme(
     content: @Composable () -> Unit,
 ) {
     val colorScheme = if (darkTheme) BrainXPDarkColors else BrainXPLightColors
+    val extended = if (darkTheme) DarkExtendedColors else LightExtendedColors
 
-    CompositionLocalProvider(LocalSpacing provides Spacing()) {
+    CompositionLocalProvider(
+        LocalSpacing provides Spacing(),
+        LocalExtendedColors provides extended,
+    ) {
         MaterialTheme(
             colorScheme = colorScheme,
             typography = BrainXPTypography,
@@ -25,4 +29,7 @@ fun BrainXPTheme(
 object BrainXPTheme {
     val spacing: Spacing
         @Composable get() = LocalSpacing.current
+
+    val extendedColors: ExtendedColors
+        @Composable get() = LocalExtendedColors.current
 }
