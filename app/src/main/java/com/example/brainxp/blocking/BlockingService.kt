@@ -9,6 +9,8 @@ import com.example.brainxp.MainActivity
 import com.example.brainxp.core.detect.ForegroundAppDetector
 import com.example.brainxp.core.detect.ScreenState
 import com.example.brainxp.core.permission.PermissionStateProvider
+import com.example.brainxp.data.prefs.SettingsDataStore
+import com.example.brainxp.data.repo.RewardReconciler
 import com.example.brainxp.di.DefaultDispatcher
 import com.example.brainxp.domain.RestrictionPolicy
 import com.example.brainxp.domain.UnlockSessionManager
@@ -19,6 +21,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -43,6 +46,15 @@ class BlockingService : Service() {
     lateinit var expiryWarning: ExpiryWarning
 
     @Inject
+    lateinit var settings: SettingsDataStore
+
+    @Inject
+    lateinit var installedApps: InstalledAppsSource
+
+    @Inject
+    lateinit var rewards: RewardReconciler
+
+    @Inject
     lateinit var notification: ProtectionNotification
 
     @Inject
@@ -58,14 +70,17 @@ class BlockingService : Service() {
     private val blocked = MutableStateFlow(false)
     private var clearTicks = 0
     private var warnedForUnlock: String? = null
+    private var appLabels: Map<String, String> = emptyMap()
 
     override fun onCreate() {
         super.onCreate()
         scope = CoroutineScope(SupervisorJob() + dispatcher)
         notification.createChannel()
+        expiryWarning.createChannel()
         startForeground(ProtectionNotification.ID, render())
         scope.launch { protection.reloadUnlock() }
         scope.launch { observeUnlockForWarning() }
+        scope.launch { appLabels = installedApps.launchableApps().associate { it.packageName to it.label } }
         scope.launch { detector.foregroundPackage.collect { foregroundPackage.value = it } }
         scope.launch {
             ScreenGatedTicker(screenState.isScreenOn, TICK_INTERVAL_MS).ticks().collect { tick() }
@@ -89,7 +104,7 @@ class BlockingService : Service() {
     private suspend fun observeUnlockForWarning() {
         unlocks.state.collect { unlock ->
             if (unlock is UnlockState.Active) {
-                expiryWarning.schedule(unlock)
+                expiryWarning.schedule(unlock, settings.settings.first().warningLeadSeconds)
             } else {
                 expiryWarning.cancel()
                 warnedForUnlock = null
@@ -97,14 +112,15 @@ class BlockingService : Service() {
         }
     }
 
-    private fun maybeWarn(unlock: UnlockState) {
+    private suspend fun maybeWarn(unlock: UnlockState) {
         if (unlock !is UnlockState.Active || warnedForUnlock == unlock.unlockId) {
             return
         }
-        val remaining = unlocks.remaining().inWholeMilliseconds
-        if (remaining in 1..ExpiryWarning.LEAD_MILLIS) {
+        val remainingSeconds = unlocks.remaining().inWholeSeconds
+        val lead = settings.settings.first().warningLeadSeconds
+        if (remainingSeconds in 1..lead) {
             warnedForUnlock = unlock.unlockId
-            expiryWarning.post()
+            expiryWarning.post(remainingSeconds.toInt())
         }
     }
 
@@ -123,7 +139,15 @@ class BlockingService : Service() {
         if (shouldBlock) {
             clearTicks = 0
             blocked.value = true
-            overlay.show(requireNotNull(current)) { launchEarnTime(it) }
+            val blockedPackage = requireNotNull(current)
+            overlay.show(
+                blockedPackage = blockedPackage,
+                appLabel = appLabels[blockedPackage] ?: blockedPackage,
+                balanceSeconds = rewards.state.value.balanceSeconds,
+                capReached =
+                    snapshot.restriction.unlock !is UnlockState.Active &&
+                        rewards.state.value.balanceSeconds > 0,
+            ) { launchEarnTime(it) }
         } else {
             clearTicks++
             if (ours || clearTicks >= CLEAR_TICKS_BEFORE_HIDE) {
