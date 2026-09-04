@@ -100,6 +100,6 @@ private fun defaultDecorators(): List<NavEntryDecorator<NavKey>> =
         rememberViewModelStoreNavEntryDecorator(),
     )
 
-private fun NavBackStack<NavKey>.popOrIgnore() {
+internal fun NavBackStack<NavKey>.popOrIgnore() {
     if (size > 1) removeAt(lastIndex)
 }
