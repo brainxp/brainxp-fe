@@ -69,6 +69,10 @@
 
     <string name="block_screen_title">Saldomu
 sedang kosong.</string>
+    <string name="block_screen_idle_title">Waktunya belum
+kamu mulai.</string>
+    <string name="block_screen_idle_body">Saldomu masih ada. Buka BrainXP dan mulai waktu bermain untuk memakainya.</string>
+    <string name="block_screen_idle_action">Mulai waktu bermain</string>
     <string name="block_screen_body">Aplikasi ini kamu kunci sendiri. Kerjakan satu sesi dari materimu, dan waktunya kebuka lagi.</string>
     <string name="block_screen_hero_label">Saldo utuh, nggak berkurang</string>
     <string name="block_screen_hero_sub">Nunggu kamu belajar lagi</string>
@@ -126,6 +130,10 @@ sudah kepakai.</string>
     <string name="home_cap_reached">Batas harian tercapai. Saldomu tidak berkurang dan menunggu — hari berganti sekitar %1$s lagi.</string>
 
     <string name="home_start_earning">Setor materi</string>
+    <string name="home_session_label">Pakai waktumu sekarang</string>
+    <string name="home_session_start">Mulai waktu bermain</string>
+    <string name="home_session_starting">Menyiapkan…</string>
+    <string name="home_spend_failed">Gagal mencatat pemakaian ke server, jadi sesinya tidak dimulai. Coba lagi.</string>
     <string name="home_end_early">Selesai sekarang</string>
 
     <string name="home_apps_open">Terbuka selama saldo ada</string>
