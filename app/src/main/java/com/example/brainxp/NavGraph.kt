@@ -37,6 +37,7 @@ internal fun EntryProviderScope<NavKey>.onboardingEntries(
 internal fun EntryProviderScope<NavKey>.dailyEntries(
     backStack: NavBackStack<NavKey>,
     onResetSetup: () -> Unit,
+    onToggleProtection: () -> Unit,
 ) {
     entry<MainRoute.Home> {
         Placeholder("Home", "MainRoute.Home") {
@@ -60,6 +61,7 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(
             listOf(
                 action("Restricted apps", backStack, MainRoute.AppPicker),
                 action("Permissions", backStack, MainRoute.PermissionSetup),
+                PlaceholderAction("Toggle protection", onToggleProtection),
                 PlaceholderAction("Re-run setup", onResetSetup),
             )
         }
