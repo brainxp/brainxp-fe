@@ -66,4 +66,9 @@
     <plurals name="blocking_notification_restricted_count">
         <item quantity="other">%1$d aplikasi dijaga</item>
     </plurals>
+
+    <string name="block_screen_badge">Dibatasi</string>
+    <string name="block_screen_title">Waktunya belajar dulu</string>
+    <string name="block_screen_body">Aplikasi ini kamu batasi sendiri. Jawab beberapa pertanyaan dari materimu untuk membuka waktu bermain.</string>
+    <string name="block_screen_action">Kumpulkan waktu</string>
 </resources>
