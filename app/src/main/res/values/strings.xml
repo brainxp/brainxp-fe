@@ -24,4 +24,32 @@
     <string name="error_unknown_title">Terjadi kesalahan</string>
     <string name="error_unknown_body">Kami belum tahu penyebabnya. Coba lagi.</string>
     <string name="error_unknown_body_code">Kami belum tahu penyebabnya (kode %1$d).</string>
+
+    <string name="permission_setup_title">Siapkan izin</string>
+    <string name="permission_setup_subtitle">BrainXP butuh beberapa izin sistem untuk bisa menjaga waktu bermainmu. Buka tiap langkah secara berurutan.</string>
+    <string name="permission_setup_step_label">Langkah %1$d dari %2$d</string>
+    <string name="permission_setup_open">Buka pengaturan</string>
+    <string name="permission_setup_granted">Sudah aktif</string>
+    <string name="permission_setup_optional">Opsional</string>
+    <string name="permission_setup_recommended">Disarankan</string>
+    <string name="permission_setup_continue">Lanjut</string>
+    <string name="permission_setup_finish">Selesai</string>
+    <string name="permission_setup_blocked">Dua izin wajib di atas harus aktif sebelum kamu bisa lanjut.</string>
+    <string name="permission_setup_degraded">Perlindungan aktif, tapi belum penuh. Langkah yang kamu lewati membuat BrainXP lebih mudah gagal tanpa memberitahumu.</string>
+    <string name="permission_setup_unavailable">Perangkat ini tidak punya halaman pengaturan untuk izin tersebut.</string>
+
+    <string name="permission_notifications_title">Notifikasi</string>
+    <string name="permission_notifications_breaks">Tanpa ini kamu tidak akan diberi tahu saat waktu bermain hampir habis, dan notifikasi layanan penjaga akan tersembunyi.</string>
+
+    <string name="permission_usage_access_title">Akses penggunaan aplikasi</string>
+    <string name="permission_usage_access_breaks">Tanpa ini BrainXP tidak bisa mengetahui aplikasi apa yang sedang kamu buka, sehingga tidak ada yang bisa dibatasi sama sekali.</string>
+
+    <string name="permission_overlay_title">Tampil di atas aplikasi lain</string>
+    <string name="permission_overlay_breaks">Tanpa ini layar pemblokir tidak bisa muncul, jadi aplikasi yang dibatasi tetap bisa dipakai bebas.</string>
+
+    <string name="permission_battery_title">Bebas dari penghemat baterai</string>
+    <string name="permission_battery_breaks">Tanpa ini sistem bisa mematikan layanan penjaga saat ponsel menganggur, dan pembatasan berhenti tanpa peringatan.</string>
+
+    <string name="permission_accessibility_title">Layanan aksesibilitas</string>
+    <string name="permission_accessibility_breaks">Ini alternatif pendeteksi aplikasi yang sedikit lebih cepat. Melewatinya tidak mengurangi apa pun — pendeteksi utama sudah cukup.</string>
 </resources>
