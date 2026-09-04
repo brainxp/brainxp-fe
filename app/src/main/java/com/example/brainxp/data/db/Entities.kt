@@ -84,9 +84,8 @@ data class AnswerEntity(
 @Entity(tableName = "unlock_sessions", indices = [Index("status")])
 data class UnlockSessionEntity(
     @PrimaryKey val id: String,
-    val endAtElapsed: Long,
-    val endAtWallClock: Long,
-    val bootWallClock: Long,
+    val budgetMillis: Long,
+    val consumedByPackage: Map<String, Long>,
     val allowedPackages: List<String>,
     val status: UnlockStatus,
 )

@@ -16,10 +16,10 @@ import androidx.room.TypeConverters
         OcrDraftEntity::class,
         PendingOperationEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = false,
 )
-@TypeConverters(Converters::class)
+@TypeConverters(Converters::class, JsonConverters::class)
 abstract class BrainXPDatabase : RoomDatabase() {
     abstract fun materialDao(): MaterialDao
 

@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.example.brainxp.data.db.ActivityEventDao
 import com.example.brainxp.data.db.AnswerDao
 import com.example.brainxp.data.db.BrainXPDatabase
+import com.example.brainxp.data.db.MIGRATION_1_2
 import com.example.brainxp.data.db.MaterialDao
 import com.example.brainxp.data.db.OcrDraftDao
 import com.example.brainxp.data.db.PendingOperationDao
@@ -26,7 +27,11 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(
         @ApplicationContext context: Context,
-    ): BrainXPDatabase = Room.databaseBuilder(context, BrainXPDatabase::class.java, BrainXPDatabase.NAME).build()
+    ): BrainXPDatabase =
+        Room
+            .databaseBuilder(context, BrainXPDatabase::class.java, BrainXPDatabase.NAME)
+            .addMigrations(MIGRATION_1_2)
+            .build()
 
     @Provides
     fun provideMaterialDao(db: BrainXPDatabase): MaterialDao = db.materialDao()

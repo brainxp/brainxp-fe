@@ -2,19 +2,34 @@ package com.example.brainxp.data.db
 
 import androidx.room.TypeConverter
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 
-class Converters {
+private val STRING_LIST = ListSerializer(String.serializer())
+private val MILLIS_BY_KEY = MapSerializer(String.serializer(), Long.serializer())
+
+class JsonConverters {
     @TypeConverter
-    fun stringListToJson(value: List<String>): String = Json.encodeToString(ListSerializer(String.serializer()), value)
+    fun stringListToJson(value: List<String>): String = Json.encodeToString(STRING_LIST, value)
 
     @TypeConverter
     fun jsonToStringList(value: String): List<String> =
         runCatching {
-            Json.decodeFromString(ListSerializer(String.serializer()), value)
+            Json.decodeFromString(STRING_LIST, value)
         }.getOrDefault(emptyList())
 
+    @TypeConverter
+    fun millisByKeyToJson(value: Map<String, Long>): String = Json.encodeToString(MILLIS_BY_KEY, value)
+
+    @TypeConverter
+    fun jsonToMillisByKey(value: String): Map<String, Long> =
+        runCatching {
+            Json.decodeFromString(MILLIS_BY_KEY, value)
+        }.getOrDefault(emptyMap())
+}
+
+class Converters {
     @TypeConverter
     fun syncStateToString(value: SyncState): String = value.name
 
