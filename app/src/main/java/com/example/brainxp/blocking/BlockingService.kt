@@ -5,6 +5,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.os.SystemClock
+import com.example.brainxp.MainActivity
 import com.example.brainxp.core.detect.ForegroundAppDetector
 import com.example.brainxp.core.detect.ScreenState
 import com.example.brainxp.data.repo.RestrictionRepository
@@ -36,6 +37,9 @@ class BlockingService : Service() {
     lateinit var notification: ProtectionNotification
 
     @Inject
+    lateinit var overlay: BlockOverlayController
+
+    @Inject
     @DefaultDispatcher
     lateinit var dispatcher: CoroutineDispatcher
 
@@ -44,6 +48,7 @@ class BlockingService : Service() {
     private val foregroundPackage = MutableStateFlow<String?>(null)
     private val restrictionState = MutableStateFlow(RestrictionState())
     private val blocked = MutableStateFlow(false)
+    private var clearTicks = 0
 
     override fun onCreate() {
         super.onCreate()
@@ -64,6 +69,7 @@ class BlockingService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
+        overlay.hide()
         scope.cancel()
         super.onDestroy()
     }
@@ -93,15 +99,41 @@ class BlockingService : Service() {
 
     private fun tick() {
         val current = foregroundPackage.value
-        blocked.value =
-            current != null &&
-            RestrictionPolicy.isBlocked(current, restrictionState.value, SystemClock.elapsedRealtime())
+        val ours = current == packageName
+        val shouldBlock =
+            !ours &&
+                current != null &&
+                RestrictionPolicy.isBlocked(current, restrictionState.value, SystemClock.elapsedRealtime())
+
+        if (shouldBlock && current != null) {
+            clearTicks = 0
+            blocked.value = true
+            overlay.show(current) { launchEarnTime(it) }
+        } else {
+            clearTicks++
+            if (ours || clearTicks >= CLEAR_TICKS_BEFORE_HIDE) {
+                blocked.value = false
+                overlay.hide()
+            }
+        }
         getSystemService(NotificationManager::class.java).notify(ProtectionNotification.ID, render())
+    }
+
+    private fun launchEarnTime(blockedPackage: String) {
+        overlay.hide()
+        startActivity(
+            Intent(this, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                putExtra(EXTRA_BLOCKED_PACKAGE, blockedPackage)
+            },
+        )
     }
 
     private fun render() = notification.build(restrictionState.value, blocked.value, SystemClock.elapsedRealtime())
 
-    private companion object {
-        const val TICK_INTERVAL_MS = 600L
+    companion object {
+        const val EXTRA_BLOCKED_PACKAGE = "blocked_package"
+        private const val TICK_INTERVAL_MS = 600L
+        private const val CLEAR_TICKS_BEFORE_HIDE = 3
     }
 }
