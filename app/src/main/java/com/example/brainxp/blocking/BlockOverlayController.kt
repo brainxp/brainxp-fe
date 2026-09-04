@@ -105,11 +105,11 @@ class BlockOverlayController
 
         private fun onConfigurationChanged(newConfig: Configuration) {
             val signature = signatureOf(newConfig)
-            if (signature == configSignature) {
+            val blockedPackage = target
+            val callback = earnTime
+            if (signature == configSignature || blockedPackage == null || callback == null) {
                 return
             }
-            val blockedPackage = target ?: return
-            val callback = earnTime ?: return
             configSignature = signature
             detach()
             attach(blockedPackage, callback)
