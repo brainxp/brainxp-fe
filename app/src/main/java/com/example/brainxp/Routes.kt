@@ -49,6 +49,16 @@ sealed interface MainRoute : NavKey {
     data object Capture : MainRoute
 
     @Serializable
+    data class Preparing(
+        val materialId: String,
+    ) : MainRoute
+
+    @Serializable
+    data class Rejected(
+        val materialId: String,
+    ) : MainRoute
+
+    @Serializable
     data class OcrReview(
         val draftId: String,
     ) : MainRoute
