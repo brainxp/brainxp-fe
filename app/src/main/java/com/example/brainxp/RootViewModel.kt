@@ -55,7 +55,7 @@ class RootViewModel
             }
         }
 
-        fun grantDebugUnlock() {
+        fun grantDebugUnlock(durationSeconds: Int) {
             if (!BuildConfig.DEBUG) {
                 return
             }
@@ -67,12 +67,22 @@ class RootViewModel
                         .filter { it.enabled }
                         .map { it.packageName }
                         .toSet()
-                unlocks.start(DEBUG_UNLOCK_SECONDS, packages)
+                unlocks.start(durationSeconds.coerceAtLeast(1), packages)
             }
+        }
+
+        fun setWarningLead(seconds: Int) {
+            if (!BuildConfig.DEBUG) {
+                return
+            }
+            viewModelScope.launch { settings.setWarningLeadSeconds(seconds.coerceAtLeast(1)) }
+        }
+
+        fun endUnlock() {
+            viewModelScope.launch { unlocks.endEarly() }
         }
 
         private companion object {
             const val SUBSCRIPTION_TIMEOUT_MS = 5_000L
-            const val DEBUG_UNLOCK_SECONDS = 300
         }
     }
