@@ -59,6 +59,36 @@
     <string name="pair_delete">Hapus satu angka</string>
     <string name="pair_digit">Angka %1$s</string>
 
+    <string name="library_title">Pustaka materi</string>
+    <string name="library_intro">Materi dan soalmu tersimpan sampai kamu yang menghapusnya. Belajar ulang tidak menambah banyak waktu, tapi tetap menambah pemahaman.</string>
+    <string name="library_empty">Belum ada materi. Setor satu, dan soalnya jadi milikmu untuk dipelajari ulang.</string>
+    <string name="library_question_count">%1$s karakter</string>
+    <string name="library_times_studied">dikerjakan %1$d×</string>
+    <string name="library_manage">Kelola</string>
+    <string name="library_manage_hint">Ketuk untuk menghapus berkas dan soalnya</string>
+    <string name="library_remove">Hapus</string>
+    <string name="library_removing">Menghapus…</string>
+    <string name="library_manage_empty">Belum ada yang bisa dikelola</string>
+    <string name="library_remove_failed">Materinya gagal dihapus. Coba lagi.</string>
+
+    <string name="progress_title">Kemajuanmu</string>
+    <string name="progress_streak_label">Streak berjalan</string>
+    <string name="progress_days">hari</string>
+    <string name="progress_freeze">Jatah bolong tersisa</string>
+    <string name="progress_freeze_sub">Satu per 7 hari beruntun, maksimal dua</string>
+    <string name="progress_longest">Streak terpanjang</string>
+    <string name="progress_sessions">Sesi selesai</string>
+    <string name="progress_correct">Soal dijawab benar</string>
+    <string name="progress_essays">Esai lolos ambang</string>
+    <string name="progress_badges">Lencana · %1$d dari %2$d</string>
+    <string name="progress_badge_note">Lencana tidak menghasilkan waktu. Sebagian hanya bisa diraih lewat soal sulit dan esai.</string>
+
+    <string name="home_progress_open">Buka kemajuan</string>
+    <string name="home_rest_days">Boleh libur</string>
+    <string name="home_rest_days_sub">Sebelum saldonya ditahan</string>
+    <string name="home_rest_days_value">%1$d hari</string>
+    <string name="home_idle_locked">Terkunci · terakhir belajar %1$d hari lalu</string>
+
     <string name="error_network_title">Tidak ada koneksi</string>
     <string name="error_network_body">Periksa koneksi internetmu, lalu coba lagi.</string>
 
@@ -166,7 +196,6 @@
 
     <string name="home_title">Beranda</string>
     <string name="home_streak">%1$d hari</string>
-    <string name="home_progress">Kemajuan</string>
 
     <string name="home_protection_active">Perlindungan aktif</string>
     <string name="home_protection_degraded">Tidak penuh</string>
@@ -194,8 +223,7 @@
     <string name="home_no_apps_title">Belum ada aplikasi dikunci</string>
     <string name="home_no_apps_sub">Pilih dulu aplikasi yang mau dibatasi</string>
 
-    <string name="home_library_title">Pustaka materi</string>
-    <string name="home_library_sub">Soal lama bisa dipelajari ulang</string>
+    <string name="home_library_title">Pustaka materi</string>    <string name="home_library_sub">Soal lama bisa dipelajari ulang</string>
     <string name="home_daily_cap">Jatah main hari ini</string>
     <string name="home_reset_in">Hari berganti dalam</string>
 
