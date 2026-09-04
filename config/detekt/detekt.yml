@@ -5,6 +5,8 @@ naming:
 complexity:
   LongParameterList:
     ignoreAnnotated: ['Composable']
+  LongMethod:
+    ignoreAnnotated: ['Composable']
 
 style:
   MagicNumber:
