@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brainxp.blocking.InstalledAppsSource
 import com.example.brainxp.blocking.ProtectionStateHolder
-import com.example.brainxp.core.result.AppResult
 import com.example.brainxp.data.prefs.SettingsDataStore
 import com.example.brainxp.data.repo.BalanceSource
 import com.example.brainxp.data.repo.ReconciledBalance
@@ -12,7 +11,7 @@ import com.example.brainxp.data.repo.RestrictionRepository
 import com.example.brainxp.data.repo.RewardReconciler
 import com.example.brainxp.domain.UnlockSessionManager
 import com.example.brainxp.domain.model.BlockReason
-import com.example.brainxp.domain.remainingFlow
+import com.example.brainxp.domain.model.UnlockState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -37,8 +36,8 @@ class HomeViewModel
         protection: ProtectionStateHolder,
     ) : ViewModel() {
         private companion object {
-            const val SPEND_NOTE = "unlock"
             val PRESET_SECONDS = listOf(300, 600, 900, 1_800)
+            const val MILLIS_PER_SECOND = 1_000L
         }
 
         private val mutableState = MutableStateFlow(HomeUiState())
@@ -56,7 +55,7 @@ class HomeViewModel
                 combine(
                     reconciler.state,
                     unlocks.state,
-                    unlocks.remainingFlow(),
+                    unlocks.remainingFlow,
                     protection.snapshot,
                     combine(restrictions.observeRestricted(), labels) { apps, names ->
                         apps.filter { it.enabled }.map { app ->
@@ -65,10 +64,13 @@ class HomeViewModel
                     },
                 ) { balance, unlock, remaining, snapshot, lockedApps ->
                     val standing = balance.standing
-                    val options = durationOptions(balance.balanceSeconds)
+                    val consumedSeconds =
+                        ((unlock as? UnlockState.Active)?.consumedMillis ?: 0L) / MILLIS_PER_SECOND
+                    val liveBalance = (balance.balanceSeconds - consumedSeconds).coerceAtLeast(0).toInt()
+                    val options = durationOptions(liveBalance)
                     HomeUiState(
                         phase = phaseFor(balance),
-                        balanceSeconds = balance.balanceSeconds,
+                        balanceSeconds = liveBalance,
                         spentTodaySeconds = standing?.spentTodaySeconds ?: 0,
                         dailyCapSeconds = standing?.dailyCapSeconds ?: 0,
                         secondsUntilReset = standing?.secondsUntilReset ?: 0,
@@ -118,10 +120,7 @@ class HomeViewModel
 
             mutableState.value = current.copy(starting = true)
             viewModelScope.launch {
-                when (val spent = reconciler.spend(seconds, SPEND_NOTE)) {
-                    is AppResult.Success -> unlocks.start(seconds, packages)
-                    is AppResult.Failure -> emit(HomeEffect.SpendFailed(spent.error))
-                }
+                unlocks.start(seconds, packages)
                 mutableState.value = mutableState.value.copy(starting = false)
             }
         }
