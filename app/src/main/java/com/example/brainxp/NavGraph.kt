@@ -44,6 +44,7 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(
     backStack: NavBackStack<NavKey>,
     onResetSetup: () -> Unit,
     onToggleProtection: () -> Unit,
+    onGrantDebugUnlock: () -> Unit,
 ) {
     entry<MainRoute.Home> {
         Column {
@@ -75,7 +76,7 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(
                 action("Permissions", backStack, MainRoute.PermissionSetup),
                 PlaceholderAction("Toggle protection", onToggleProtection),
                 PlaceholderAction("Re-run setup", onResetSetup),
-            )
+            ) + debugActions(onGrantDebugUnlock)
         }
     }
     entry<MainRoute.PermissionSetup> {
@@ -161,3 +162,10 @@ private fun step(
 
 private val SCREEN_PADDING = 20.dp
 private val BANNER_GAP = 8.dp
+
+private fun debugActions(onGrantDebugUnlock: () -> Unit): List<PlaceholderAction> =
+    if (BuildConfig.DEBUG) {
+        listOf(PlaceholderAction("Grant 5 minutes (debug)", onGrantDebugUnlock))
+    } else {
+        emptyList()
+    }
