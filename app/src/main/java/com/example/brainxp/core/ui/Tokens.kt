@@ -28,6 +28,7 @@ internal object Tokens {
     val AlertInk = Color(0xFF7A2617)
 
     val Ok = Color(0xFF1D7A55)
+    val Mint = Color(0xFF8FE3B8)
     val OkSurface = Color(0xFFEFF7F3)
     val OkInk = Color(0xFF16543C)
 
