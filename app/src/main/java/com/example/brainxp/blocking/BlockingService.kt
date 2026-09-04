@@ -12,6 +12,7 @@ import com.example.brainxp.core.permission.PermissionStateProvider
 import com.example.brainxp.di.DefaultDispatcher
 import com.example.brainxp.domain.RestrictionPolicy
 import com.example.brainxp.domain.UnlockSessionManager
+import com.example.brainxp.domain.model.UnlockState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -39,6 +40,9 @@ class BlockingService : Service() {
     lateinit var unlocks: UnlockSessionManager
 
     @Inject
+    lateinit var expiryWarning: ExpiryWarning
+
+    @Inject
     lateinit var notification: ProtectionNotification
 
     @Inject
@@ -53,6 +57,7 @@ class BlockingService : Service() {
     private val foregroundPackage = MutableStateFlow<String?>(null)
     private val blocked = MutableStateFlow(false)
     private var clearTicks = 0
+    private var warnedForUnlock: String? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -60,6 +65,7 @@ class BlockingService : Service() {
         notification.createChannel()
         startForeground(ProtectionNotification.ID, render())
         scope.launch { protection.reloadUnlock() }
+        scope.launch { observeUnlockForWarning() }
         scope.launch { detector.foregroundPackage.collect { foregroundPackage.value = it } }
         scope.launch {
             ScreenGatedTicker(screenState.isScreenOn, TICK_INTERVAL_MS).ticks().collect { tick() }
@@ -80,9 +86,32 @@ class BlockingService : Service() {
         super.onDestroy()
     }
 
+    private suspend fun observeUnlockForWarning() {
+        unlocks.state.collect { unlock ->
+            if (unlock is UnlockState.Active) {
+                expiryWarning.schedule(unlock)
+            } else {
+                expiryWarning.cancel()
+                warnedForUnlock = null
+            }
+        }
+    }
+
+    private fun maybeWarn(unlock: UnlockState) {
+        if (unlock !is UnlockState.Active || warnedForUnlock == unlock.unlockId) {
+            return
+        }
+        val remaining = unlocks.remaining().inWholeMilliseconds
+        if (remaining in 1..ExpiryWarning.LEAD_MILLIS) {
+            warnedForUnlock = unlock.unlockId
+            expiryWarning.post()
+        }
+    }
+
     private suspend fun tick() {
         permissions.refresh()
-        unlocks.evaluate()
+        val unlock = unlocks.evaluate()
+        maybeWarn(unlock)
         val snapshot = protection.snapshot.value
         val current = foregroundPackage.value
         val ours = current != null && current == packageName
