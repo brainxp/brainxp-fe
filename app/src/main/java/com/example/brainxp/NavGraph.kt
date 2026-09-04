@@ -1,12 +1,17 @@
 package com.example.brainxp
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.example.brainxp.core.ui.PlaceholderAction
 import com.example.brainxp.core.ui.PlaceholderScreen
 import com.example.brainxp.feature.apps.AppPickerRoute
+import com.example.brainxp.feature.health.ProtectionHealthBanner
 import com.example.brainxp.feature.onboarding.permission.PermissionSetupRoute
 
 internal fun EntryProviderScope<NavKey>.onboardingEntries(
@@ -41,16 +46,22 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(
     onToggleProtection: () -> Unit,
 ) {
     entry<MainRoute.Home> {
-        Placeholder("Home", "MainRoute.Home") {
-            listOf(
-                action("Materials", backStack, MainRoute.MaterialList),
-                action("Restricted apps", backStack, MainRoute.AppPicker),
-                action("History", backStack, MainRoute.History),
-                action("Progress", backStack, MainRoute.Progress),
-                action("Activity log", backStack, MainRoute.ActivityLog),
-                action("Family", backStack, MainRoute.FamilyHome),
-                action("Settings", backStack, MainRoute.Settings),
+        Column {
+            ProtectionHealthBanner(
+                onFixPermissions = { backStack.add(MainRoute.PermissionSetup) },
+                modifier = Modifier.padding(horizontal = SCREEN_PADDING, vertical = BANNER_GAP),
             )
+            Placeholder("Home", "MainRoute.Home") {
+                listOf(
+                    action("Materials", backStack, MainRoute.MaterialList),
+                    action("Restricted apps", backStack, MainRoute.AppPicker),
+                    action("History", backStack, MainRoute.History),
+                    action("Progress", backStack, MainRoute.Progress),
+                    action("Activity log", backStack, MainRoute.ActivityLog),
+                    action("Family", backStack, MainRoute.FamilyHome),
+                    action("Settings", backStack, MainRoute.Settings),
+                )
+            }
         }
     }
     entry<MainRoute.AppPicker> { AppPickerRoute() }
@@ -147,3 +158,6 @@ private fun step(
     backStack: NavBackStack<NavKey>,
     target: NavKey,
 ) = listOf(action(label, backStack, target))
+
+private val SCREEN_PADDING = 20.dp
+private val BANNER_GAP = 8.dp
