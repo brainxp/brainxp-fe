@@ -21,7 +21,21 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.example.brainxp.core.ui.PlaceholderAction
 import com.example.brainxp.core.ui.PlaceholderScreen
+import com.example.brainxp.feature.SAMPLE_ASSESSED_LEVEL
+import com.example.brainxp.feature.SAMPLE_DECLARED_LEVEL
+import com.example.brainxp.feature.SAMPLE_ESTIMATE_SECONDS
+import com.example.brainxp.feature.SAMPLE_MATERIAL_ID
+import com.example.brainxp.feature.SAMPLE_MATERIAL_NAME
+import com.example.brainxp.feature.SAMPLE_QUESTION_COUNT
+import com.example.brainxp.feature.SAMPLE_QUIZ
+import com.example.brainxp.feature.SAMPLE_READY_QUESTIONS
+import com.example.brainxp.feature.SAMPLE_RECEIPT
+import com.example.brainxp.feature.SAMPLE_REJECT_REASON
 import com.example.brainxp.feature.apps.AppPickerRoute
+import com.example.brainxp.feature.capture.PickSourceScreen
+import com.example.brainxp.feature.capture.PreparingScreen
+import com.example.brainxp.feature.capture.PreparingStage
+import com.example.brainxp.feature.capture.RejectedScreen
 import com.example.brainxp.feature.debug.DebugUnlockPanel
 import com.example.brainxp.feature.family.PAIRING_CODE_LENGTH
 import com.example.brainxp.feature.family.PairDeviceScreen
@@ -40,6 +54,10 @@ import com.example.brainxp.feature.onboarding.WelcomeScreen
 import com.example.brainxp.feature.onboarding.permission.PermissionSetupRoute
 import com.example.brainxp.feature.progress.ProgressScreen
 import com.example.brainxp.feature.progress.ProgressViewModel
+import com.example.brainxp.feature.questions.QuizEvent
+import com.example.brainxp.feature.questions.QuizScreen
+import com.example.brainxp.feature.questions.recordAnswer
+import com.example.brainxp.feature.results.ReceiptScreen
 
 internal fun EntryProviderScope<NavKey>.onboardingEntries(
     backStack: NavBackStack<NavKey>,
@@ -195,6 +213,34 @@ internal fun EntryProviderScope<NavKey>.debugEntries(
     }
 }
 
+internal fun EntryProviderScope<NavKey>.captureEntries(backStack: NavBackStack<NavKey>) {
+    entry<MainRoute.Capture> {
+        PickSourceScreen(
+            questionCount = SAMPLE_QUESTION_COUNT,
+            estimatedRewardSeconds = SAMPLE_ESTIMATE_SECONDS,
+            onBack = { backStack.popOrIgnore() },
+            onPick = { backStack.add(MainRoute.Preparing(SAMPLE_MATERIAL_ID)) },
+        )
+    }
+    entry<MainRoute.Preparing> { key ->
+        PreparingScreen(
+            materialName = SAMPLE_MATERIAL_NAME,
+            stage = PreparingStage.PARTIAL,
+            readyQuestions = SAMPLE_READY_QUESTIONS,
+            onStart = { backStack.add(MainRoute.Questions(key.materialId)) },
+        )
+    }
+    entry<MainRoute.Rejected> {
+        RejectedScreen(
+            assessedLevel = SAMPLE_ASSESSED_LEVEL,
+            declaredLevel = SAMPLE_DECLARED_LEVEL,
+            reason = SAMPLE_REJECT_REASON,
+            onBack = { backStack.popOrIgnore() },
+            onRetry = { backStack.popOrIgnore() },
+        )
+    }
+}
+
 internal fun EntryProviderScope<NavKey>.learningEntries(backStack: NavBackStack<NavKey>) {
     entry<MainRoute.MaterialList> {
         val viewModel: LibraryViewModel = hiltViewModel()
@@ -228,21 +274,32 @@ internal fun EntryProviderScope<NavKey>.learningEntries(backStack: NavBackStack<
             listOf(action("Start session", backStack, MainRoute.Questions("session-1")))
         }
     }
-    entry<MainRoute.Capture> {
-        Placeholder("Capture", "MainRoute.Capture") {
-            listOf(action("Review extracted text", backStack, MainRoute.OcrReview("draft-1")))
-        }
-    }
     entry<MainRoute.OcrReview> { key ->
         Placeholder("OCR review", "draftId = ${key.draftId}")
     }
     entry<MainRoute.Questions> { key ->
-        Placeholder("Questions", "sessionId = ${key.sessionId}") {
-            listOf(action("See results", backStack, MainRoute.Results(key.sessionId)))
-        }
+        var quiz by remember { mutableStateOf(SAMPLE_QUIZ) }
+
+        QuizScreen(
+            state = quiz,
+            onBack = { backStack.popOrIgnore() },
+            onEvent = { event ->
+                when (event) {
+                    is QuizEvent.Jump -> quiz = quiz.copy(index = event.index, chosen = null, draft = "")
+                    is QuizEvent.Choose -> quiz = quiz.copy(chosen = event.option)
+                    is QuizEvent.Draft -> quiz = quiz.copy(draft = event.text)
+                    QuizEvent.Save -> quiz = quiz.recordAnswer()
+                    QuizEvent.Submit -> backStack.add(MainRoute.Results(key.sessionId))
+                }
+            },
+        )
     }
-    entry<MainRoute.Results> { key ->
-        Placeholder("Results", "sessionId = ${key.sessionId}")
+    entry<MainRoute.Results> {
+        ReceiptScreen(
+            state = SAMPLE_RECEIPT,
+            onHome = { backStack.popOrIgnore() },
+            onLibrary = { backStack.add(MainRoute.MaterialList) },
+        )
     }
 }
 
@@ -296,6 +353,8 @@ private fun DebugDestinations(
                 action("Permissions", backStack, MainRoute.PermissionSetup),
                 action("Materials", backStack, MainRoute.MaterialList),
                 action("Capture", backStack, MainRoute.Capture),
+                action("Rejected", backStack, MainRoute.Rejected(SAMPLE_MATERIAL_ID)),
+                action("Receipt", backStack, MainRoute.Results("session-1")),
                 action("History", backStack, MainRoute.History),
                 action("Progress", backStack, MainRoute.Progress),
                 action("Activity log", backStack, MainRoute.ActivityLog),
