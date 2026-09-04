@@ -6,6 +6,7 @@ import com.example.brainxp.data.prefs.SettingsDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -41,6 +42,13 @@ class RootViewModel
 
         fun resetSetup() {
             viewModelScope.launch { settings.setOnboardingComplete(false) }
+        }
+
+        fun toggleProtection() {
+            viewModelScope.launch {
+                val current = settings.settings.first().protectionEnabled
+                settings.setProtectionEnabled(!current)
+            }
         }
 
         private companion object {
