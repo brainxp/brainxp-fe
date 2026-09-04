@@ -1,6 +1,7 @@
 package com.example.brainxp.core.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -44,6 +45,7 @@ class RowGroupScope internal constructor() {
         subtitle: String? = null,
         value: String? = null,
         emphasiseValue: Boolean = false,
+        onClick: (() -> Unit)? = null,
         leading: @Composable (() -> Unit)? = null,
     ) {
         if (rendered > 0) {
@@ -56,7 +58,7 @@ class RowGroupScope internal constructor() {
             value = value,
             emphasiseValue = emphasiseValue,
             leading = leading,
-            modifier = modifier,
+            modifier = if (onClick == null) modifier else modifier.clickable(onClick = onClick),
         )
     }
 }
