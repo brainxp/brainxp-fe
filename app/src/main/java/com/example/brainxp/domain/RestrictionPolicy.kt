@@ -7,7 +7,6 @@ object RestrictionPolicy {
     fun isBlocked(
         packageName: String,
         state: RestrictionState,
-        now: Long,
     ): Boolean {
         if (packageName !in state.restrictedPackages) {
             return false
@@ -15,8 +14,8 @@ object RestrictionPolicy {
         val unlock = state.unlock
         val covered =
             unlock is UnlockState.Active &&
-                now < unlock.endAtElapsed &&
-                packageName in unlock.allowedPackages
+                !unlock.exhausted &&
+                unlock.meters(packageName)
         return !covered
     }
 }
