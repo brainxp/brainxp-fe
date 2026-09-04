@@ -21,7 +21,10 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 
 @Composable
-fun BrainXPApp(modifier: Modifier = Modifier) {
+fun BrainXPApp(
+    modifier: Modifier = Modifier,
+    deepLink: NavKey? = null,
+) {
     val viewModel: RootViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -44,6 +47,7 @@ fun BrainXPApp(modifier: Modifier = Modifier) {
                     modifier = content,
                     onResetSetup = viewModel::resetSetup,
                     onToggleProtection = viewModel::toggleProtection,
+                    deepLink = deepLink,
                 )
             }
         }
@@ -78,8 +82,14 @@ private fun MainNavHost(
     onResetSetup: () -> Unit,
     onToggleProtection: () -> Unit,
     modifier: Modifier = Modifier,
+    deepLink: NavKey? = null,
 ) {
-    val backStack = rememberNavBackStack(MainRoute.Home)
+    val backStack =
+        if (deepLink == null) {
+            rememberNavBackStack(MainRoute.Home)
+        } else {
+            rememberNavBackStack(MainRoute.Home, deepLink)
+        }
 
     NavDisplay(
         backStack = backStack,
