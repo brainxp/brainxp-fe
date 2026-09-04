@@ -7,6 +7,7 @@ import com.example.brainxp.domain.model.BlockReason
 import com.example.brainxp.domain.model.ConsumptionEntry
 import com.example.brainxp.domain.model.LedgerDirection
 import com.example.brainxp.domain.model.LedgerEntry
+import com.example.brainxp.domain.model.Progress
 import com.example.brainxp.domain.model.Standing
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -28,6 +29,8 @@ class FakeRewardRepository
         var guardianStale: Boolean = false
 
         override suspend fun standing(): AppResult<Standing> = backend.respond(FakeBackend.REWARD_STANDING) { snapshot() }
+
+        override suspend fun progress(): AppResult<Progress> = backend.respond(FakeBackend.REWARD_PROGRESS) { FakeData.progress(streak) }
 
         override suspend fun reportConsumption(entries: List<ConsumptionEntry>): AppResult<Standing> {
             val invalid = entries.firstOrNull { it.seconds < 0 }
@@ -97,6 +100,8 @@ class FakeRewardRepository
                 streakCurrent = streak,
                 points = points,
                 freezeTokens = FREEZE_TOKENS,
+                idleDays = IDLE_DAYS,
+                idleDaysAllowed = IDLE_DAYS_ALLOWED,
             )
         }
 
@@ -118,6 +123,8 @@ class FakeRewardRepository
             const val SECONDS_UNTIL_RESET = 18_000
             const val STARTING_STREAK = 3
             const val FREEZE_TOKENS = 1
+            const val IDLE_DAYS = 0
+            const val IDLE_DAYS_ALLOWED = 2
             const val POINTS_DIVISOR = 60
         }
     }

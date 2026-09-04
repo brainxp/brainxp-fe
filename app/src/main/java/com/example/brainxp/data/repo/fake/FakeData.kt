@@ -2,12 +2,14 @@ package com.example.brainxp.data.repo.fake
 
 import com.example.brainxp.domain.model.ActivityEvent
 import com.example.brainxp.domain.model.ActivityKind
+import com.example.brainxp.domain.model.Badge
 import com.example.brainxp.domain.model.ChildConfig
 import com.example.brainxp.domain.model.FamilyChild
 import com.example.brainxp.domain.model.GuardianStatus
 import com.example.brainxp.domain.model.Material
 import com.example.brainxp.domain.model.MaterialStatus
 import com.example.brainxp.domain.model.MaterialType
+import com.example.brainxp.domain.model.Progress
 import com.example.brainxp.domain.model.Question
 import com.example.brainxp.domain.model.RestrictedApp
 import com.example.brainxp.domain.model.SessionMode
@@ -151,6 +153,33 @@ internal object FakeData {
     private const val SCORE_LOW = 0.6
     private const val UNLOCK_STARTED_AGO = 90 * MINUTE_MILLIS
     private const val REWARD_EARNED_AGO = 95 * MINUTE_MILLIS
+
+    fun progress(streakCurrent: Int): Progress =
+        Progress(
+            streakCurrent = streakCurrent,
+            streakLongest = LONGEST_STREAK,
+            sessions = TOTAL_SESSIONS,
+            correctTotal = TOTAL_CORRECT,
+            essayPassed = TOTAL_ESSAYS,
+            freezeTokens = SAMPLE_FREEZE_TOKENS,
+            badges = badges(),
+        )
+
+    private fun badges(): List<Badge> =
+        listOf(
+            Badge("first-step", "Langkah pertama", "Selesaikan satu sesi", earned = true),
+            Badge("week-streak", "Tujuh hari", "Belajar tujuh hari beruntun", earned = false),
+            Badge("essayist", "Penulis", "Lolos ambang tiga esai", earned = true),
+            Badge("hard-mode", "Soal sulit", "Benar sepuluh soal sulit", earned = false),
+            Badge("night-owl", "Rajin malam", "Sesi setelah jam sembilan", earned = true),
+            Badge("comeback", "Balik lagi", "Kembali setelah libur", earned = false),
+        )
+
+    private const val LONGEST_STREAK = 9
+    private const val TOTAL_SESSIONS = 14
+    private const val TOTAL_CORRECT = 96
+    private const val TOTAL_ESSAYS = 3
+    private const val SAMPLE_FREEZE_TOKENS = 1
     private const val SESSION_DONE_AGO = 96 * MINUTE_MILLIS
     private const val REWARD_HIGH_SECONDS = 900
     private const val REWARD_LOW_SECONDS = 600

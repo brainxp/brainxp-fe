@@ -58,6 +58,11 @@ class FakeMaterialRepository
                 )
             }
 
+        override suspend fun delete(materialId: String): AppResult<Unit> =
+            backend.respond(FakeBackend.MATERIAL_DELETE) {
+                cache.value = cache.value.filterNot { it.id == materialId }
+            }
+
         override suspend fun detail(materialId: String): AppResult<MaterialDetail> {
             val material =
                 cache.value.firstOrNull { it.id == materialId }
