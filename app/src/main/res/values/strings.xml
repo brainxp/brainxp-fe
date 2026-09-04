@@ -52,4 +52,7 @@
 
     <string name="permission_accessibility_title">Layanan aksesibilitas</string>
     <string name="permission_accessibility_breaks">Ini alternatif pendeteksi aplikasi yang sedikit lebih cepat. Melewatinya tidak mengurangi apa pun — pendeteksi utama sudah cukup.</string>
+
+    <string name="accessibility_service_label">Pendeteksi aplikasi BrainXP</string>
+    <string name="accessibility_service_description">Memberi tahu BrainXP aplikasi mana yang sedang kamu buka, supaya aplikasi yang kamu batasi bisa dikunci lebih cepat. BrainXP hanya membaca nama aplikasinya, bukan isi layar.</string>
 </resources>
