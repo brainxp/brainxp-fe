@@ -12,6 +12,17 @@ sealed interface OnboardingRoute : NavKey {
     data object ModeSelect : OnboardingRoute
 
     @Serializable
+    data object RoleSelect : OnboardingRoute
+
+    @Serializable
+    data class SignIn(
+        val family: Boolean,
+    ) : OnboardingRoute
+
+    @Serializable
+    data object PairDevice : OnboardingRoute
+
+    @Serializable
     data object PermissionSetup : OnboardingRoute
 
     @Serializable
