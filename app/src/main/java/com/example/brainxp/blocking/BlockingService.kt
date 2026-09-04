@@ -11,6 +11,7 @@ import com.example.brainxp.core.detect.ScreenState
 import com.example.brainxp.core.permission.PermissionStateProvider
 import com.example.brainxp.di.DefaultDispatcher
 import com.example.brainxp.domain.RestrictionPolicy
+import com.example.brainxp.domain.UnlockSessionManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -35,6 +36,9 @@ class BlockingService : Service() {
     lateinit var protection: ProtectionStateHolder
 
     @Inject
+    lateinit var unlocks: UnlockSessionManager
+
+    @Inject
     lateinit var notification: ProtectionNotification
 
     @Inject
@@ -55,7 +59,7 @@ class BlockingService : Service() {
         scope = CoroutineScope(SupervisorJob() + dispatcher)
         notification.createChannel()
         startForeground(ProtectionNotification.ID, render())
-        protection.reloadUnlock(System.currentTimeMillis(), SystemClock.elapsedRealtime())
+        scope.launch { protection.reloadUnlock() }
         scope.launch { detector.foregroundPackage.collect { foregroundPackage.value = it } }
         scope.launch {
             ScreenGatedTicker(screenState.isScreenOn, TICK_INTERVAL_MS).ticks().collect { tick() }
@@ -76,8 +80,9 @@ class BlockingService : Service() {
         super.onDestroy()
     }
 
-    private fun tick() {
+    private suspend fun tick() {
         permissions.refresh()
+        unlocks.evaluate()
         val snapshot = protection.snapshot.value
         val current = foregroundPackage.value
         val ours = current != null && current == packageName
