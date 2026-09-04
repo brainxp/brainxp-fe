@@ -3,6 +3,61 @@
     <string name="placeholder_home">BrainXP</string>
 
     <string name="action_retry">Coba lagi</string>
+    <string name="action_back">Kembali</string>
+
+    <string name="welcome_title">Setor materi,\ndapat menit main.</string>
+    <string name="welcome_body">Foto catatan atau kirim file pelajaranmu. Soalnya dibikin dari situ, dan tiap jawaban benar nambah waktu main.</string>
+    <string name="welcome_start">Mulai</string>
+    <string name="welcome_meter_label">Kartu waktu bermain</string>
+    <string name="welcome_take_motion">Gerak lurus</string>
+    <string name="welcome_take_newton">Hukum Newton</string>
+    <string name="welcome_take_friction">Esai gaya gesek</string>
+    <string name="welcome_level_easy">mudah</string>
+    <string name="welcome_level_medium">sedang</string>
+    <string name="welcome_level_hard">sulit</string>
+    <string name="welcome_gain">+%1$s</string>
+
+    <string name="mode_nav">Pengaturan awal</string>
+    <string name="mode_title">Siapa yang atur?</string>
+    <string name="mode_body">Yang dipilih di sini nanti yang pegang kendali aturannya.</string>
+    <string name="mode_family_title">Mode Keluarga</string>
+    <string name="mode_family_sub">Orang tua yang atur dari HP-nya. Anak tinggal ikut, nggak bisa ubah-ubah.</string>
+    <string name="mode_personal_title">Mode Pribadi</string>
+    <string name="mode_personal_sub">Kamu atur sendiri buat kamu sendiri. Kalau dilonggarkan, jalannya besok.</string>
+    <string name="mode_note">HP ini belum terdaftar di keluarga mana pun.</string>
+
+    <string name="role_nav">Mode Keluarga</string>
+    <string name="role_title">HP ini punya siapa?</string>
+    <string name="role_body">Aturannya dipasang di HP anak. HP orang tua dipakai buat nyusun dan memantau.</string>
+    <string name="role_parent_title">Orang tua</string>
+    <string name="role_parent_sub">Bikin profil anak, susun aturan, terbitkan kode</string>
+    <string name="role_child_title">Anak</string>
+    <string name="role_child_sub">Masukkan kode dari HP orang tua</string>
+    <string name="role_note">Anak nggak punya kata sandi. Yang disimpan cuma nama panggilan dan jenjangnya.</string>
+
+    <string name="signin_nav_login">Masuk</string>
+    <string name="signin_nav_register">Buat akun</string>
+    <string name="signin_title_login">Selamat datang</string>
+    <string name="signin_title_register">Buat akun baru</string>
+    <string name="signin_body_family">Akun ini memegang aturan untuk seluruh anggota keluarga.</string>
+    <string name="signin_body_personal">Akun ini menyimpan aturan yang kamu buat untuk dirimu sendiri.</string>
+    <string name="signin_name">Nama</string>
+    <string name="signin_name_hint">Nama panggilan</string>
+    <string name="signin_email">Email</string>
+    <string name="signin_email_hint">kamu@contoh.id</string>
+    <string name="signin_password">Kata sandi</string>
+    <string name="signin_password_hint">Minimal 10 karakter</string>
+    <string name="signin_submit_login">Masuk</string>
+    <string name="signin_submit_register">Daftar</string>
+    <string name="signin_to_register">Belum punya akun? Daftar</string>
+    <string name="signin_to_login">Sudah punya akun? Masuk</string>
+
+    <string name="pair_nav">Gabung ke keluarga</string>
+    <string name="pair_title">Masukkan kode</string>
+    <string name="pair_body">Minta enam angka dari ponsel orang tuamu.</string>
+    <string name="pair_note">Setelah kode diterima, aturan, jenjang, dan saldo awal langsung terpasang di ponsel ini.</string>
+    <string name="pair_delete">Hapus satu angka</string>
+    <string name="pair_digit">Angka %1$s</string>
 
     <string name="error_network_title">Tidak ada koneksi</string>
     <string name="error_network_body">Periksa koneksi internetmu, lalu coba lagi.</string>
@@ -67,10 +122,8 @@
         <item quantity="other">%1$d aplikasi dijaga</item>
     </plurals>
 
-    <string name="block_screen_title">Saldomu
-sedang kosong.</string>
-    <string name="block_screen_idle_title">Waktunya belum
-kamu mulai.</string>
+    <string name="block_screen_title">Saldomu\nsedang kosong.</string>
+    <string name="block_screen_idle_title">Waktunya belum\nkamu mulai.</string>
     <string name="block_screen_idle_body">Saldomu masih ada. Buka BrainXP dan mulai waktu bermain untuk memakainya.</string>
     <string name="block_screen_idle_action">Mulai waktu bermain</string>
     <string name="block_screen_body">Aplikasi ini kamu kunci sendiri. Kerjakan satu sesi dari materimu, dan waktunya kebuka lagi.</string>
@@ -78,8 +131,7 @@ kamu mulai.</string>
     <string name="block_screen_hero_sub">Nunggu kamu belajar lagi</string>
     <string name="block_screen_note">Nggak ada yang hangus. Satu sesi selesai, semuanya bisa dipakai lagi.</string>
     <string name="block_screen_action">Setor materi</string>
-    <string name="block_screen_cap_title">Batas hari ini
-sudah kepakai.</string>
+    <string name="block_screen_cap_title">Batas hari ini\nsudah kepakai.</string>
     <string name="block_screen_cap_body">Bukan saldomu yang habis — cuma jatah main hari ini. Saldonya tetap tersimpan dan menunggu besok.</string>
 
     <string name="app_picker_title">Pilih aplikasi</string>
