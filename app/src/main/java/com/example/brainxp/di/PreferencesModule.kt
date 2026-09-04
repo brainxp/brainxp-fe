@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.example.brainxp.data.prefs.AuthDataStore
+import com.example.brainxp.data.prefs.DataStoreRewardCache
+import com.example.brainxp.data.prefs.RewardCache
 import com.example.brainxp.data.prefs.SettingsDataStore
 import dagger.Module
 import dagger.Provides
@@ -41,4 +43,10 @@ object PreferencesModule {
     fun provideAuthDataStore(
         @Named("authStore") store: DataStore<Preferences>,
     ): AuthDataStore = AuthDataStore(store)
+
+    @Provides
+    @Singleton
+    fun provideRewardCache(
+        @Named("settingsStore") store: DataStore<Preferences>,
+    ): RewardCache = DataStoreRewardCache(store)
 }
