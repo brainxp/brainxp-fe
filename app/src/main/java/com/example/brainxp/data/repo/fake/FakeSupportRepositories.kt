@@ -4,12 +4,10 @@ import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.result.AppResult
 import com.example.brainxp.data.repo.ActivityLogRepository
 import com.example.brainxp.data.repo.FamilyRepository
-import com.example.brainxp.data.repo.RestrictionRepository
 import com.example.brainxp.domain.model.ActivityEvent
 import com.example.brainxp.domain.model.ChildConfig
 import com.example.brainxp.domain.model.FamilyChild
 import com.example.brainxp.domain.model.PairingResult
-import com.example.brainxp.domain.model.RestrictedApp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,34 +16,6 @@ import kotlinx.coroutines.flow.update
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
-
-@Singleton
-class FakeRestrictionRepository
-    @Inject
-    constructor(
-        private val backend: FakeBackend,
-    ) : RestrictionRepository {
-        private val apps = MutableStateFlow(FakeData.restrictedApps())
-
-        override fun observeRestricted(): Flow<List<RestrictedApp>> = apps.asStateFlow()
-
-        override suspend fun setRestricted(
-            packageName: String,
-            enabled: Boolean,
-        ): AppResult<Unit> =
-            backend.respond(FakeBackend.RESTRICTION_SET) {
-                apps.update { list ->
-                    list.map { if (it.packageName == packageName) it.copy(enabled = enabled) else it }
-                }
-            }
-
-        override suspend fun replaceRestricted(packageNames: List<String>): AppResult<Unit> =
-            backend.respond(FakeBackend.RESTRICTION_REPLACE) {
-                apps.update { list ->
-                    list.map { it.copy(enabled = it.packageName in packageNames) }
-                }
-            }
-    }
 
 @Singleton
 class FakeActivityLogRepository
