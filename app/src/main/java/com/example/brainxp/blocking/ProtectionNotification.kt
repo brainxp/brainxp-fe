@@ -9,11 +9,12 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.example.brainxp.MainActivity
 import com.example.brainxp.R
+import com.example.brainxp.core.time.clock
 import com.example.brainxp.domain.model.UnlockState
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration
 
 @Singleton
 class ProtectionNotification
@@ -47,16 +48,16 @@ class ProtectionNotification
         fun build(
             snapshot: ProtectionSnapshot,
             blocked: Boolean,
-            now: Long,
+            remaining: Duration,
         ): Notification {
             val unlock = snapshot.restriction.unlock
-            val running = unlock is UnlockState.Active && now < unlock.endAtElapsed
+            val running = unlock is UnlockState.Active && !unlock.exhausted
 
             return NotificationCompat
                 .Builder(context, if (snapshot.degraded) DEGRADED_CHANNEL_ID else CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(title(snapshot, blocked, running))
-                .setContentText(body(snapshot, unlock, running, now))
+                .setContentText(body(snapshot, running, remaining))
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
                 .setShowWhen(false)
@@ -79,17 +80,16 @@ class ProtectionNotification
 
         private fun body(
             snapshot: ProtectionSnapshot,
-            unlock: UnlockState,
             running: Boolean,
-            now: Long,
+            remaining: Duration,
         ): String =
             when {
                 snapshot.degraded -> {
                     context.getString(R.string.degraded_notification_body)
                 }
 
-                running && unlock is UnlockState.Active -> {
-                    context.getString(R.string.blocking_notification_remaining, remaining(unlock.endAtElapsed - now))
+                running -> {
+                    context.getString(R.string.blocking_notification_remaining, clock(remaining))
                 }
 
                 else -> {
@@ -100,11 +100,6 @@ class ProtectionNotification
                     )
                 }
             }
-
-        private fun remaining(millis: Long): String {
-            val total = millis.milliseconds.inWholeSeconds
-            return "%d:%02d".format(total / SECONDS_PER_MINUTE, total % SECONDS_PER_MINUTE)
-        }
 
         private fun openApp(): PendingIntent =
             PendingIntent.getActivity(
@@ -118,6 +113,5 @@ class ProtectionNotification
             const val ID = 1001
             private const val CHANNEL_ID = "brainxp_protection"
             private const val DEGRADED_CHANNEL_ID = "brainxp_protection_degraded"
-            private const val SECONDS_PER_MINUTE = 60
         }
     }
