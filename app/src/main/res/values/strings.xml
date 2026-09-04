@@ -267,4 +267,73 @@ kehilangan kontak.</string>
     <string name="debug_end_session">Akhiri sesi sekarang</string>
     <string name="debug_hint_title">Cara mengujinya</string>
     <string name="debug_hint_body">Mulai sesi, lalu buka aplikasi yang kamu batasi. Aplikasinya lolos sampai durasi habis, peringatan muncul di ambang yang kamu isi, dan layar pemblokir kembali pada tick berikutnya.</string>
+    <string name="source_title">Setor materi</string>
+    <string name="source_hero_label">Sesi ini</string>
+    <string name="source_unit">soal</string>
+    <string name="source_hero_sub">Perkiraan sampai +%1$s</string>
+    <string name="source_pick">Pilih cara menyetor</string>
+    <string name="source_photo">Foto catatan</string>
+    <string name="source_photo_sub">Buku, papan tulis, tulisan tangan. Rumus dan diagram terbaca.</string>
+    <string name="source_document">Kirim dokumen</string>
+    <string name="source_document_sub">PDF, DOCX, PPTX, ODT, ODP, TXT — sampai 32 MB.</string>
+    <string name="source_note">Materi diproses layanan AI dan tidak dipakai melatih model. Materi yang sama diunggah ulang tetap boleh dipelajari, tapi hadiahnya menurun.</string>
+
+    <string name="preparing_title">Menyiapkan soal</string>
+    <string name="preparing_ready_count">%1$d siap</string>
+    <string name="preparing_reading">Membaca materimu…</string>
+    <string name="preparing_first_ready">Soal pertama sudah bisa dikerjakan</string>
+    <string name="preparing_step_reading">Materi dibaca</string>
+    <string name="preparing_step_validating">Diperiksa dan dikalibrasi</string>
+    <string name="preparing_step_partial">Soal pertama siap</string>
+    <string name="preparing_step_ready">Sisa soal disusun</string>
+    <string name="preparing_note">Mulai saja begitu soal pertama siap. Sisanya menyusul sambil kamu mengerjakan.</string>
+    <string name="preparing_wait">Menyiapkan…</string>
+    <string name="preparing_start">Mulai kerjakan</string>
+
+    <string name="rejected_title">Materi belum bisa dipakai</string>
+    <string name="rejected_alert">Materi ini dinilai setara tingkat %1$s, sedangkan jenjangmu %2$s.</string>
+    <string name="rejected_headline">Soal dari materi ini tidak bisa menguji apa pun</string>
+    <string name="rejected_rules">Aturannya</string>
+    <string name="rejected_rule_at_level">Setara atau di atas jenjang</string>
+    <string name="rejected_rule_one_below">Satu tingkat di bawah</string>
+    <string name="rejected_rule_two_below">Dua tingkat atau lebih</string>
+    <string name="rejected_rule_refused">Ditolak</string>
+    <string name="rejected_deleted">Berkas ini dihapus dalam satu jam dan tidak tersimpan di pustaka.</string>
+    <string name="rejected_action">Setor materi lain</string>
+
+    <string name="quiz_title">Sesi belajar</string>
+    <string name="quiz_position">Soal %1$d dari %2$d</string>
+    <string name="quiz_filled">%1$d terisi</string>
+    <string name="quiz_jump">Soal %1$d</string>
+    <string name="quiz_excerpt">Dari materimu: %1$s</string>
+    <string name="quiz_answer_label">Jawabanmu</string>
+    <string name="quiz_answer_hint">Tulis dengan kalimatmu sendiri, minimal delapan kata.</string>
+    <string name="quiz_rubric">Dinilai terhadap %1$d kriteria, lolos di atas 60.</string>
+    <string name="quiz_save">Simpan jawaban</string>
+    <string name="quiz_change">Ganti jawaban</string>
+    <string name="quiz_submit">Kumpulkan sesi</string>
+    <string name="quiz_hint_partial">Jawaban tersimpan tiap kali disimpan. Boleh dilanjutkan nanti.</string>
+    <string name="quiz_hint_complete">Semua sudah terisi. Benar salahnya ketahuan setelah dikumpulkan.</string>
+
+    <string name="receipt_title">Sesi selesai</string>
+    <string name="receipt_correct">%1$d dari %2$d benar</string>
+    <string name="receipt_header">Rincian reward</string>
+    <string name="receipt_base">DASAR PER SOAL</string>
+    <string name="receipt_subtotal">SUBTOTAL</string>
+    <string name="receipt_level">Kalibrasi level · %1$s</string>
+    <string name="receipt_novelty">Kebaruan · %1$s</string>
+    <string name="receipt_credited">Masuk ke saldo</string>
+    <string name="receipt_new_balance">Saldo baru</string>
+    <string name="receipt_missed">Yang belum tepat</string>
+    <string name="receipt_missed_row">Soal %1$d · %2$s</string>
+    <string name="receipt_streak">Streak %1$d hari. %2$s</string>
+    <string name="receipt_streak_keep">Terus begitu.</string>
+    <string name="receipt_new_badges">Lencana baru: %1$s.</string>
+    <string name="receipt_home">Kembali ke beranda</string>
+    <string name="receipt_library">Lihat pustaka</string>
+
+    <string name="level_easy">mudah</string>
+    <string name="level_medium">sedang</string>
+    <string name="level_hard">sulit</string>
+    <string name="void_wrong">salah</string>
 </resources>
