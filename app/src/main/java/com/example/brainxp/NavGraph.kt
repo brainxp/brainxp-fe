@@ -74,7 +74,6 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(
                     HomeEffect.OpenLibrary -> backStack.add(MainRoute.MaterialList)
                     HomeEffect.OpenProgress -> backStack.add(MainRoute.Progress)
                     is HomeEffect.LaunchApp -> launchApp(context, effect.packageName)
-                    is HomeEffect.SpendFailed -> Unit
                 }
             }
         }

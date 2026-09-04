@@ -1,7 +1,5 @@
 package com.example.brainxp.feature.home
 
-import com.example.brainxp.core.result.ApiError
-
 sealed interface HomeEvent {
     data object Retry : HomeEvent
 
@@ -29,10 +27,6 @@ sealed interface HomeEvent {
 }
 
 sealed interface HomeEffect {
-    data class SpendFailed(
-        val error: ApiError,
-    ) : HomeEffect
-
     data object OpenAddMaterial : HomeEffect
 
     data object OpenPermissionSetup : HomeEffect
