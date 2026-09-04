@@ -8,10 +8,28 @@ sealed interface HomeEvent {
     data object EndUnlockEarly : HomeEvent
 
     data object FixPermissions : HomeEvent
+
+    data object ToggleProtection : HomeEvent
+
+    data object OpenLibrary : HomeEvent
+
+    data object OpenProgress : HomeEvent
+
+    data class OpenApp(
+        val packageName: String,
+    ) : HomeEvent
 }
 
 sealed interface HomeEffect {
     data object OpenAddMaterial : HomeEffect
 
     data object OpenPermissionSetup : HomeEffect
+
+    data object OpenLibrary : HomeEffect
+
+    data object OpenProgress : HomeEffect
+
+    data class LaunchApp(
+        val packageName: String,
+    ) : HomeEffect
 }
