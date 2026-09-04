@@ -2,6 +2,7 @@ package com.example.brainxp
 
 import android.content.Context
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -27,6 +28,9 @@ import com.example.brainxp.feature.family.PairDeviceScreen
 import com.example.brainxp.feature.home.HomeEffect
 import com.example.brainxp.feature.home.HomeScreen
 import com.example.brainxp.feature.home.HomeViewModel
+import com.example.brainxp.feature.library.LibraryEffect
+import com.example.brainxp.feature.library.LibraryScreen
+import com.example.brainxp.feature.library.LibraryViewModel
 import com.example.brainxp.feature.onboarding.DeviceRole
 import com.example.brainxp.feature.onboarding.PickModeScreen
 import com.example.brainxp.feature.onboarding.PickRoleScreen
@@ -34,6 +38,8 @@ import com.example.brainxp.feature.onboarding.SetupMode
 import com.example.brainxp.feature.onboarding.SignInScreen
 import com.example.brainxp.feature.onboarding.WelcomeScreen
 import com.example.brainxp.feature.onboarding.permission.PermissionSetupRoute
+import com.example.brainxp.feature.progress.ProgressScreen
+import com.example.brainxp.feature.progress.ProgressViewModel
 
 internal fun EntryProviderScope<NavKey>.onboardingEntries(
     backStack: NavBackStack<NavKey>,
@@ -142,7 +148,16 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(
     }
     entry<MainRoute.AppPicker> { AppPickerRoute() }
     entry<MainRoute.History> { Placeholder("History", "MainRoute.History") }
-    entry<MainRoute.Progress> { Placeholder("Progress", "MainRoute.Progress") }
+    entry<MainRoute.Progress> {
+        val viewModel: ProgressViewModel = hiltViewModel()
+        val progressState by viewModel.state.collectAsStateWithLifecycle()
+
+        ProgressScreen(
+            state = progressState,
+            onRetry = viewModel::retry,
+            onBack = { backStack.popOrIgnore() },
+        )
+    }
     entry<MainRoute.ActivityLog> { Placeholder("Activity log", "MainRoute.ActivityLog") }
     entry<MainRoute.Settings> {
         Placeholder("Settings", "MainRoute.Settings") {
@@ -182,12 +197,31 @@ internal fun EntryProviderScope<NavKey>.debugEntries(
 
 internal fun EntryProviderScope<NavKey>.learningEntries(backStack: NavBackStack<NavKey>) {
     entry<MainRoute.MaterialList> {
-        Placeholder("Materials", "MainRoute.MaterialList") {
-            listOf(
-                action("Open sample material", backStack, MainRoute.MaterialDetail("material-1")),
-                action("Capture new", backStack, MainRoute.Capture),
-            )
+        val viewModel: LibraryViewModel = hiltViewModel()
+        val libraryState by viewModel.state.collectAsStateWithLifecycle()
+        val context = LocalContext.current
+
+        LaunchedEffect(viewModel) {
+            viewModel.effects.collect { effect ->
+                when (effect) {
+                    is LibraryEffect.OpenMaterial -> {
+                        backStack.add(MainRoute.MaterialDetail(effect.materialId))
+                    }
+
+                    is LibraryEffect.RemoveFailed -> {
+                        Toast
+                            .makeText(context, R.string.library_remove_failed, Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                }
+            }
         }
+
+        LibraryScreen(
+            state = libraryState,
+            onEvent = viewModel::onEvent,
+            onBack = { backStack.popOrIgnore() },
+        )
     }
     entry<MainRoute.MaterialDetail> { key ->
         Placeholder("Material detail", "materialId = ${key.materialId}") {
