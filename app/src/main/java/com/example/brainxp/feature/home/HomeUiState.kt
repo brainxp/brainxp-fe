@@ -24,6 +24,9 @@ data class HomeUiState(
     val remaining: Duration = Duration.ZERO,
     val protection: ProtectionStatus = ProtectionStatus.OFF,
     val lockedApps: List<LockedApp> = emptyList(),
+    val sessionOptions: List<Int> = emptyList(),
+    val selectedOption: Int? = null,
+    val starting: Boolean = false,
 ) {
     sealed interface Phase {
         data object Loading : Phase
@@ -45,6 +48,9 @@ data class HomeUiState(
     val capReached: Boolean get() = blockReason == BlockReason.DAILY_CAP
 
     val appsOpen: Boolean get() = unlockRunning
+
+    val canStartSession: Boolean
+        get() = !unlockRunning && balanceSeconds > 0 && !capReached && sessionOptions.isNotEmpty()
 
     val spentFraction: Float
         get() = if (dailyCapSeconds <= 0) 0f else (spentTodaySeconds.toFloat() / dailyCapSeconds)
