@@ -30,6 +30,7 @@ class BlockOverlayController
         private var configSignature: String? = null
         private var target: String? = null
         private var earnTime: ((String) -> Unit)? = null
+        private var content: BlockContent? = null
 
         val isShowing: Boolean get() = container != null
 
@@ -37,9 +38,13 @@ class BlockOverlayController
 
         fun show(
             blockedPackage: String,
+            appLabel: String = blockedPackage,
+            balanceSeconds: Int = 0,
+            capReached: Boolean = false,
             onEarnTime: (String) -> Unit,
         ) {
             onMain {
+                content = BlockContent(blockedPackage, appLabel, balanceSeconds, capReached)
                 when {
                     container == null -> {
                         attach(blockedPackage, onEarnTime)
@@ -71,8 +76,11 @@ class BlockOverlayController
             val composeView =
                 ComposeView(context).apply {
                     setContent {
+                        val shown = content ?: BlockContent(blockedPackage, blockedPackage, 0, false)
                         BlockScreen(
-                            blockedPackage = blockedPackage,
+                            appLabel = shown.appLabel,
+                            balanceSeconds = shown.balanceSeconds,
+                            capReached = shown.capReached,
                             onEarnTime = { onEarnTime(blockedPackage) },
                         )
                     }
@@ -159,3 +167,10 @@ private class OverlayContainer(
     override fun dispatchKeyEvent(event: KeyEvent): Boolean =
         if (event.keyCode == KeyEvent.KEYCODE_BACK) true else super.dispatchKeyEvent(event)
 }
+
+private data class BlockContent(
+    val packageName: String,
+    val appLabel: String,
+    val balanceSeconds: Int,
+    val capReached: Boolean,
+)
