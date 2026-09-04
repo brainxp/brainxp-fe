@@ -39,12 +39,11 @@ class BlockOverlayController
         fun show(
             blockedPackage: String,
             appLabel: String = blockedPackage,
-            balanceSeconds: Int = 0,
-            capReached: Boolean = false,
+            info: BlockedInfo = BlockedInfo(),
             onEarnTime: (String) -> Unit,
         ) {
             onMain {
-                content = BlockContent(blockedPackage, appLabel, balanceSeconds, capReached)
+                content = BlockContent(blockedPackage, appLabel, info)
                 when {
                     container == null -> {
                         attach(blockedPackage, onEarnTime)
@@ -76,11 +75,11 @@ class BlockOverlayController
             val composeView =
                 ComposeView(context).apply {
                     setContent {
-                        val shown = content ?: BlockContent(blockedPackage, blockedPackage, 0, false)
+                        val shown =
+                            content ?: BlockContent(blockedPackage, blockedPackage, BlockedInfo())
                         BlockScreen(
                             appLabel = shown.appLabel,
-                            balanceSeconds = shown.balanceSeconds,
-                            capReached = shown.capReached,
+                            info = shown.info,
                             onEarnTime = { onEarnTime(blockedPackage) },
                         )
                     }
@@ -171,6 +170,5 @@ private class OverlayContainer(
 private data class BlockContent(
     val packageName: String,
     val appLabel: String,
-    val balanceSeconds: Int,
-    val capReached: Boolean,
+    val info: BlockedInfo,
 )
