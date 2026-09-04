@@ -6,6 +6,7 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.example.brainxp.core.ui.PlaceholderAction
 import com.example.brainxp.core.ui.PlaceholderScreen
+import com.example.brainxp.feature.onboarding.permission.PermissionSetupRoute
 
 internal fun EntryProviderScope<NavKey>.onboardingEntries(
     backStack: NavBackStack<NavKey>,
@@ -22,9 +23,9 @@ internal fun EntryProviderScope<NavKey>.onboardingEntries(
         }
     }
     entry<OnboardingRoute.PermissionSetup> {
-        Placeholder("Permission setup", "OnboardingRoute.PermissionSetup") {
-            step("Prepare text recognition", backStack, OnboardingRoute.OcrPrepare)
-        }
+        PermissionSetupRoute(
+            onDone = { backStack.add(OnboardingRoute.OcrPrepare) },
+        )
     }
     entry<OnboardingRoute.OcrPrepare> {
         Placeholder("OCR prepare", "OnboardingRoute.OcrPrepare") {
@@ -58,9 +59,16 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(
         Placeholder("Settings", "MainRoute.Settings") {
             listOf(
                 action("Restricted apps", backStack, MainRoute.AppPicker),
+                action("Permissions", backStack, MainRoute.PermissionSetup),
                 PlaceholderAction("Re-run setup", onResetSetup),
             )
         }
+    }
+    entry<MainRoute.PermissionSetup> {
+        PermissionSetupRoute(
+            onDone = { backStack.popOrIgnore() },
+            reentrant = true,
+        )
     }
 }
 
