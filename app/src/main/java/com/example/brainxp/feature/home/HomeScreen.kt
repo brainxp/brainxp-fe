@@ -32,6 +32,7 @@ import com.example.brainxp.core.ui.ErrorState
 import com.example.brainxp.core.ui.HeroCard
 import com.example.brainxp.core.ui.HeroTone
 import com.example.brainxp.core.ui.LoadingState
+import com.example.brainxp.core.ui.Note
 import com.example.brainxp.core.ui.PillTone
 import com.example.brainxp.core.ui.PrimaryButton
 import com.example.brainxp.core.ui.RowGroup
@@ -196,16 +197,7 @@ private fun ReadyContent(
         )
 
         if (state.unlockRunning) {
-            OutlinedButton(
-                onClick = { onEvent(HomeEvent.EndUnlockEarly) },
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.medium,
-            ) {
-                Text(
-                    text = stringResource(R.string.home_end_early),
-                    style = MaterialTheme.typography.labelLarge,
-                )
-            }
+            RunningSession(state = state, onEvent = onEvent)
         }
 
         Text(
@@ -235,6 +227,34 @@ private fun ReadyContent(
                 title = stringResource(R.string.home_rest_days),
                 subtitle = stringResource(R.string.home_rest_days_sub),
                 value = stringResource(R.string.home_rest_days_value, state.idleDaysAllowed),
+            )
+        }
+    }
+}
+
+@Composable
+private fun RunningSession(
+    state: HomeUiState,
+    onEvent: (HomeEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val spacing = BrainXPTheme.spacing
+
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(spacing.sm)) {
+        Text(
+            text = stringResource(R.string.home_session_spent, shortDuration(state.consumedSeconds)),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Note(text = stringResource(R.string.home_session_note))
+        OutlinedButton(
+            onClick = { onEvent(HomeEvent.EndUnlockEarly) },
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium,
+        ) {
+            Text(
+                text = stringResource(R.string.home_end_early),
+                style = MaterialTheme.typography.labelLarge,
             )
         }
     }
