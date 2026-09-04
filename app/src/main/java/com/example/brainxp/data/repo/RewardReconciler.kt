@@ -5,11 +5,13 @@ import com.example.brainxp.core.result.AppResult
 import com.example.brainxp.core.time.AppClock
 import com.example.brainxp.data.prefs.CachedBalance
 import com.example.brainxp.data.prefs.RewardCache
+import com.example.brainxp.domain.model.ConsumptionEntry
 import com.example.brainxp.domain.model.Standing
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -50,6 +52,30 @@ class RewardReconciler
                 }
             mutableState.value = reconciled
             return reconciled
+        }
+
+        suspend fun spend(
+            seconds: Int,
+            appLabel: String,
+        ): AppResult<ReconciledBalance> {
+            val entry =
+                ConsumptionEntry(
+                    clientEventId = UUID.randomUUID().toString(),
+                    appLabel = appLabel,
+                    seconds = seconds,
+                    occurredAtWallClock = clock.wallClock(),
+                )
+            return when (val result = rewards.reportConsumption(listOf(entry))) {
+                is AppResult.Success -> {
+                    val reconciled = fromServer(result.value)
+                    mutableState.value = reconciled
+                    AppResult.Success(reconciled)
+                }
+
+                is AppResult.Failure -> {
+                    AppResult.Failure(result.error)
+                }
+            }
         }
 
         private suspend fun fromServer(standing: Standing): ReconciledBalance {
