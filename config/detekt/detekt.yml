@@ -3,6 +3,8 @@ naming:
     ignoreAnnotated: ['Composable']
 
 complexity:
+  TooManyFunctions:
+    ignoreAnnotatedFunctions: ['Composable', 'Preview']
   LongParameterList:
     ignoreAnnotated: ['Composable']
   LongMethod:
