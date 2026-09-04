@@ -1,8 +1,12 @@
 package com.example.brainxp
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
@@ -61,7 +65,21 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(
             }
         }
 
-        HomeScreen(state = homeState, onEvent = viewModel::onEvent)
+        Column {
+            if (BuildConfig.DEBUG) {
+                TextButton(onClick = { backStack.add(MainRoute.DebugMenu) }) {
+                    Text("Debug menu")
+                }
+            }
+            HomeScreen(
+                state = homeState,
+                onEvent = viewModel::onEvent,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+    entry<MainRoute.DebugMenu> {
+        DebugDestinations(backStack, onResetSetup, onToggleProtection, onGrantDebugUnlock)
     }
     entry<MainRoute.AppPicker> { AppPickerRoute() }
     entry<MainRoute.History> { Placeholder("History", "MainRoute.History") }
@@ -157,6 +175,34 @@ private fun step(
     backStack: NavBackStack<NavKey>,
     target: NavKey,
 ) = listOf(action(label, backStack, target))
+
+@Composable
+private fun DebugDestinations(
+    backStack: NavBackStack<NavKey>,
+    onResetSetup: () -> Unit,
+    onToggleProtection: () -> Unit,
+    onGrantDebugUnlock: () -> Unit,
+) {
+    PlaceholderScreen(
+        name = "Debug",
+        detail = "Semua tujuan navigasi, hanya di build debug",
+        actions =
+            listOf(
+                action("Restricted apps", backStack, MainRoute.AppPicker),
+                action("Permissions", backStack, MainRoute.PermissionSetup),
+                action("Materials", backStack, MainRoute.MaterialList),
+                action("Capture", backStack, MainRoute.Capture),
+                action("History", backStack, MainRoute.History),
+                action("Progress", backStack, MainRoute.Progress),
+                action("Activity log", backStack, MainRoute.ActivityLog),
+                action("Family", backStack, MainRoute.FamilyHome),
+                action("Settings", backStack, MainRoute.Settings),
+                PlaceholderAction("Toggle protection", onToggleProtection),
+                PlaceholderAction("Grant 5 minutes", onGrantDebugUnlock),
+                PlaceholderAction("Re-run setup", onResetSetup),
+            ),
+    )
+}
 
 private fun debugActions(onGrantDebugUnlock: () -> Unit): List<PlaceholderAction> =
     if (BuildConfig.DEBUG) {
