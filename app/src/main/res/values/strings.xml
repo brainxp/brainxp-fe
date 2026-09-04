@@ -55,4 +55,15 @@
 
     <string name="accessibility_service_label">Pendeteksi aplikasi BrainXP</string>
     <string name="accessibility_service_description">Memberi tahu BrainXP aplikasi mana yang sedang kamu buka, supaya aplikasi yang kamu batasi bisa dikunci lebih cepat. BrainXP hanya membaca nama aplikasinya, bukan isi layar.</string>
+
+    <string name="blocking_channel_name">Perlindungan</string>
+    <string name="blocking_channel_description">Menandakan BrainXP sedang menjaga aplikasi yang kamu batasi.</string>
+    <string name="blocking_notification_active">Perlindungan aktif</string>
+    <string name="blocking_notification_blocked">Aplikasi ini sedang dibatasi</string>
+    <string name="blocking_notification_unlocked">Waktu bermain berjalan</string>
+    <string name="blocking_notification_remaining">Sisa %1$s</string>
+
+    <plurals name="blocking_notification_restricted_count">
+        <item quantity="other">%1$d aplikasi dijaga</item>
+    </plurals>
 </resources>
