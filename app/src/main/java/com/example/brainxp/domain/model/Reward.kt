@@ -4,6 +4,7 @@ enum class BlockReason {
     NONE,
     NO_BALANCE,
     DAILY_CAP,
+    IDLE,
     GUARDIAN_STALE,
 }
 
