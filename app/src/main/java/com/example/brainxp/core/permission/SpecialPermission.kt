@@ -6,10 +6,6 @@ enum class PermissionRequirement {
     OPTIONAL,
 }
 
-/**
- * Declared in the setup order FR-ON-1 prescribes: notifications, usage access,
- * overlay, battery optimisation, then optional accessibility.
- */
 enum class SpecialPermission(
     val requirement: PermissionRequirement,
 ) {

@@ -64,7 +64,6 @@ sealed interface MainRoute : NavKey {
     @Serializable
     data object Settings : MainRoute
 
-    /** FR-ON-3: the same setup screen, re-entered from Settings or the T2.9 health banner. */
     @Serializable
     data object PermissionSetup : MainRoute
 

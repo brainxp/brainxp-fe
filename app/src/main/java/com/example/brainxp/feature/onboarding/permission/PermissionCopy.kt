@@ -14,7 +14,6 @@ internal fun titleRes(permission: SpecialPermission): Int =
         SpecialPermission.ACCESSIBILITY -> R.string.permission_accessibility_title
     }
 
-/** FR-ON-1 requires each step to state what breaks without it. */
 @StringRes
 internal fun breaksRes(permission: SpecialPermission): Int =
     when (permission) {

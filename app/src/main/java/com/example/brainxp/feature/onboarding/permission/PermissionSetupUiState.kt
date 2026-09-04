@@ -22,11 +22,6 @@ data class PermissionSetupUiState(
         get() = steps.filter { !it.granted && it.requirement != PermissionRequirement.REQUIRED }.map { it.permission }
 }
 
-/**
- * The current step is the first one still missing, walking FR-ON-1's order. Completion
- * is gated on REQUIRED only, so skipping an optional or recommended step still lets the
- * user finish; a missing recommended step reports degraded instead, per invariant 7.
- */
 fun PermissionSnapshot.toSetupState(): PermissionSetupUiState {
     val currentIndex = entries.indexOfFirst { !it.granted }
     val steps =

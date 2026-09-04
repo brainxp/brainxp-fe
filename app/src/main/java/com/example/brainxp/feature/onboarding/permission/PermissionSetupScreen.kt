@@ -28,10 +28,6 @@ import com.example.brainxp.core.permission.SpecialPermission
 import com.example.brainxp.core.ui.BrainXPTheme
 import com.example.brainxp.core.ui.PrimaryButton
 
-/**
- * @param reentrant true when opened from Settings or the health banner (FR-ON-3), where
- * the primary action closes the screen rather than advancing the onboarding flow.
- */
 @Composable
 fun PermissionSetupScreen(
     state: PermissionSetupUiState,

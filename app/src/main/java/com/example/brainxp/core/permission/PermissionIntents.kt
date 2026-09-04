@@ -9,11 +9,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 interface PermissionIntents {
-    /**
-     * Ordered candidates for reaching [permission] in Settings. Callers launch them in
-     * order and fall through on ActivityNotFoundException, because several of these
-     * screens are missing or renamed on OEM builds.
-     */
     fun settingsIntents(permission: SpecialPermission): List<Intent>
 }
 

@@ -23,10 +23,6 @@ private object NoIntents : PermissionIntents {
     override fun settingsIntents(permission: SpecialPermission): List<Intent> = emptyList()
 }
 
-/**
- * onResume never touches its owner, so the lifecycle is never materialised. This keeps
- * the observer testable on the JVM without Robolectric.
- */
 private object StubLifecycleOwner : LifecycleOwner {
     override val lifecycle: Lifecycle get() = throw UnsupportedOperationException()
 }

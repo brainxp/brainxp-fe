@@ -10,10 +10,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
-/**
- * Stateful host for [PermissionSetupScreen]. Serves both the onboarding route and the
- * re-entrant main-graph route (FR-ON-3), so there is one screen and one view model.
- */
 @Composable
 fun PermissionSetupRoute(
     onDone: () -> Unit,
