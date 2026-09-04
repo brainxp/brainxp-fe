@@ -41,18 +41,22 @@ class UsageStatsDetector
 
         private fun pollLoop(): Flow<String> =
             flow {
+                var lastSeen: String? = null
+                var window = CATCH_UP_WINDOW_MS
                 while (true) {
-                    latestResumedPackage()?.let { emit(it) }
+                    latestResumedPackage(window)?.let { lastSeen = it }
+                    window = QUERY_WINDOW_MS
+                    lastSeen?.let { emit(it) }
                     delay(POLL_INTERVAL_MS)
                 }
             }.distinctUntilChanged()
 
-        private fun latestResumedPackage(): String? {
+        private fun latestResumedPackage(windowMs: Long): String? {
             val manager = context.getSystemService(UsageStatsManager::class.java) ?: return null
             val now = System.currentTimeMillis()
             val events =
                 try {
-                    manager.queryEvents(now - QUERY_WINDOW_MS, now)
+                    manager.queryEvents(now - windowMs, now)
                 } catch (ignored: SecurityException) {
                     return null
                 }
@@ -74,5 +78,6 @@ class UsageStatsDetector
         private companion object {
             const val POLL_INTERVAL_MS = 600L
             const val QUERY_WINDOW_MS = 5_000L
+            const val CATCH_UP_WINDOW_MS = 300_000L
         }
     }
