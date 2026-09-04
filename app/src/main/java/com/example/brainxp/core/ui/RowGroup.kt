@@ -45,6 +45,7 @@ class RowGroupScope internal constructor() {
         subtitle: String? = null,
         value: String? = null,
         emphasiseValue: Boolean = false,
+        destructiveValue: Boolean = false,
         onClick: (() -> Unit)? = null,
         leading: @Composable (() -> Unit)? = null,
     ) {
@@ -57,6 +58,7 @@ class RowGroupScope internal constructor() {
             subtitle = subtitle,
             value = value,
             emphasiseValue = emphasiseValue,
+            destructiveValue = destructiveValue,
             leading = leading,
             modifier = if (onClick == null) modifier else modifier.clickable(onClick = onClick),
         )
@@ -69,6 +71,7 @@ private fun RowGroupItem(
     subtitle: String?,
     value: String?,
     emphasiseValue: Boolean,
+    destructiveValue: Boolean,
     leading: @Composable (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
@@ -118,10 +121,10 @@ private fun RowGroupItem(
                 text = value,
                 style = MaterialTheme.typography.titleSmall,
                 color =
-                    if (emphasiseValue) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
+                    when {
+                        destructiveValue -> MaterialTheme.colorScheme.error
+                        emphasiseValue -> MaterialTheme.colorScheme.primary
+                        else -> MaterialTheme.colorScheme.onSurface
                     },
             )
         }
