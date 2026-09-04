@@ -8,17 +8,15 @@ import android.os.SystemClock
 import com.example.brainxp.MainActivity
 import com.example.brainxp.core.detect.ForegroundAppDetector
 import com.example.brainxp.core.detect.ScreenState
-import com.example.brainxp.data.repo.RestrictionRepository
+import com.example.brainxp.core.permission.PermissionStateProvider
 import com.example.brainxp.di.DefaultDispatcher
 import com.example.brainxp.domain.RestrictionPolicy
-import com.example.brainxp.domain.model.RestrictionState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -31,7 +29,10 @@ class BlockingService : Service() {
     lateinit var screenState: ScreenState
 
     @Inject
-    lateinit var restrictions: RestrictionRepository
+    lateinit var permissions: PermissionStateProvider
+
+    @Inject
+    lateinit var protection: ProtectionStateHolder
 
     @Inject
     lateinit var notification: ProtectionNotification
@@ -46,7 +47,6 @@ class BlockingService : Service() {
     private lateinit var scope: CoroutineScope
 
     private val foregroundPackage = MutableStateFlow<String?>(null)
-    private val restrictionState = MutableStateFlow(RestrictionState())
     private val blocked = MutableStateFlow(false)
     private var clearTicks = 0
 
@@ -55,9 +55,11 @@ class BlockingService : Service() {
         scope = CoroutineScope(SupervisorJob() + dispatcher)
         notification.createChannel()
         startForeground(ProtectionNotification.ID, render())
-        observeRestrictions()
-        observeForegroundPackage()
-        startTicking()
+        protection.reloadUnlock(System.currentTimeMillis(), SystemClock.elapsedRealtime())
+        scope.launch { detector.foregroundPackage.collect { foregroundPackage.value = it } }
+        scope.launch {
+            ScreenGatedTicker(screenState.isScreenOn, TICK_INTERVAL_MS).ticks().collect { tick() }
+        }
     }
 
     override fun onStartCommand(
@@ -74,41 +76,20 @@ class BlockingService : Service() {
         super.onDestroy()
     }
 
-    private fun observeRestrictions() {
-        scope.launch {
-            restrictions
-                .observeRestricted()
-                .map { apps -> apps.filter { it.enabled }.map { it.packageName }.toSet() }
-                .collect { packages ->
-                    restrictionState.value = restrictionState.value.copy(restrictedPackages = packages)
-                }
-        }
-    }
-
-    private fun observeForegroundPackage() {
-        scope.launch {
-            detector.foregroundPackage.collect { foregroundPackage.value = it }
-        }
-    }
-
-    private fun startTicking() {
-        scope.launch {
-            ScreenGatedTicker(screenState.isScreenOn, TICK_INTERVAL_MS).ticks().collect { tick() }
-        }
-    }
-
     private fun tick() {
+        permissions.refresh()
+        val snapshot = protection.snapshot.value
         val current = foregroundPackage.value
-        val ours = current == packageName
+        val ours = current != null && current == packageName
         val shouldBlock =
-            !ours &&
-                current != null &&
-                RestrictionPolicy.isBlocked(current, restrictionState.value, SystemClock.elapsedRealtime())
+            current != null &&
+                !ours &&
+                RestrictionPolicy.isBlocked(current, snapshot.restriction, SystemClock.elapsedRealtime())
 
-        if (shouldBlock && current != null) {
+        if (shouldBlock) {
             clearTicks = 0
             blocked.value = true
-            overlay.show(current) { launchEarnTime(it) }
+            overlay.show(requireNotNull(current)) { launchEarnTime(it) }
         } else {
             clearTicks++
             if (ours || clearTicks >= CLEAR_TICKS_BEFORE_HIDE) {
@@ -129,7 +110,12 @@ class BlockingService : Service() {
         )
     }
 
-    private fun render() = notification.build(restrictionState.value, blocked.value, SystemClock.elapsedRealtime())
+    private fun render() =
+        notification.build(
+            snapshot = protection.snapshot.value,
+            blocked = blocked.value,
+            now = SystemClock.elapsedRealtime(),
+        )
 
     companion object {
         const val EXTRA_BLOCKED_PACKAGE = "blocked_package"
