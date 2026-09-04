@@ -65,6 +65,11 @@
         </service>
 
         <receiver
+            android:name=".blocking.ExpiryWarningReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
+        <receiver
             android:name=".blocking.BootReceiver"
             android:enabled="true"
             android:exported="false">
