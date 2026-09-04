@@ -6,20 +6,23 @@ import android.content.Intent
 import androidx.core.content.ContextCompat
 import com.example.brainxp.data.prefs.SettingsDataStore
 import com.example.brainxp.di.AppScope
-import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@AndroidEntryPoint
 class BootReceiver : BroadcastReceiver() {
-    @Inject
-    lateinit var settings: SettingsDataStore
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface Dependencies {
+        fun settings(): SettingsDataStore
 
-    @Inject
-    @AppScope
-    lateinit var scope: CoroutineScope
+        @AppScope
+        fun scope(): CoroutineScope
+    }
 
     override fun onReceive(
         context: Context,
@@ -28,11 +31,23 @@ class BootReceiver : BroadcastReceiver() {
         if (intent.action != Intent.ACTION_BOOT_COMPLETED) {
             return
         }
-        val pending = goAsync()
+
         val appContext = context.applicationContext
-        scope.launch {
+        val dependencies =
+            runCatching {
+                EntryPointAccessors.fromApplication(appContext, Dependencies::class.java)
+            }.getOrNull() ?: return
+
+        val pending = goAsync()
+        dependencies.scope().launch {
             try {
-                if (settings.settings.first().protectionEnabled) {
+                val enabled =
+                    dependencies
+                        .settings()
+                        .settings
+                        .first()
+                        .protectionEnabled
+                if (enabled) {
                     ContextCompat.startForegroundService(
                         appContext,
                         Intent(appContext, BlockingService::class.java),
