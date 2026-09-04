@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +35,7 @@ fun Field(
     secret: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text,
     imeAction: ImeAction = ImeAction.Next,
+    multiline: Boolean = false,
 ) {
     val scheme = MaterialTheme.colorScheme
 
@@ -49,9 +51,15 @@ fun Field(
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            modifier = Modifier.fillMaxWidth().height(INPUT),
+            modifier =
+                if (multiline) {
+                    Modifier.fillMaxWidth().heightIn(min = TEXTAREA)
+                } else {
+                    Modifier.fillMaxWidth().height(INPUT)
+                },
             enabled = enabled,
-            singleLine = true,
+            singleLine = !multiline,
+            minLines = if (multiline) TEXTAREA_LINES else 1,
             textStyle = MaterialTheme.typography.bodyLarge,
             placeholder =
                 placeholder?.let {
@@ -81,6 +89,8 @@ fun Field(
 
 private val LABEL_GAP = 6.dp
 private val INPUT = 56.dp
+private val TEXTAREA = 132.dp
+private const val TEXTAREA_LINES = 4
 private const val HINT_ALPHA = 0.7f
 
 @Composable
