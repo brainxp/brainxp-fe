@@ -78,4 +78,12 @@
     <string name="app_picker_game">Game</string>
     <string name="app_picker_empty_title">Tidak ada yang cocok</string>
     <string name="app_picker_empty_body">Coba kata lain, atau kosongkan pencarian untuk melihat semuanya.</string>
+
+    <string name="degraded_channel_name">Perlindungan bermasalah</string>
+    <string name="degraded_channel_description">Peringatan ketika izin yang dibutuhkan BrainXP dicabut.</string>
+    <string name="degraded_notification_title">Perlindungan tidak berjalan penuh</string>
+    <string name="degraded_notification_body">Ada izin yang dicabut. Aplikasi yang kamu batasi bisa dibuka bebas sampai izinnya dipulihkan.</string>
+    <string name="degraded_banner_title">Perlindungan tidak berjalan penuh</string>
+    <string name="degraded_banner_body">Izin yang dibutuhkan dicabut, jadi pembatasan tidak bekerja.</string>
+    <string name="degraded_banner_action">Perbaiki izin</string>
 </resources>
