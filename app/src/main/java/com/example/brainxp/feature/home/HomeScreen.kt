@@ -10,16 +10,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.composables.icons.lucide.ChartNoAxesColumn
 import com.composables.icons.lucide.Flame
 import com.composables.icons.lucide.Library
 import com.composables.icons.lucide.Lucide
@@ -29,6 +30,7 @@ import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.ui.BrainXPTheme
 import com.example.brainxp.core.ui.ErrorState
 import com.example.brainxp.core.ui.HeroCard
+import com.example.brainxp.core.ui.HeroTone
 import com.example.brainxp.core.ui.LoadingState
 import com.example.brainxp.core.ui.PillTone
 import com.example.brainxp.core.ui.PrimaryButton
@@ -118,6 +120,16 @@ private fun TopBar(
                 )
             }
             ProtectionPill(state = state, onEvent = onEvent)
+            IconButton(
+                onClick = { onEvent(HomeEvent.OpenProgress) },
+                modifier = Modifier.size(NAV_TAP),
+            ) {
+                Icon(
+                    imageVector = Lucide.ChartNoAxesColumn,
+                    contentDescription = stringResource(R.string.home_progress_open),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
@@ -220,15 +232,9 @@ private fun ReadyContent(
                 value = shortDuration(state.dailyCapSeconds),
             )
             item(
-                title = stringResource(R.string.home_reset_in),
-                value = shortDuration(state.secondsUntilReset),
-            )
-        }
-
-        TextButton(onClick = { onEvent(HomeEvent.OpenProgress) }) {
-            Text(
-                text = stringResource(R.string.home_progress),
-                style = MaterialTheme.typography.labelMedium,
+                title = stringResource(R.string.home_rest_days),
+                subtitle = stringResource(R.string.home_rest_days_sub),
+                value = stringResource(R.string.home_rest_days_value, state.idleDaysAllowed),
             )
         }
     }
@@ -285,17 +291,26 @@ private fun Hero(state: HomeUiState) {
             ),
         value = if (running) shortDuration(state.remaining) else shortDuration(state.balanceSeconds),
         progress = if (state.dailyCapSeconds > 0) state.spentFraction else null,
+        tone = if (state.capReached || state.idleLocked) HeroTone.DARK else HeroTone.PRIMARY,
         footer = {
             Text(
                 text =
-                    if (state.dailyCapSeconds > 0) {
-                        stringResource(
-                            R.string.home_spent_of_cap,
-                            shortDuration(state.spentTodaySeconds),
-                            shortDuration(state.dailyCapSeconds),
-                        )
-                    } else {
-                        stringResource(R.string.home_no_cap)
+                    when {
+                        state.idleLocked -> {
+                            stringResource(R.string.home_idle_locked, state.idleDays)
+                        }
+
+                        state.dailyCapSeconds > 0 -> {
+                            stringResource(
+                                R.string.home_spent_of_cap,
+                                shortDuration(state.spentTodaySeconds),
+                                shortDuration(state.dailyCapSeconds),
+                            )
+                        }
+
+                        else -> {
+                            stringResource(R.string.home_no_cap)
+                        }
                     },
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onPrimary,
@@ -333,6 +348,7 @@ private fun LockedApps(
 }
 
 private val PILL_ICON = 13.dp
+private val NAV_TAP = 34.dp
 
 private val PREVIEW_OPTIONS = listOf(300, 600, 900)
 private const val PREVIEW_BUDGET_MILLIS = 900_000L

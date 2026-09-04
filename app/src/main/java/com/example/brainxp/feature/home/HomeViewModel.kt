@@ -86,6 +86,8 @@ class HomeViewModel
                             mutableState.value.selectedOption?.takeIf { it in options }
                                 ?: options.firstOrNull(),
                         starting = mutableState.value.starting,
+                        idleDays = standing?.idleDays ?: 0,
+                        idleDaysAllowed = standing?.idleDaysAllowed ?: 0,
                     )
                 }.collect { mutableState.value = it }
             }

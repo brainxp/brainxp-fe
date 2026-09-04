@@ -27,6 +27,8 @@ data class HomeUiState(
     val sessionOptions: List<Int> = emptyList(),
     val selectedOption: Int? = null,
     val starting: Boolean = false,
+    val idleDays: Int = 0,
+    val idleDaysAllowed: Int = 0,
 ) {
     sealed interface Phase {
         data object Loading : Phase
@@ -46,6 +48,8 @@ data class HomeUiState(
     val protectionOff: Boolean get() = protection == ProtectionStatus.OFF
 
     val capReached: Boolean get() = blockReason == BlockReason.DAILY_CAP
+
+    val idleLocked: Boolean get() = blockReason == BlockReason.GUARDIAN_STALE
 
     val appsOpen: Boolean get() = unlockRunning
 
