@@ -7,9 +7,13 @@ import com.example.brainxp.data.repo.UnlockRepository
 import com.example.brainxp.domain.model.ActivityEvent
 import com.example.brainxp.domain.model.ActivityKind
 import com.example.brainxp.domain.model.UnlockState
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.UUID
@@ -166,3 +170,13 @@ class UnlockSessionManager
             const val MILLIS_PER_SECOND = 1_000L
         }
     }
+
+fun UnlockSessionManager.remainingFlow(): Flow<Duration> =
+    flow {
+        while (true) {
+            emit(remaining())
+            delay(COUNTDOWN_TICK_MILLIS)
+        }
+    }.distinctUntilChanged()
+
+private const val COUNTDOWN_TICK_MILLIS = 1_000L
