@@ -136,11 +136,11 @@ class BlockingService : Service() {
             clearTicks = 0
             blocked.value = true
             val blockedPackage = requireNotNull(current)
+            val balance = rewards.state.value
             overlay.show(
                 blockedPackage = blockedPackage,
                 appLabel = appLabels[blockedPackage] ?: blockedPackage,
-                balanceSeconds = rewards.state.value.balanceSeconds,
-                capReached = unlock !is UnlockState.Active && rewards.state.value.balanceSeconds > 0,
+                info = blockedInfoOf(balance.standing, balance.balanceSeconds),
             ) { launchEarnTime(it) }
         } else {
             clearTicks++
