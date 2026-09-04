@@ -86,4 +86,7 @@
     <string name="degraded_banner_title">Perlindungan tidak berjalan penuh</string>
     <string name="degraded_banner_body">Izin yang dibutuhkan dicabut, jadi pembatasan tidak bekerja.</string>
     <string name="degraded_banner_action">Perbaiki izin</string>
+
+    <string name="expiry_warning_title">Satu menit lagi</string>
+    <string name="expiry_warning_body">Waktu bermainmu hampir habis. Selesaikan dulu yang sedang kamu tonton.</string>
 </resources>
