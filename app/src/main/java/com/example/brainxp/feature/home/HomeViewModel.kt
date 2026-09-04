@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brainxp.blocking.InstalledAppsSource
 import com.example.brainxp.blocking.ProtectionStateHolder
+import com.example.brainxp.core.result.AppResult
 import com.example.brainxp.data.prefs.SettingsDataStore
 import com.example.brainxp.data.repo.BalanceSource
 import com.example.brainxp.data.repo.ReconciledBalance
@@ -35,6 +36,11 @@ class HomeViewModel
         private val settings: SettingsDataStore,
         protection: ProtectionStateHolder,
     ) : ViewModel() {
+        private companion object {
+            const val SPEND_NOTE = "unlock"
+            val PRESET_SECONDS = listOf(300, 600, 900, 1_800)
+        }
+
         private val mutableState = MutableStateFlow(HomeUiState())
         val state: StateFlow<HomeUiState> = mutableState.asStateFlow()
 
@@ -59,6 +65,7 @@ class HomeViewModel
                     },
                 ) { balance, unlock, remaining, snapshot, lockedApps ->
                     val standing = balance.standing
+                    val options = durationOptions(balance.balanceSeconds)
                     HomeUiState(
                         phase = phaseFor(balance),
                         balanceSeconds = balance.balanceSeconds,
@@ -72,6 +79,11 @@ class HomeViewModel
                         remaining = remaining,
                         protection = snapshot.status,
                         lockedApps = lockedApps,
+                        sessionOptions = options,
+                        selectedOption =
+                            mutableState.value.selectedOption?.takeIf { it in options }
+                                ?: options.firstOrNull(),
+                        starting = mutableState.value.starting,
                     )
                 }.collect { mutableState.value = it }
             }
@@ -87,6 +99,30 @@ class HomeViewModel
                 HomeEvent.EndUnlockEarly -> viewModelScope.launch { unlocks.endEarly() }
                 HomeEvent.ToggleProtection -> toggleProtection()
                 is HomeEvent.OpenApp -> emit(HomeEffect.LaunchApp(event.packageName))
+                is HomeEvent.SelectDuration -> selectDuration(event.seconds)
+                HomeEvent.StartSession -> startSession()
+            }
+        }
+
+        private fun selectDuration(seconds: Int) {
+            mutableState.value = mutableState.value.copy(selectedOption = seconds)
+        }
+
+        private fun startSession() {
+            val current = mutableState.value
+            val seconds = current.selectedOption ?: current.sessionOptions.firstOrNull() ?: return
+            val packages = current.lockedApps.map { it.packageName }.toSet()
+            if (packages.isEmpty() || current.starting) {
+                return
+            }
+
+            mutableState.value = current.copy(starting = true)
+            viewModelScope.launch {
+                when (val spent = reconciler.spend(seconds, SPEND_NOTE)) {
+                    is AppResult.Success -> unlocks.start(seconds, packages)
+                    is AppResult.Failure -> emit(HomeEffect.SpendFailed(spent.error))
+                }
+                mutableState.value = mutableState.value.copy(starting = false)
             }
         }
 
@@ -103,6 +139,14 @@ class HomeViewModel
 
         private fun emit(effect: HomeEffect) {
             viewModelScope.launch { effectChannel.send(effect) }
+        }
+
+        private fun durationOptions(balanceSeconds: Int): List<Int> {
+            if (balanceSeconds <= 0) {
+                return emptyList()
+            }
+            val fitting = PRESET_SECONDS.filter { it <= balanceSeconds }
+            return fitting.ifEmpty { listOf(balanceSeconds) }
         }
 
         private fun phaseFor(balance: ReconciledBalance): HomeUiState.Phase {
