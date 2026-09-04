@@ -4,7 +4,8 @@ import com.example.brainxp.core.result.AppResult
 import com.example.brainxp.core.time.FakeAppClock
 import com.example.brainxp.data.db.UnlockStatus
 import com.example.brainxp.data.repo.ActivityLogRepository
-import com.example.brainxp.data.repo.StoredUnlock
+import com.example.brainxp.data.repo.ConsumptionReporter
+import com.example.brainxp.data.repo.ReconciledBalance
 import com.example.brainxp.data.repo.UnlockRepository
 import com.example.brainxp.domain.model.ActivityEvent
 import com.example.brainxp.domain.model.ActivityKind
@@ -13,39 +14,29 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 private const val GAME = "com.mobile.legends"
-private const val MINUTE = 60_000L
+private const val CHAT = "com.chat.app"
+private const val NOTES = "com.notes.app"
+private const val TICK = 600L
 
 private class FakeUnlockRepository : UnlockRepository {
-    var stored: StoredUnlock? = null
-    val ended = mutableListOf<Pair<String, UnlockStatus>>()
+    var stored: UnlockState.Active? = null
+    val saves = mutableListOf<Pair<UnlockState.Active, UnlockStatus>>()
 
-    override suspend fun activeUnlock(
-        nowWallClock: Long,
-        nowElapsed: Long,
-    ): UnlockState = stored?.state ?: UnlockState.Locked
-
-    override suspend fun loadActive(): StoredUnlock? = stored
+    override suspend fun loadActive(): UnlockState.Active? = stored
 
     override suspend fun save(
         state: UnlockState.Active,
-        bootWallClock: Long,
-    ): AppResult<Unit> {
-        stored = StoredUnlock(state, bootWallClock)
-        return AppResult.Success(Unit)
-    }
-
-    override suspend fun markEnded(
-        unlockId: String,
         status: UnlockStatus,
     ): AppResult<Unit> {
-        ended += unlockId to status
-        stored = null
+        saves += state to status
+        stored = if (status == UnlockStatus.ACTIVE) state else null
         return AppResult.Success(Unit)
     }
 }
@@ -63,203 +54,284 @@ private class RecordingActivityLog : ActivityLogRepository {
     override suspend fun flushPending(): AppResult<Int> = AppResult.Success(0)
 }
 
+private class RecordingReporter : ConsumptionReporter {
+    val reports = mutableListOf<Map<String, Int>>()
+
+    override suspend fun report(secondsByPackage: Map<String, Int>): AppResult<ReconciledBalance> {
+        reports += secondsByPackage
+        return AppResult.Success(ReconciledBalance())
+    }
+}
+
 class UnlockSessionManagerTest {
     private val clock = FakeAppClock()
     private val repository = FakeUnlockRepository()
     private val log = RecordingActivityLog()
-    private val manager = UnlockSessionManager(clock, repository, log)
+    private val reporter = RecordingReporter()
+    private val manager = UnlockSessionManager(clock, repository, log, reporter)
 
-    private fun kinds() = log.events.map { it.kind }
-
-    @Test
-    fun `starting a session stores both timestamps`() =
-        runTest {
-            val state = manager.start(durationSeconds = 300, allowedPackages = setOf(GAME)) as UnlockState.Active
-
-            assertEquals(clock.elapsed + 5 * MINUTE, state.endAtElapsed)
-            assertEquals(clock.wall + 5 * MINUTE, state.endAtWallClock)
-            assertEquals(setOf(GAME), state.allowedPackages)
+    private suspend fun tick(
+        foreground: String?,
+        times: Int = 1,
+    ) {
+        repeat(times) {
+            clock.advance(TICK)
+            manager.meter(foreground)
         }
+    }
 
     @Test
-    fun `starting a session logs unlock started`() =
+    fun `a fresh session has its whole budget and nothing consumed`() =
         runTest {
-            manager.start(300, setOf(GAME))
+            val state = manager.start(300, setOf(GAME)) as UnlockState.Active
 
-            assertEquals(listOf(ActivityKind.UNLOCK_STARTED), kinds())
-        }
-
-    @Test
-    fun `remaining is recomputed from the stored end and never accumulated`() =
-        runTest {
-            manager.start(300, setOf(GAME))
-
+            assertEquals(300_000L, state.budgetMillis)
+            assertEquals(0L, state.consumedMillis)
             assertEquals(5.minutes, manager.remaining())
-            clock.advance(2 * MINUTE)
-            assertEquals(3.minutes, manager.remaining())
-            clock.advance(3 * MINUTE)
-            assertEquals(kotlin.time.Duration.ZERO, manager.remaining())
         }
 
     @Test
-    fun `an allowed package is permitted while the session runs`() =
+    fun `time does not drain while another app is in the foreground`() =
         runTest {
-            manager.start(300, setOf(GAME))
+            manager.start(60, setOf(GAME))
 
-            assertTrue(manager.allows(GAME))
-            assertFalse(manager.allows("com.other.app"))
+            tick(CHAT, times = 50)
+
+            assertEquals(1.minutes, manager.remaining())
+            assertTrue(manager.state.value is UnlockState.Active)
         }
 
     @Test
-    fun `an allowed package stops being permitted at expiry`() =
+    fun `time does not drain while nothing is in the foreground`() =
         runTest {
-            manager.start(300, setOf(GAME))
-            clock.advance(5 * MINUTE)
+            manager.start(60, setOf(GAME))
 
-            assertFalse(manager.allows(GAME))
+            tick(null, times = 50)
+
+            assertEquals(1.minutes, manager.remaining())
         }
 
     @Test
-    fun `the session expires on the tick after its end`() =
+    fun `time drains while the unlocked app is in the foreground`() =
         runTest {
-            manager.start(300, setOf(GAME))
-            clock.advance(4 * MINUTE)
-            assertTrue(manager.evaluate() is UnlockState.Active)
+            manager.start(60, setOf(GAME))
 
-            clock.advance(MINUTE)
+            tick(GAME, times = 11)
 
-            assertEquals(UnlockState.Expired, manager.evaluate())
-            assertTrue(kinds().contains(ActivityKind.UNLOCK_ENDED))
+            assertEquals(54.seconds, manager.remaining())
         }
 
     @Test
-    fun `expiry marks the stored session expired`() =
+    fun `the first tick after switching in only arms the meter`() =
         runTest {
-            manager.start(300, setOf(GAME))
-            clock.advance(6 * MINUTE)
+            manager.start(60, setOf(GAME))
 
-            manager.evaluate()
+            tick(GAME)
 
-            assertEquals(UnlockStatus.EXPIRED, repository.ended.single().second)
+            assertEquals(1.minutes, manager.remaining())
         }
 
     @Test
-    fun `ending early marks the session ended and logs it`() =
+    fun `leaving the app and coming back does not count the time away`() =
         runTest {
-            manager.start(300, setOf(GAME))
+            manager.start(60, setOf(GAME))
 
-            assertEquals(UnlockState.Expired, manager.endEarly())
+            tick(GAME, times = 6)
+            val afterPlaying = manager.remaining()
+            clock.advance(30 * 60 * 1_000L)
+            manager.meter(CHAT)
+            tick(GAME)
 
-            assertEquals(UnlockStatus.ENDED, repository.ended.single().second)
-            assertTrue(kinds().contains(ActivityKind.UNLOCK_ENDED))
+            assertEquals(afterPlaying, manager.remaining())
         }
 
     @Test
-    fun `a reboot rebases remaining time from the wall clock`() =
+    fun `the session expires once the budget is spent`() =
         runTest {
-            manager.start(600, setOf(GAME))
-            clock.advance(4 * MINUTE)
-            clock.reboot(downtimeMillis = MINUTE)
+            manager.start(3, setOf(GAME))
 
-            val recovered = manager.refresh() as UnlockState.Active
+            tick(GAME, times = 20)
 
-            assertEquals(5 * MINUTE, recovered.endAtElapsed - clock.elapsed)
-            assertTrue(manager.allows(GAME))
+            assertEquals(UnlockState.Expired, manager.state.value)
+            assertEquals(UnlockStatus.EXPIRED, repository.saves.last().second)
         }
 
     @Test
-    fun `a reboot after the session would have ended expires it`() =
+    fun `consumption never exceeds the budget`() =
         runTest {
-            manager.start(300, setOf(GAME))
-            clock.advance(MINUTE)
-            clock.reboot(downtimeMillis = 10 * MINUTE)
+            manager.start(3, setOf(GAME))
 
-            assertEquals(UnlockState.Expired, manager.refresh())
-            assertFalse(manager.allows(GAME))
+            tick(GAME, times = 20)
+
+            assertEquals(
+                3_000L,
+                repository.saves
+                    .last()
+                    .first.consumedMillis,
+            )
         }
 
     @Test
-    fun `the stale elapsed end from before the reboot is not trusted`() =
+    fun `consumption is attributed to the app that was open`() =
         runTest {
-            manager.start(600, setOf(GAME))
-            clock.advance(9 * MINUTE)
-            val staleEnd = (repository.stored!!.state).endAtElapsed
-            clock.reboot(downtimeMillis = 0L)
+            manager.start(600, setOf(GAME, CHAT))
 
-            val recovered = manager.refresh() as UnlockState.Active
+            tick(GAME, times = 6)
+            tick(CHAT, times = 6)
 
-            assertTrue(recovered.endAtElapsed < staleEnd)
-            assertEquals(MINUTE, recovered.endAtElapsed - clock.elapsed)
+            val active = manager.state.value as UnlockState.Active
+            assertEquals(3_000L, active.consumedByPackage[GAME])
+            assertEquals(3_600L, active.consumedByPackage[CHAT])
+            assertEquals(6_600L, active.consumedMillis)
         }
 
     @Test
-    fun `moving the wall clock forward past tolerance is treated as tampering`() =
-        runTest {
-            manager.start(600, setOf(GAME))
-            manager.evaluate()
-
-            clock.moveWallClock(5 * MINUTE)
-
-            assertEquals(UnlockState.Expired, manager.evaluate())
-            assertTrue(kinds().contains(ActivityKind.PROTECTION_ANOMALY))
-        }
-
-    @Test
-    fun `moving the wall clock backward past tolerance is treated as tampering`() =
+    fun `an app outside the session is never metered`() =
         runTest {
             manager.start(600, setOf(GAME))
-            manager.evaluate()
 
-            clock.moveWallClock(-5 * MINUTE)
+            tick(NOTES, times = 6)
 
-            assertEquals(UnlockState.Expired, manager.evaluate())
-            assertTrue(kinds().contains(ActivityKind.PROTECTION_ANOMALY))
+            assertEquals(emptyMap<String, Long>(), (manager.state.value as UnlockState.Active).consumedByPackage)
         }
 
     @Test
-    fun `a clock nudge inside tolerance is not tampering`() =
+    fun `expiring reports what was actually consumed`() =
         runTest {
-            manager.start(600, setOf(GAME))
-            manager.evaluate()
+            manager.start(3, setOf(GAME))
 
-            clock.moveWallClock(30_000L)
+            tick(GAME, times = 20)
 
-            assertTrue(manager.evaluate() is UnlockState.Active)
-            assertFalse(kinds().contains(ActivityKind.PROTECTION_ANOMALY))
+            assertEquals(listOf(mapOf(GAME to 3)), reporter.reports)
         }
 
     @Test
-    fun `tampering marks the session ended rather than expired`() =
+    fun `ending early reports only the consumed part`() =
         runTest {
             manager.start(600, setOf(GAME))
-            manager.evaluate()
-            clock.moveWallClock(5 * MINUTE)
 
-            manager.evaluate()
+            tick(GAME, times = 11)
+            manager.endEarly()
 
-            assertEquals(UnlockStatus.ENDED, repository.ended.single().second)
+            assertEquals(listOf(mapOf(GAME to 6)), reporter.reports)
+            assertEquals(UnlockStatus.ENDED, repository.saves.last().second)
         }
 
     @Test
-    fun `a backward clock move while the process was dead is tampering`() =
+    fun `ending a session that was never used reports nothing`() =
         runTest {
             manager.start(600, setOf(GAME))
-            clock.moveWallClock(-5 * MINUTE)
 
-            assertEquals(UnlockState.Expired, manager.refresh())
-            assertTrue(kinds().contains(ActivityKind.PROTECTION_ANOMALY))
+            manager.endEarly()
+
+            assertEquals(emptyList<Map<String, Int>>(), reporter.reports)
+        }
+
+    @Test
+    fun `moving the system clock forward does not consume the budget`() =
+        runTest {
+            manager.start(60, setOf(GAME))
+
+            tick(GAME, times = 6)
+            clock.moveWallClock(2 * 60 * 60 * 1_000L)
+            manager.meter(GAME)
+
+            assertEquals(57.seconds, manager.remaining())
+            assertTrue(manager.state.value is UnlockState.Active)
+        }
+
+    @Test
+    fun `moving the system clock backward does not extend the budget`() =
+        runTest {
+            manager.start(60, setOf(GAME))
+
+            tick(GAME, times = 6)
+            clock.moveWallClock(-(60 * 60 * 1_000L))
+            tick(GAME, times = 6)
+
+            assertEquals(53_400.milliseconds, manager.remaining())
+        }
+
+    @Test
+    fun `a reboot in the middle of a session does not count the downtime`() =
+        runTest {
+            manager.start(60, setOf(GAME))
+            tick(GAME, times = 11)
+            repository.stored = manager.state.value as UnlockState.Active
+
+            clock.reboot(downtimeMillis = 10 * 60 * 1_000L)
+            manager.refresh()
+            tick(GAME)
+
+            assertEquals(54.seconds, manager.remaining())
+        }
+
+    @Test
+    fun `a stalled ticker counts no more than the cap`() =
+        runTest {
+            manager.start(600, setOf(GAME))
+
+            tick(GAME)
+            clock.advance(10 * 60 * 1_000L)
+            manager.meter(GAME)
+
+            assertEquals(595.seconds, manager.remaining())
+        }
+
+    @Test
+    fun `refresh restores progress already made`() =
+        runTest {
+            manager.start(600, setOf(GAME))
+            tick(GAME, times = 11)
+            val saved = manager.state.value as UnlockState.Active
+            repository.stored = saved
+
+            val restored = manager.refresh() as UnlockState.Active
+
+            assertEquals(saved.consumedMillis, restored.consumedMillis)
+            assertEquals(594.seconds, manager.remaining())
         }
 
     @Test
     fun `refresh with no stored session reports locked`() =
         runTest {
             assertEquals(UnlockState.Locked, manager.refresh())
-            assertEquals(kotlin.time.Duration.ZERO, manager.remaining())
         }
 
     @Test
-    fun `nothing is allowed while locked`() =
+    fun `a stored session already spent is closed on refresh`() =
         runTest {
-            assertFalse(manager.allows(GAME))
+            repository.stored =
+                UnlockState.Active(
+                    unlockId = "spent",
+                    budgetMillis = 1_000L,
+                    consumedByPackage = mapOf(GAME to 1_000L),
+                    allowedPackages = setOf(GAME),
+                )
+
+            assertEquals(UnlockState.Expired, manager.refresh())
+        }
+
+    @Test
+    fun `metering an ended session changes nothing`() =
+        runTest {
+            manager.start(600, setOf(GAME))
+            manager.endEarly()
+
+            tick(GAME, times = 6)
+
+            assertEquals(UnlockState.Expired, manager.state.value)
+        }
+
+    @Test
+    fun `the activity log records the start and the end once each`() =
+        runTest {
+            manager.start(3, setOf(GAME))
+            tick(GAME, times = 20)
+
+            assertEquals(
+                listOf(ActivityKind.UNLOCK_STARTED, ActivityKind.UNLOCK_ENDED),
+                log.events.map { it.kind },
+            )
         }
 }
