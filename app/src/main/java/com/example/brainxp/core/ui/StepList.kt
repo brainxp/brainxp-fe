@@ -6,6 +6,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,6 +49,13 @@ internal fun StepList(
     }
 }
 
+private fun borderFor(
+    state: LoadingStepState,
+    scheme: ColorScheme,
+): Color = if (state == LoadingStepState.Pending) scheme.outline else Color.Transparent
+
+private val HAIRLINE = 1.dp
+
 @Composable
 private fun StepRow(
     step: LoadingStep,
@@ -60,19 +69,19 @@ private fun StepRow(
     val labelColor: Color
     when (step.state) {
         LoadingStepState.Done -> {
+            dotBackground = scheme.primary.copy(alpha = DONE_FILL)
+            dotContent = scheme.onPrimary
+            labelColor = scheme.onSurfaceVariant
+        }
+
+        LoadingStepState.Active -> {
             dotBackground = scheme.primary
             dotContent = scheme.onPrimary
             labelColor = scheme.onSurface
         }
 
-        LoadingStepState.Active -> {
-            dotBackground = scheme.secondaryContainer
-            dotContent = scheme.onSecondaryContainer
-            labelColor = scheme.onSurface
-        }
-
         LoadingStepState.Pending -> {
-            dotBackground = scheme.surfaceContainerHigh
+            dotBackground = Color.Transparent
             dotContent = scheme.onSurfaceVariant
             labelColor = scheme.onSurfaceVariant
         }
@@ -90,7 +99,8 @@ private fun StepRow(
                 Modifier
                     .alpha(pulse)
                     .size(DOT_SIZE)
-                    .background(dotBackground, CircleShape),
+                    .background(dotBackground, CircleShape)
+                    .border(HAIRLINE, borderFor(step.state, scheme), CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             Text(
@@ -123,6 +133,7 @@ private fun activePulse(): Float {
     return alpha
 }
 
+private const val DONE_FILL = 0.55f
 private val DOT_SIZE = 20.dp
 private const val PULSE_MIN_ALPHA = 0.45f
 private const val PULSE_DURATION_MS = 600
