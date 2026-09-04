@@ -32,6 +32,7 @@ fun ChoiceRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     highlight: Boolean = false,
+    trailing: @Composable (() -> Unit)? = null,
 ) {
     val scheme = MaterialTheme.colorScheme
 
@@ -62,7 +63,7 @@ fun ChoiceRow(
             }
 
             Column(
-                modifier = Modifier.fillMaxWidth(BODY_SHARE),
+                modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(SUB_GAP),
             ) {
                 Text(
@@ -77,12 +78,16 @@ fun ChoiceRow(
                 )
             }
 
-            Icon(
-                imageVector = Lucide.ChevronRight,
-                contentDescription = null,
-                tint = scheme.onSurfaceVariant,
-                modifier = Modifier.size(GLYPH),
-            )
+            if (trailing == null) {
+                Icon(
+                    imageVector = Lucide.ChevronRight,
+                    contentDescription = null,
+                    tint = scheme.onSurfaceVariant,
+                    modifier = Modifier.size(GLYPH),
+                )
+            } else {
+                trailing()
+            }
         }
     }
 }
@@ -94,7 +99,6 @@ private val GAP = 12.dp
 private val TILE = 38.dp
 private val GLYPH = 18.dp
 private val SUB_GAP = 1.dp
-private const val BODY_SHARE = 0.86f
 
 @Composable
 private fun ChoiceRowSample(modifier: Modifier = Modifier) {
