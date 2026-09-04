@@ -1,22 +1,18 @@
 package com.example.brainxp.core.ui
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -29,71 +25,74 @@ fun <T> SegmentedControl(
     label: (T) -> String,
     modifier: Modifier = Modifier,
 ) {
-    val spacing = BrainXPTheme.spacing
-
-    Row(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .height(CONTROL_HEIGHT)
-                .clip(PillShape)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                .padding(TRACK_INSET),
-        horizontalArrangement = Arrangement.spacedBy(TRACK_INSET),
-        verticalAlignment = Alignment.CenterVertically,
+    FlowRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(GAP),
+        verticalArrangement = Arrangement.spacedBy(GAP),
     ) {
         options.forEach { option ->
-            val active = option == selected
-            val container by
-                animateColorAsState(
-                    targetValue =
-                        if (active) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.surfaceContainerHigh
-                        },
-                    label = "segmentContainer",
-                )
-            val ink by
-                animateColorAsState(
-                    targetValue =
-                        if (active) {
-                            MaterialTheme.colorScheme.onPrimary
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                    label = "segmentInk",
-                )
-
-            Box(
-                modifier =
-                    Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .height(SEGMENT_HEIGHT)
-                        .clip(PillShape)
-                        .background(container)
-                        .selectable(
-                            selected = active,
-                            role = Role.Tab,
-                            onClick = { onSelect(option) },
-                        ),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = label(option),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = ink,
-                    modifier = Modifier.padding(horizontal = spacing.sm),
-                )
-            }
+            Segment(
+                text = label(option),
+                active = option == selected,
+                onClick = { onSelect(option) },
+            )
         }
     }
 }
 
-private val CONTROL_HEIGHT = 48.dp
-private val SEGMENT_HEIGHT = 40.dp
-private val TRACK_INSET = 4.dp
+@Composable
+private fun Segment(
+    text: String,
+    active: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val container by
+        animateColorAsState(
+            targetValue =
+                if (active) {
+                    MaterialTheme.colorScheme.primaryContainer
+                } else {
+                    MaterialTheme.colorScheme.surface
+                },
+            label = "segmentContainer",
+        )
+    val border by
+        animateColorAsState(
+            targetValue =
+                if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+            label = "segmentBorder",
+        )
+    val ink by
+        animateColorAsState(
+            targetValue =
+                if (active) {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+            label = "segmentInk",
+        )
+
+    Surface(
+        modifier = modifier.selectable(selected = active, role = Role.Tab, onClick = onClick),
+        shape = SegmentShape,
+        color = container,
+        border = BorderStroke(BORDER, border),
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelMedium,
+            color = ink,
+            modifier = Modifier.padding(horizontal = HORIZONTAL, vertical = VERTICAL),
+        )
+    }
+}
+
+private val GAP = 6.dp
+private val BORDER = 1.5.dp
+private val HORIZONTAL = 13.dp
+private val VERTICAL = 9.dp
 
 private enum class SampleMode {
     SELF,
