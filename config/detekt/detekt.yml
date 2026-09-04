@@ -5,6 +5,8 @@ naming:
 style:
   MagicNumber:
     ignorePropertyDeclaration: true
+  MaxLineLength:
+    maxLineLength: 140
   UnusedPrivateMember:
     ignoreAnnotated: ['Preview']
   ReturnCount:
