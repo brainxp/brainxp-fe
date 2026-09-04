@@ -33,6 +33,7 @@ fun BlockScreen(
     modifier: Modifier = Modifier,
     capReached: Boolean = false,
 ) {
+    val hasBalance = balanceSeconds > 0 && !capReached
     BrainXPTheme(darkTheme = false) {
         val spacing = BrainXPTheme.spacing
 
@@ -50,9 +51,11 @@ fun BlockScreen(
 
             Text(
                 text =
-                    stringResource(
-                        if (capReached) R.string.block_screen_cap_title else R.string.block_screen_title,
-                    ),
+                    when {
+                        capReached -> stringResource(R.string.block_screen_cap_title)
+                        hasBalance -> stringResource(R.string.block_screen_idle_title)
+                        else -> stringResource(R.string.block_screen_title)
+                    },
                 style = MaterialTheme.typography.displaySmall,
                 color = Color.White,
                 modifier = Modifier.padding(top = spacing.md),
@@ -60,9 +63,11 @@ fun BlockScreen(
 
             Text(
                 text =
-                    stringResource(
-                        if (capReached) R.string.block_screen_cap_body else R.string.block_screen_body,
-                    ),
+                    when {
+                        capReached -> stringResource(R.string.block_screen_cap_body)
+                        hasBalance -> stringResource(R.string.block_screen_idle_body)
+                        else -> stringResource(R.string.block_screen_body)
+                    },
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White.copy(alpha = SECONDARY_INK),
             )
@@ -98,7 +103,10 @@ fun BlockScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             PrimaryButton(
-                text = stringResource(R.string.block_screen_action),
+                text =
+                    stringResource(
+                        if (hasBalance) R.string.block_screen_idle_action else R.string.block_screen_action,
+                    ),
                 onClick = onEarnTime,
                 modifier = Modifier.fillMaxWidth(),
             )
