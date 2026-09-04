@@ -33,6 +33,7 @@ import com.example.brainxp.core.ui.LoadingState
 import com.example.brainxp.core.ui.PillTone
 import com.example.brainxp.core.ui.PrimaryButton
 import com.example.brainxp.core.ui.RowGroup
+import com.example.brainxp.core.ui.SegmentedControl
 import com.example.brainxp.core.ui.StatusPill
 import com.example.brainxp.core.ui.shortDuration
 import com.example.brainxp.domain.model.UnlockState
@@ -173,6 +174,10 @@ private fun ReadyContent(
             )
         }
 
+        if (state.canStartSession) {
+            SessionStarter(state = state, onEvent = onEvent)
+        }
+
         PrimaryButton(
             text = stringResource(R.string.home_start_earning),
             onClick = { onEvent(HomeEvent.StartEarning) },
@@ -224,6 +229,47 @@ private fun ReadyContent(
             Text(
                 text = stringResource(R.string.home_progress),
                 style = MaterialTheme.typography.labelMedium,
+            )
+        }
+    }
+}
+
+@Composable
+private fun SessionStarter(
+    state: HomeUiState,
+    onEvent: (HomeEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val spacing = BrainXPTheme.spacing
+
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(spacing.sm)) {
+        Text(
+            text = stringResource(R.string.home_session_label),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        SegmentedControl(
+            options = state.sessionOptions,
+            selected = state.selectedOption ?: state.sessionOptions.first(),
+            onSelect = { onEvent(HomeEvent.SelectDuration(it)) },
+            label = { shortDuration(it) },
+        )
+        OutlinedButton(
+            onClick = { onEvent(HomeEvent.StartSession) },
+            enabled = !state.starting,
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium,
+        ) {
+            Text(
+                text =
+                    stringResource(
+                        if (state.starting) {
+                            R.string.home_session_starting
+                        } else {
+                            R.string.home_session_start
+                        },
+                    ),
+                style = MaterialTheme.typography.labelLarge,
             )
         }
     }
@@ -288,6 +334,8 @@ private fun LockedApps(
 
 private val PILL_ICON = 13.dp
 
+private val PREVIEW_OPTIONS = listOf(300, 600, 900)
+
 private val PREVIEW_APPS =
     listOf(
         LockedApp("com.mobile.legends", "Mobile Legends"),
@@ -309,6 +357,8 @@ private fun HomeLockedPreview() {
                     streakDays = 3,
                     protection = ProtectionStatus.ACTIVE,
                     lockedApps = PREVIEW_APPS,
+                    sessionOptions = PREVIEW_OPTIONS,
+                    selectedOption = PREVIEW_OPTIONS.first(),
                 ),
             onEvent = {},
         )
