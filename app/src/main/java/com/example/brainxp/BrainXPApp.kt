@@ -47,7 +47,12 @@ fun BrainXPApp(
                     modifier = content,
                     onResetSetup = viewModel::resetSetup,
                     onToggleProtection = viewModel::toggleProtection,
-                    onGrantDebugUnlock = viewModel::grantDebugUnlock,
+                    debug =
+                        DebugActions(
+                            grantUnlock = viewModel::grantDebugUnlock,
+                            setWarningLead = viewModel::setWarningLead,
+                            endUnlock = viewModel::endUnlock,
+                        ),
                     deepLink = deepLink,
                 )
             }
@@ -82,7 +87,7 @@ private fun OnboardingNavHost(
 private fun MainNavHost(
     onResetSetup: () -> Unit,
     onToggleProtection: () -> Unit,
-    onGrantDebugUnlock: () -> Unit,
+    debug: DebugActions,
     modifier: Modifier = Modifier,
     deepLink: NavKey? = null,
 ) {
@@ -100,7 +105,8 @@ private fun MainNavHost(
         entryDecorators = defaultDecorators(),
         entryProvider =
             entryProvider {
-                dailyEntries(backStack, onResetSetup, onToggleProtection, onGrantDebugUnlock)
+                dailyEntries(backStack, onResetSetup, onToggleProtection)
+                debugEntries(backStack, onResetSetup, onToggleProtection, debug)
                 learningEntries(backStack)
                 familyEntries(backStack)
             },
