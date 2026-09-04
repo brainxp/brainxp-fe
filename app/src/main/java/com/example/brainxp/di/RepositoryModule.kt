@@ -5,7 +5,9 @@ import com.example.brainxp.data.repo.FamilyRepository
 import com.example.brainxp.data.repo.MaterialRepository
 import com.example.brainxp.data.repo.RestrictionRepository
 import com.example.brainxp.data.repo.RewardRepository
+import com.example.brainxp.data.repo.RoomUnlockRepository
 import com.example.brainxp.data.repo.SessionRepository
+import com.example.brainxp.data.repo.UnlockRepository
 import com.example.brainxp.data.repo.fake.FakeActivityLogRepository
 import com.example.brainxp.data.repo.fake.FakeFamilyRepository
 import com.example.brainxp.data.repo.fake.FakeMaterialRepository
@@ -37,4 +39,7 @@ interface RepositoryModule {
 
     @Binds
     fun bindFamilyRepository(impl: FakeFamilyRepository): FamilyRepository
+
+    @Binds
+    fun bindUnlockRepository(impl: RoomUnlockRepository): UnlockRepository
 }
