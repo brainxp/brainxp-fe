@@ -1,17 +1,19 @@
 package com.example.brainxp
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.example.brainxp.core.ui.PlaceholderAction
 import com.example.brainxp.core.ui.PlaceholderScreen
 import com.example.brainxp.feature.apps.AppPickerRoute
-import com.example.brainxp.feature.health.ProtectionHealthBanner
+import com.example.brainxp.feature.home.HomeEffect
+import com.example.brainxp.feature.home.HomeScreen
+import com.example.brainxp.feature.home.HomeViewModel
 import com.example.brainxp.feature.onboarding.permission.PermissionSetupRoute
 
 internal fun EntryProviderScope<NavKey>.onboardingEntries(
@@ -47,23 +49,19 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(
     onGrantDebugUnlock: () -> Unit,
 ) {
     entry<MainRoute.Home> {
-        Column {
-            ProtectionHealthBanner(
-                onFixPermissions = { backStack.add(MainRoute.PermissionSetup) },
-                modifier = Modifier.padding(horizontal = SCREEN_PADDING, vertical = BANNER_GAP),
-            )
-            Placeholder("Home", "MainRoute.Home") {
-                listOf(
-                    action("Materials", backStack, MainRoute.MaterialList),
-                    action("Restricted apps", backStack, MainRoute.AppPicker),
-                    action("History", backStack, MainRoute.History),
-                    action("Progress", backStack, MainRoute.Progress),
-                    action("Activity log", backStack, MainRoute.ActivityLog),
-                    action("Family", backStack, MainRoute.FamilyHome),
-                    action("Settings", backStack, MainRoute.Settings),
-                )
+        val viewModel: HomeViewModel = hiltViewModel()
+        val homeState by viewModel.state.collectAsStateWithLifecycle()
+
+        LaunchedEffect(viewModel) {
+            viewModel.effects.collect { effect ->
+                when (effect) {
+                    HomeEffect.OpenAddMaterial -> backStack.add(MainRoute.Capture)
+                    HomeEffect.OpenPermissionSetup -> backStack.add(MainRoute.PermissionSetup)
+                }
             }
         }
+
+        HomeScreen(state = homeState, onEvent = viewModel::onEvent)
     }
     entry<MainRoute.AppPicker> { AppPickerRoute() }
     entry<MainRoute.History> { Placeholder("History", "MainRoute.History") }
@@ -159,9 +157,6 @@ private fun step(
     backStack: NavBackStack<NavKey>,
     target: NavKey,
 ) = listOf(action(label, backStack, target))
-
-private val SCREEN_PADDING = 20.dp
-private val BANNER_GAP = 8.dp
 
 private fun debugActions(onGrantDebugUnlock: () -> Unit): List<PlaceholderAction> =
     if (BuildConfig.DEBUG) {
