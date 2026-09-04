@@ -1,6 +1,7 @@
 package com.example.brainxp.blocking
 
 import android.app.AlarmManager
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -10,6 +11,8 @@ import androidx.core.app.NotificationCompat
 import com.example.brainxp.MainActivity
 import com.example.brainxp.R
 import com.example.brainxp.core.time.AppClock
+import com.example.brainxp.core.time.clock
+import com.example.brainxp.domain.UnlockSessionManager
 import com.example.brainxp.domain.model.UnlockState
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -21,11 +24,27 @@ class ExpiryWarning
     @Inject
     constructor(
         @ApplicationContext private val context: Context,
-        private val clock: AppClock,
+        private val appClock: AppClock,
     ) {
-        fun schedule(active: UnlockState.Active) {
-            val triggerAt = active.endAtElapsed - LEAD_MILLIS
-            if (triggerAt <= clock.elapsedRealtime()) {
+        fun createChannel() {
+            context.getSystemService(NotificationManager::class.java).createNotificationChannel(
+                NotificationChannel(
+                    CHANNEL_ID,
+                    context.getString(R.string.warning_channel_name),
+                    NotificationManager.IMPORTANCE_HIGH,
+                ).apply {
+                    description = context.getString(R.string.warning_channel_description)
+                    setShowBadge(false)
+                },
+            )
+        }
+
+        fun schedule(
+            active: UnlockState.Active,
+            leadSeconds: Int,
+        ) {
+            val triggerAt = active.endAtElapsed - leadSeconds * MILLIS_PER_SECOND
+            if (triggerAt <= appClock.elapsedRealtime()) {
                 return
             }
             alarmManager()?.setAndAllowWhileIdle(
@@ -40,14 +59,15 @@ class ExpiryWarning
             notificationManager().cancel(ID)
         }
 
-        fun post() {
+        fun post(remainingSeconds: Int) {
             val notification =
                 NotificationCompat
                     .Builder(context, CHANNEL_ID)
                     .setSmallIcon(R.mipmap.ic_launcher)
-                    .setContentTitle(context.getString(R.string.expiry_warning_title))
+                    .setContentTitle(context.getString(R.string.expiry_warning_title, clock(remainingSeconds)))
                     .setContentText(context.getString(R.string.expiry_warning_body))
                     .setAutoCancel(true)
+                    .setOnlyAlertOnce(true)
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
                     .setContentIntent(
                         PendingIntent.getActivity(
@@ -73,11 +93,11 @@ class ExpiryWarning
             )
 
         companion object {
-            const val LEAD_MILLIS = 60_000L
-            private const val CHANNEL_ID = "brainxp_protection_degraded"
+            private const val CHANNEL_ID = "brainxp_expiry_warning"
             private const val ID = 1002
             private const val REQUEST_ALARM = 20
             private const val REQUEST_OPEN = 21
+            private const val MILLIS_PER_SECOND = 1_000L
         }
     }
 
@@ -86,10 +106,13 @@ class ExpiryWarningReceiver : BroadcastReceiver() {
     @Inject
     lateinit var warning: ExpiryWarning
 
+    @Inject
+    lateinit var unlocks: UnlockSessionManager
+
     override fun onReceive(
         context: Context,
         intent: Intent,
     ) {
-        warning.post()
+        warning.post(unlocks.remaining().inWholeSeconds.toInt())
     }
 }
