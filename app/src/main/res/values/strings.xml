@@ -89,4 +89,13 @@
 
     <string name="expiry_warning_title">Satu menit lagi</string>
     <string name="expiry_warning_body">Waktu bermainmu hampir habis. Selesaikan dulu yang sedang kamu tonton.</string>
+
+    <string name="home_balance_label">Waktu bermain tersedia</string>
+    <string name="home_countdown_label">Sisa waktu bermain</string>
+    <string name="home_unit_minutes">menit</string>
+    <string name="home_stale_balance">Belum tersambung ke server. Angka ini dari catatan terakhir.</string>
+    <string name="home_start_earning">Kumpulkan waktu</string>
+    <string name="home_end_early">Selesai sekarang</string>
+    <string name="home_locked_footer">Jawab pertanyaan dari materimu untuk menambah waktu.</string>
+    <string name="home_running_footer">Aplikasi yang kamu batasi sedang terbuka.</string>
 </resources>
