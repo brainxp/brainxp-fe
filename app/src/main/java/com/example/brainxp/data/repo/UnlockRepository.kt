@@ -5,30 +5,14 @@ import com.example.brainxp.data.db.UnlockSessionDao
 import com.example.brainxp.data.db.UnlockSessionEntity
 import com.example.brainxp.data.db.UnlockStatus
 import com.example.brainxp.domain.model.UnlockState
-import com.example.brainxp.domain.model.rebasedAfterBoot
 import javax.inject.Inject
 import javax.inject.Singleton
 
-data class StoredUnlock(
-    val state: UnlockState.Active,
-    val bootWallClock: Long,
-)
-
 interface UnlockRepository {
-    suspend fun activeUnlock(
-        nowWallClock: Long,
-        nowElapsed: Long,
-    ): UnlockState
-
-    suspend fun loadActive(): StoredUnlock?
+    suspend fun loadActive(): UnlockState.Active?
 
     suspend fun save(
         state: UnlockState.Active,
-        bootWallClock: Long,
-    ): AppResult<Unit>
-
-    suspend fun markEnded(
-        unlockId: String,
         status: UnlockStatus,
     ): AppResult<Unit>
 }
@@ -39,54 +23,29 @@ class RoomUnlockRepository
     constructor(
         private val dao: UnlockSessionDao,
     ) : UnlockRepository {
-        override suspend fun activeUnlock(
-            nowWallClock: Long,
-            nowElapsed: Long,
-        ): UnlockState {
-            val stored = loadActive() ?: return UnlockState.Locked
-            val rebased = stored.state.rebasedAfterBoot(nowWallClock, nowElapsed)
-            if (rebased is UnlockState.Expired) {
-                dao.updateStatus(stored.state.unlockId, UnlockStatus.EXPIRED)
-            }
-            return rebased
-        }
-
-        override suspend fun loadActive(): StoredUnlock? {
+        override suspend fun loadActive(): UnlockState.Active? {
             val row = dao.findActive() ?: return null
-            return StoredUnlock(
-                state =
-                    UnlockState.Active(
-                        unlockId = row.id,
-                        endAtElapsed = row.endAtElapsed,
-                        endAtWallClock = row.endAtWallClock,
-                        allowedPackages = row.allowedPackages.toSet(),
-                    ),
-                bootWallClock = row.bootWallClock,
+            return UnlockState.Active(
+                unlockId = row.id,
+                budgetMillis = row.budgetMillis,
+                consumedByPackage = row.consumedByPackage,
+                allowedPackages = row.allowedPackages.toSet(),
             )
         }
 
         override suspend fun save(
             state: UnlockState.Active,
-            bootWallClock: Long,
+            status: UnlockStatus,
         ): AppResult<Unit> {
             dao.upsert(
                 UnlockSessionEntity(
                     id = state.unlockId,
-                    endAtElapsed = state.endAtElapsed,
-                    endAtWallClock = state.endAtWallClock,
-                    bootWallClock = bootWallClock,
+                    budgetMillis = state.budgetMillis,
+                    consumedByPackage = state.consumedByPackage,
                     allowedPackages = state.allowedPackages.toList(),
-                    status = UnlockStatus.ACTIVE,
+                    status = status,
                 ),
             )
-            return AppResult.Success(Unit)
-        }
-
-        override suspend fun markEnded(
-            unlockId: String,
-            status: UnlockStatus,
-        ): AppResult<Unit> {
-            dao.updateStatus(unlockId, status)
             return AppResult.Success(Unit)
         }
     }
