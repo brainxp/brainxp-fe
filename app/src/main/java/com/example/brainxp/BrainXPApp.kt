@@ -43,6 +43,7 @@ fun BrainXPApp(modifier: Modifier = Modifier) {
                 MainNavHost(
                     modifier = content,
                     onResetSetup = viewModel::resetSetup,
+                    onToggleProtection = viewModel::toggleProtection,
                 )
             }
         }
@@ -75,6 +76,7 @@ private fun OnboardingNavHost(
 @Composable
 private fun MainNavHost(
     onResetSetup: () -> Unit,
+    onToggleProtection: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val backStack = rememberNavBackStack(MainRoute.Home)
@@ -86,7 +88,7 @@ private fun MainNavHost(
         entryDecorators = defaultDecorators(),
         entryProvider =
             entryProvider {
-                dailyEntries(backStack, onResetSetup)
+                dailyEntries(backStack, onResetSetup, onToggleProtection)
                 learningEntries(backStack)
                 familyEntries(backStack)
             },
