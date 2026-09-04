@@ -6,6 +6,7 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.example.brainxp.core.ui.PlaceholderAction
 import com.example.brainxp.core.ui.PlaceholderScreen
+import com.example.brainxp.feature.apps.AppPickerRoute
 import com.example.brainxp.feature.onboarding.permission.PermissionSetupRoute
 
 internal fun EntryProviderScope<NavKey>.onboardingEntries(
@@ -52,7 +53,7 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(
             )
         }
     }
-    entry<MainRoute.AppPicker> { Placeholder("App picker", "MainRoute.AppPicker") }
+    entry<MainRoute.AppPicker> { AppPickerRoute() }
     entry<MainRoute.History> { Placeholder("History", "MainRoute.History") }
     entry<MainRoute.Progress> { Placeholder("Progress", "MainRoute.Progress") }
     entry<MainRoute.ActivityLog> { Placeholder("Activity log", "MainRoute.ActivityLog") }
