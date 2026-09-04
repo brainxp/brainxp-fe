@@ -37,7 +37,6 @@ fun BrainXPApp(
 
             RootUiState.Onboarding -> {
                 OnboardingNavHost(
-                    modifier = content,
                     onSetupComplete = viewModel::markSetupComplete,
                 )
             }

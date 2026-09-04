@@ -8,6 +8,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -19,9 +22,17 @@ import com.example.brainxp.core.ui.PlaceholderAction
 import com.example.brainxp.core.ui.PlaceholderScreen
 import com.example.brainxp.feature.apps.AppPickerRoute
 import com.example.brainxp.feature.debug.DebugUnlockPanel
+import com.example.brainxp.feature.family.PAIRING_CODE_LENGTH
+import com.example.brainxp.feature.family.PairDeviceScreen
 import com.example.brainxp.feature.home.HomeEffect
 import com.example.brainxp.feature.home.HomeScreen
 import com.example.brainxp.feature.home.HomeViewModel
+import com.example.brainxp.feature.onboarding.DeviceRole
+import com.example.brainxp.feature.onboarding.PickModeScreen
+import com.example.brainxp.feature.onboarding.PickRoleScreen
+import com.example.brainxp.feature.onboarding.SetupMode
+import com.example.brainxp.feature.onboarding.SignInScreen
+import com.example.brainxp.feature.onboarding.WelcomeScreen
 import com.example.brainxp.feature.onboarding.permission.PermissionSetupRoute
 
 internal fun EntryProviderScope<NavKey>.onboardingEntries(
@@ -29,14 +40,52 @@ internal fun EntryProviderScope<NavKey>.onboardingEntries(
     onSetupComplete: () -> Unit,
 ) {
     entry<OnboardingRoute.Welcome> {
-        Placeholder("Welcome", "OnboardingRoute.Welcome") {
-            step("Choose mode", backStack, OnboardingRoute.ModeSelect)
-        }
+        WelcomeScreen(onStart = { backStack.add(OnboardingRoute.ModeSelect) })
     }
     entry<OnboardingRoute.ModeSelect> {
-        Placeholder("Mode select", "OnboardingRoute.ModeSelect") {
-            step("Set up permissions", backStack, OnboardingRoute.PermissionSetup)
-        }
+        PickModeScreen(
+            onPick = { mode ->
+                when (mode) {
+                    SetupMode.FAMILY -> backStack.add(OnboardingRoute.RoleSelect)
+                    SetupMode.PERSONAL -> backStack.add(OnboardingRoute.SignIn(family = false))
+                }
+            },
+        )
+    }
+    entry<OnboardingRoute.RoleSelect> {
+        PickRoleScreen(
+            onBack = { backStack.popOrIgnore() },
+            onPick = { role ->
+                when (role) {
+                    DeviceRole.PARENT -> backStack.add(OnboardingRoute.SignIn(family = true))
+                    DeviceRole.CHILD -> backStack.add(OnboardingRoute.PairDevice)
+                }
+            },
+        )
+    }
+    entry<OnboardingRoute.SignIn> { key ->
+        SignInScreen(
+            mode = if (key.family) SetupMode.FAMILY else SetupMode.PERSONAL,
+            onBack = { backStack.popOrIgnore() },
+            onDone = { backStack.add(OnboardingRoute.PermissionSetup) },
+        )
+    }
+    entry<OnboardingRoute.PairDevice> {
+        var digits by remember { mutableStateOf("") }
+
+        PairDeviceScreen(
+            digits = digits,
+            onBack = { backStack.popOrIgnore() },
+            onKey = { key ->
+                if (digits.length < PAIRING_CODE_LENGTH) {
+                    digits += key
+                    if (digits.length == PAIRING_CODE_LENGTH) {
+                        backStack.add(OnboardingRoute.PermissionSetup)
+                    }
+                }
+            },
+            onDelete = { digits = digits.dropLast(1) },
+        )
     }
     entry<OnboardingRoute.PermissionSetup> {
         PermissionSetupRoute(
@@ -197,12 +246,6 @@ private fun action(
     backStack: NavBackStack<NavKey>,
     target: NavKey,
 ) = PlaceholderAction(label) { backStack.add(target) }
-
-private fun step(
-    label: String,
-    backStack: NavBackStack<NavKey>,
-    target: NavKey,
-) = listOf(action(label, backStack, target))
 
 @Composable
 private fun DebugDestinations(
