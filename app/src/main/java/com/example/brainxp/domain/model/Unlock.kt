@@ -17,3 +17,13 @@ data class RestrictionState(
     val restrictedPackages: Set<String> = emptySet(),
     val unlock: UnlockState = UnlockState.Locked,
 )
+
+fun UnlockState.Active.rebasedAfterBoot(
+    nowWallClock: Long,
+    nowElapsed: Long,
+): UnlockState =
+    if (endAtWallClock <= nowWallClock) {
+        UnlockState.Expired
+    } else {
+        copy(endAtElapsed = nowElapsed + (endAtWallClock - nowWallClock))
+    }
