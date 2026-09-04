@@ -1,0 +1,81 @@
+package com.example.brainxp.di
+
+import com.example.brainxp.core.network.AuthInterceptor
+import com.example.brainxp.core.network.AuthTokenStore
+import com.example.brainxp.core.network.InMemoryAuthTokenStore
+import com.example.brainxp.core.network.TokenAuthenticator
+import com.example.brainxp.core.network.TokenRefresher
+import com.example.brainxp.core.network.UnavailableTokenRefresher
+import dagger.Binds
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import retrofit2.Retrofit
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import java.util.concurrent.TimeUnit
+import javax.inject.Named
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+object NetworkModule {
+    private const val BASE_URL = "https://brainxp-api.satu-miliar-pertama-di-2027.biz.id/"
+    private const val TIMEOUT_SECONDS = 30L
+    private const val CONTENT_TYPE = "application/json"
+
+    @Provides
+    @Singleton
+    fun provideJson(): Json =
+        Json {
+            ignoreUnknownKeys = true
+            explicitNulls = false
+            encodeDefaults = true
+            isLenient = true
+        }
+
+    @Provides
+    @Named("baseUrl")
+    fun provideBaseUrl(): String = BASE_URL
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(
+        authInterceptor: AuthInterceptor,
+        authenticator: TokenAuthenticator,
+    ): OkHttpClient =
+        OkHttpClient
+            .Builder()
+            .addInterceptor(authInterceptor)
+            .authenticator(authenticator)
+            .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .build()
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(
+        client: OkHttpClient,
+        json: Json,
+        @Named("baseUrl") baseUrl: String,
+    ): Retrofit =
+        Retrofit
+            .Builder()
+            .baseUrl(baseUrl)
+            .client(client)
+            .addConverterFactory(json.asConverterFactory(CONTENT_TYPE.toMediaType()))
+            .build()
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+interface NetworkBindings {
+    @Binds
+    fun bindAuthTokenStore(impl: InMemoryAuthTokenStore): AuthTokenStore
+
+    @Binds
+    fun bindTokenRefresher(impl: UnavailableTokenRefresher): TokenRefresher
+}
