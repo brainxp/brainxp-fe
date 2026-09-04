@@ -1,5 +1,7 @@
 package com.example.brainxp
 
+import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -7,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
@@ -15,6 +18,7 @@ import androidx.navigation3.runtime.NavKey
 import com.example.brainxp.core.ui.PlaceholderAction
 import com.example.brainxp.core.ui.PlaceholderScreen
 import com.example.brainxp.feature.apps.AppPickerRoute
+import com.example.brainxp.feature.debug.DebugUnlockPanel
 import com.example.brainxp.feature.home.HomeEffect
 import com.example.brainxp.feature.home.HomeScreen
 import com.example.brainxp.feature.home.HomeViewModel
@@ -46,21 +50,30 @@ internal fun EntryProviderScope<NavKey>.onboardingEntries(
     }
 }
 
+internal data class DebugActions(
+    val grantUnlock: (Int) -> Unit,
+    val setWarningLead: (Int) -> Unit,
+    val endUnlock: () -> Unit,
+)
+
 internal fun EntryProviderScope<NavKey>.dailyEntries(
     backStack: NavBackStack<NavKey>,
     onResetSetup: () -> Unit,
     onToggleProtection: () -> Unit,
-    onGrantDebugUnlock: () -> Unit,
 ) {
     entry<MainRoute.Home> {
         val viewModel: HomeViewModel = hiltViewModel()
         val homeState by viewModel.state.collectAsStateWithLifecycle()
+        val context = LocalContext.current
 
         LaunchedEffect(viewModel) {
             viewModel.effects.collect { effect ->
                 when (effect) {
                     HomeEffect.OpenAddMaterial -> backStack.add(MainRoute.Capture)
                     HomeEffect.OpenPermissionSetup -> backStack.add(MainRoute.PermissionSetup)
+                    HomeEffect.OpenLibrary -> backStack.add(MainRoute.MaterialList)
+                    HomeEffect.OpenProgress -> backStack.add(MainRoute.Progress)
+                    is HomeEffect.LaunchApp -> launchApp(context, effect.packageName)
                 }
             }
         }
@@ -78,9 +91,6 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(
             )
         }
     }
-    entry<MainRoute.DebugMenu> {
-        DebugDestinations(backStack, onResetSetup, onToggleProtection, onGrantDebugUnlock)
-    }
     entry<MainRoute.AppPicker> { AppPickerRoute() }
     entry<MainRoute.History> { Placeholder("History", "MainRoute.History") }
     entry<MainRoute.Progress> { Placeholder("Progress", "MainRoute.Progress") }
@@ -92,13 +102,31 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(
                 action("Permissions", backStack, MainRoute.PermissionSetup),
                 PlaceholderAction("Toggle protection", onToggleProtection),
                 PlaceholderAction("Re-run setup", onResetSetup),
-            ) + debugActions(onGrantDebugUnlock)
+            )
         }
     }
     entry<MainRoute.PermissionSetup> {
         PermissionSetupRoute(
             onDone = { backStack.popOrIgnore() },
             reentrant = true,
+        )
+    }
+}
+
+internal fun EntryProviderScope<NavKey>.debugEntries(
+    backStack: NavBackStack<NavKey>,
+    onResetSetup: () -> Unit,
+    onToggleProtection: () -> Unit,
+    debug: DebugActions,
+) {
+    entry<MainRoute.DebugMenu> {
+        DebugDestinations(backStack, onResetSetup, onToggleProtection)
+    }
+    entry<MainRoute.DebugUnlock> {
+        DebugUnlockPanel(
+            onGrant = debug.grantUnlock,
+            onSetWarningLead = debug.setWarningLead,
+            onEndUnlock = debug.endUnlock,
         )
     }
 }
@@ -181,7 +209,6 @@ private fun DebugDestinations(
     backStack: NavBackStack<NavKey>,
     onResetSetup: () -> Unit,
     onToggleProtection: () -> Unit,
-    onGrantDebugUnlock: () -> Unit,
 ) {
     PlaceholderScreen(
         name = "Debug",
@@ -197,16 +224,18 @@ private fun DebugDestinations(
                 action("Activity log", backStack, MainRoute.ActivityLog),
                 action("Family", backStack, MainRoute.FamilyHome),
                 action("Settings", backStack, MainRoute.Settings),
+                action("Sesi uji", backStack, MainRoute.DebugUnlock),
                 PlaceholderAction("Toggle protection", onToggleProtection),
-                PlaceholderAction("Grant 5 minutes", onGrantDebugUnlock),
                 PlaceholderAction("Re-run setup", onResetSetup),
             ),
     )
 }
 
-private fun debugActions(onGrantDebugUnlock: () -> Unit): List<PlaceholderAction> =
-    if (BuildConfig.DEBUG) {
-        listOf(PlaceholderAction("Grant 5 minutes (debug)", onGrantDebugUnlock))
-    } else {
-        emptyList()
-    }
+private fun launchApp(
+    context: Context,
+    packageName: String,
+) {
+    val intent = context.packageManager.getLaunchIntentForPackage(packageName) ?: return
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    context.startActivity(intent)
+}
