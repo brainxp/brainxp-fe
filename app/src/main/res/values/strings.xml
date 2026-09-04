@@ -71,4 +71,11 @@
     <string name="block_screen_title">Waktunya belajar dulu</string>
     <string name="block_screen_body">Aplikasi ini kamu batasi sendiri. Jawab beberapa pertanyaan dari materimu untuk membuka waktu bermain.</string>
     <string name="block_screen_action">Kumpulkan waktu</string>
+
+    <string name="app_picker_title">Pilih aplikasi</string>
+    <string name="app_picker_search">Cari aplikasi</string>
+    <string name="app_picker_loading">Membaca daftar aplikasi</string>
+    <string name="app_picker_game">Game</string>
+    <string name="app_picker_empty_title">Tidak ada yang cocok</string>
+    <string name="app_picker_empty_body">Coba kata lain, atau kosongkan pencarian untuk melihat semuanya.</string>
 </resources>
