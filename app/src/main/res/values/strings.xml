@@ -1,3 +1,27 @@
 <resources>
     <string name="app_name">BrainXP</string>
+    <string name="placeholder_home">BrainXP</string>
+
+    <string name="action_retry">Coba lagi</string>
+
+    <string name="error_network_title">Tidak ada koneksi</string>
+    <string name="error_network_body">Periksa koneksi internetmu, lalu coba lagi.</string>
+
+    <string name="error_unauthorized_title">Sesi berakhir</string>
+    <string name="error_unauthorized_body">Masuk ulang untuk melanjutkan.</string>
+
+    <string name="error_rate_limited_title">Terlalu banyak permintaan</string>
+    <string name="error_rate_limited_body">Tunggu sebentar sebelum mencoba lagi.</string>
+    <string name="error_rate_limited_body_seconds">Coba lagi dalam %1$d detik.</string>
+
+    <string name="error_server_busy_title">Server sedang sibuk</string>
+    <string name="error_server_busy_body">Ini dari sisi kami, bukan kamu. Coba lagi sebentar.</string>
+
+    <string name="error_validation_title">Data tidak diterima</string>
+    <string name="error_validation_body">Periksa isian yang dikirim, lalu ulangi.</string>
+    <string name="error_validation_body_field">Bagian \"%1$s\" perlu diperbaiki.</string>
+
+    <string name="error_unknown_title">Terjadi kesalahan</string>
+    <string name="error_unknown_body">Kami belum tahu penyebabnya. Coba lagi.</string>
+    <string name="error_unknown_body_code">Kami belum tahu penyebabnya (kode %1$d).</string>
 </resources>
