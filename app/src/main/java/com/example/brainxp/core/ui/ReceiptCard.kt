@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
@@ -57,15 +58,29 @@ fun ReceiptCard(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
+                        val ink =
+                            when {
+                                line.voided -> MaterialTheme.colorScheme.onSurfaceVariant
+                                line.heading -> MaterialTheme.colorScheme.onSurface
+                                else -> MaterialTheme.colorScheme.onSurfaceVariant
+                            }
+                        val decoration = if (line.voided) TextDecoration.LineThrough else null
                         Text(
                             text = line.label,
                             style = BrainXPTextStyles.mono,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = ink,
+                            textDecoration = decoration,
                         )
                         Text(
                             text = line.value,
                             style = BrainXPTextStyles.mono,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color =
+                                if (line.voided) {
+                                    MaterialTheme.colorScheme.error
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                },
+                            textDecoration = decoration,
                         )
                     }
                 }

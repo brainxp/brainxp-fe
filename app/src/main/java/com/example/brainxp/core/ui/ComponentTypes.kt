@@ -18,4 +18,6 @@ enum class HeroTone {
 data class ReceiptLine(
     val label: String,
     val value: String,
+    val voided: Boolean = false,
+    val heading: Boolean = false,
 )
