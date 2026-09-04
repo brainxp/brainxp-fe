@@ -335,6 +335,8 @@ private fun LockedApps(
 private val PILL_ICON = 13.dp
 
 private val PREVIEW_OPTIONS = listOf(300, 600, 900)
+private const val PREVIEW_BUDGET_MILLIS = 900_000L
+private const val PREVIEW_CONSUMED_MILLIS = 60_000L
 
 private val PREVIEW_APPS =
     listOf(
@@ -381,8 +383,8 @@ private fun HomeRunningPreview() {
                     unlock =
                         UnlockState.Active(
                             unlockId = "unlock-1",
-                            endAtElapsed = 0L,
-                            endAtWallClock = 0L,
+                            budgetMillis = PREVIEW_BUDGET_MILLIS,
+                            consumedByPackage = mapOf("com.mobile.legends" to PREVIEW_CONSUMED_MILLIS),
                             allowedPackages = setOf("com.mobile.legends"),
                         ),
                     remaining = 14.minutes,
