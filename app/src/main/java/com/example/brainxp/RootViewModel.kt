@@ -3,6 +3,8 @@ package com.example.brainxp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brainxp.data.prefs.SettingsDataStore
+import com.example.brainxp.data.repo.RestrictionRepository
+import com.example.brainxp.domain.UnlockSessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +27,8 @@ class RootViewModel
     @Inject
     constructor(
         private val settings: SettingsDataStore,
+        private val restrictions: RestrictionRepository,
+        private val unlocks: UnlockSessionManager,
     ) : ViewModel() {
         val state: StateFlow<RootUiState> =
             settings.settings
@@ -51,7 +55,24 @@ class RootViewModel
             }
         }
 
+        fun grantDebugUnlock() {
+            if (!BuildConfig.DEBUG) {
+                return
+            }
+            viewModelScope.launch {
+                val packages =
+                    restrictions
+                        .observeRestricted()
+                        .first()
+                        .filter { it.enabled }
+                        .map { it.packageName }
+                        .toSet()
+                unlocks.start(DEBUG_UNLOCK_SECONDS, packages)
+            }
+        }
+
         private companion object {
             const val SUBSCRIPTION_TIMEOUT_MS = 5_000L
+            const val DEBUG_UNLOCK_SECONDS = 300
         }
     }
