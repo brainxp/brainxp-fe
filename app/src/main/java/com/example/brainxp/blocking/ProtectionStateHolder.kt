@@ -5,14 +5,12 @@ import com.example.brainxp.core.permission.SpecialPermission
 import com.example.brainxp.data.prefs.SettingsDataStore
 import com.example.brainxp.data.repo.ActivityLogRepository
 import com.example.brainxp.data.repo.RestrictionRepository
-import com.example.brainxp.data.repo.UnlockRepository
 import com.example.brainxp.di.AppScope
+import com.example.brainxp.domain.UnlockSessionManager
 import com.example.brainxp.domain.model.ActivityEvent
 import com.example.brainxp.domain.model.ActivityKind
 import com.example.brainxp.domain.model.RestrictionState
-import com.example.brainxp.domain.model.UnlockState
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -41,21 +39,19 @@ data class ProtectionSnapshot(
 class ProtectionStateHolder
     @Inject
     constructor(
-        private val restrictions: RestrictionRepository,
-        private val unlocks: UnlockRepository,
+        restrictions: RestrictionRepository,
+        private val unlocks: UnlockSessionManager,
         private val activityLog: ActivityLogRepository,
         permissions: PermissionStateProvider,
         settings: SettingsDataStore,
         @AppScope private val scope: CoroutineScope,
     ) {
-        private val unlockState = MutableStateFlow<UnlockState>(UnlockState.Locked)
-
         val snapshot: StateFlow<ProtectionSnapshot> =
             combine(
                 restrictions.observeRestricted().map { apps ->
                     apps.filter { it.enabled }.map { it.packageName }.toSet()
                 },
-                unlockState,
+                unlocks.state,
                 permissions.state,
                 settings.settings.map { it.protectionEnabled }.distinctUntilChanged(),
             ) { packages, unlock, permissionState, enabled ->
@@ -73,21 +69,14 @@ class ProtectionStateHolder
             }.stateIn(scope, SharingStarted.Eagerly, ProtectionSnapshot())
 
         init {
-            reportDegradedTransitions()
+            reportStatusTransitions()
         }
 
-        fun reloadUnlock(
-            nowWallClock: Long,
-            nowElapsed: Long,
-        ) {
-            scope.launch { unlockState.value = unlocks.activeUnlock(nowWallClock, nowElapsed) }
+        suspend fun reloadUnlock() {
+            unlocks.refresh()
         }
 
-        fun setUnlock(state: UnlockState) {
-            unlockState.value = state
-        }
-
-        private fun reportDegradedTransitions() {
+        private fun reportStatusTransitions() {
             scope.launch {
                 snapshot
                     .map { it.status }
