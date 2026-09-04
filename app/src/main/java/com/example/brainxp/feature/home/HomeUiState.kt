@@ -27,6 +27,7 @@ data class HomeUiState(
     val sessionOptions: List<Int> = emptyList(),
     val selectedOption: Int? = null,
     val starting: Boolean = false,
+    val consumedSeconds: Int = 0,
     val idleDays: Int = 0,
     val idleDaysAllowed: Int = 0,
 ) {
@@ -49,7 +50,9 @@ data class HomeUiState(
 
     val capReached: Boolean get() = blockReason == BlockReason.DAILY_CAP
 
-    val idleLocked: Boolean get() = blockReason == BlockReason.GUARDIAN_STALE
+    val idleLocked: Boolean get() = blockReason == BlockReason.IDLE
+
+    val guardianStale: Boolean get() = blockReason == BlockReason.GUARDIAN_STALE
 
     val appsOpen: Boolean get() = unlockRunning
 
