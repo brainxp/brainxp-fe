@@ -14,6 +14,7 @@ import com.example.brainxp.domain.model.MaterialDetail
 import com.example.brainxp.domain.model.MaterialPage
 import com.example.brainxp.domain.model.MaterialType
 import com.example.brainxp.domain.model.PairingResult
+import com.example.brainxp.domain.model.Progress
 import com.example.brainxp.domain.model.QuestionSession
 import com.example.brainxp.domain.model.RestrictedApp
 import com.example.brainxp.domain.model.SessionMode
@@ -32,6 +33,8 @@ interface MaterialRepository {
     suspend fun page(cursor: String?): AppResult<MaterialPage>
 
     suspend fun detail(materialId: String): AppResult<MaterialDetail>
+
+    suspend fun delete(materialId: String): AppResult<Unit>
 
     fun observeCached(): Flow<List<Material>>
 }
@@ -59,6 +62,8 @@ interface SessionRepository {
 
 interface RewardRepository {
     suspend fun standing(): AppResult<Standing>
+
+    suspend fun progress(): AppResult<Progress>
 
     suspend fun reportConsumption(entries: List<ConsumptionEntry>): AppResult<Standing>
 

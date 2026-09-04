@@ -9,6 +9,7 @@ import com.example.brainxp.domain.model.BlockReason
 import com.example.brainxp.domain.model.ConsumptionEntry
 import com.example.brainxp.domain.model.LedgerDirection
 import com.example.brainxp.domain.model.LedgerEntry
+import com.example.brainxp.domain.model.Progress
 import com.example.brainxp.domain.model.Standing
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,6 +39,19 @@ private class StubRewardRepository : RewardRepository {
     var result: AppResult<Standing> = AppResult.Success(standing(0))
 
     override suspend fun standing(): AppResult<Standing> = result
+
+    override suspend fun progress(): AppResult<Progress> =
+        AppResult.Success(
+            Progress(
+                streakCurrent = 0,
+                streakLongest = 0,
+                sessions = 0,
+                correctTotal = 0,
+                essayPassed = 0,
+                freezeTokens = 0,
+                badges = emptyList(),
+            ),
+        )
 
     override suspend fun reportConsumption(entries: List<ConsumptionEntry>): AppResult<Standing> = result
 
