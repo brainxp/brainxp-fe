@@ -152,17 +152,48 @@
         <item quantity="other">%1$d aplikasi dijaga</item>
     </plurals>
 
-    <string name="block_screen_title">Saldomu\nsedang kosong.</string>
-    <string name="block_screen_idle_title">Waktunya belum\nkamu mulai.</string>
-    <string name="block_screen_idle_body">Saldomu masih ada. Buka BrainXP dan mulai waktu bermain untuk memakainya.</string>
-    <string name="block_screen_idle_action">Mulai waktu bermain</string>
+    <string name="block_screen_title">Saldomu
+sedang kosong.</string>
     <string name="block_screen_body">Aplikasi ini kamu kunci sendiri. Kerjakan satu sesi dari materimu, dan waktunya kebuka lagi.</string>
-    <string name="block_screen_hero_label">Saldo utuh, nggak berkurang</string>
-    <string name="block_screen_hero_sub">Nunggu kamu belajar lagi</string>
-    <string name="block_screen_note">Nggak ada yang hangus. Satu sesi selesai, semuanya bisa dipakai lagi.</string>
+    <string name="block_screen_hero_label">Saldo waktu bermain</string>
+    <string name="block_screen_hero_sub">Kerjakan satu sesi buat nambah</string>
+    <string name="block_screen_note">Mengerjakan soal tidak memakan waktu bermainmu.</string>
     <string name="block_screen_action">Setor materi</string>
-    <string name="block_screen_cap_title">Batas hari ini\nsudah kepakai.</string>
-    <string name="block_screen_cap_body">Bukan saldomu yang habis — cuma jatah main hari ini. Saldonya tetap tersimpan dan menunggu besok.</string>
+
+    <string name="block_screen_idle_title">Waktunya belum
+kamu mulai.</string>
+    <string name="block_screen_idle_body">Saldomu masih ada. Buka BrainXP dan mulai waktu bermain untuk memakainya.</string>
+    <string name="block_screen_idle_hero">Saldo siap dipakai</string>
+    <string name="block_screen_idle_hero_sub">Tinggal kamu mulai</string>
+    <string name="block_screen_idle_note">Saldo cuma berkurang saat kamu benar-benar main.</string>
+    <string name="block_screen_idle_action">Mulai waktu bermain</string>
+
+    <string name="block_screen_cap_title">Batas hari ini
+sudah kepakai.</string>
+    <string name="block_screen_cap_body">Bukan saldomu yang habis — cuma jatah main hari ini. Hari berganti sekitar %1$s lagi.</string>
+    <string name="block_screen_cap_hero">Saldomu aman, tidak berkurang</string>
+    <string name="block_screen_cap_hero_sub">Kuota hari ini penuh</string>
+    <string name="block_screen_cap_note">Mengerjakan soal sekarang tetap menambah saldo dan menjaga streak, tapi tidak membuka aplikasi hari ini.</string>
+    <string name="block_screen_cap_action">Setor materi untuk besok</string>
+
+    <string name="block_screen_hold_title">Saldomu
+lagi ditahan.</string>
+    <string name="block_screen_hold_body">Terakhir kamu belajar %1$d hari lalu, padahal jatah liburnya %2$d hari. Kerjakan satu sesi, dan saldomu kebuka lagi.</string>
+    <string name="block_screen_hold_hero">Saldo utuh, nggak berkurang</string>
+    <string name="block_screen_hold_hero_sub">Nunggu kamu belajar lagi</string>
+    <string name="block_screen_hold_note">Nggak ada yang hangus. Satu sesi selesai, semuanya bisa dipakai lagi.</string>
+    <string name="block_screen_hold_action">Kerjakan satu sesi</string>
+
+    <string name="block_screen_stale_title">Penjaga
+kehilangan kontak.</string>
+    <string name="block_screen_stale_body">BrainXP berhenti melapor, jadi aplikasi terkunci sampai kontaknya pulih. Saldomu tidak berkurang.</string>
+    <string name="block_screen_stale_hero">Saldo tersimpan</string>
+    <string name="block_screen_stale_hero_sub">Menunggu penjaga tersambung lagi</string>
+    <string name="block_screen_stale_note">Buka BrainXP dan biarkan terhubung sebentar. Kuncinya lepas sendiri.</string>
+    <string name="block_screen_stale_action">Setor materi sambil menunggu</string>
+
+    <string name="home_session_spent">Terpakai %1$s sesi ini</string>
+    <string name="home_session_note">Saldo berkurang cuma selama aplikasi yang dikunci kamu buka. Berhenti kapan saja, sisanya tetap tersimpan.</string>
 
     <string name="app_picker_title">Pilih aplikasi</string>
     <string name="app_picker_search">Cari aplikasi</string>
