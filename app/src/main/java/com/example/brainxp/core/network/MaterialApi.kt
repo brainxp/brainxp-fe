@@ -4,6 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -42,6 +43,16 @@ interface MaterialApi {
         @Part file: MultipartBody.Part,
         @Part("method") method: RequestBody,
     ): MaterialAcceptedDto
+
+    @GET("subjects/{subjectId}/library")
+    suspend fun library(
+        @Path("subjectId") subjectId: String,
+    ): List<MaterialDto>
+
+    @DELETE("materials/{materialId}")
+    suspend fun delete(
+        @Path("materialId") materialId: String,
+    )
 
     @GET("materials/{materialId}")
     suspend fun material(
