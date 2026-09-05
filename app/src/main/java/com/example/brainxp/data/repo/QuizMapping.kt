@@ -1,5 +1,6 @@
 package com.example.brainxp.data.repo
 
+import com.example.brainxp.core.network.AnswerStateDto
 import com.example.brainxp.core.network.QuestionDto
 import com.example.brainxp.core.network.QuizDto
 import com.example.brainxp.core.network.ReceiptDto
@@ -7,6 +8,7 @@ import com.example.brainxp.core.network.ReceiptRowDto
 import com.example.brainxp.domain.model.Question
 import com.example.brainxp.domain.model.QuestionSession
 import com.example.brainxp.domain.model.ReceiptLine
+import com.example.brainxp.domain.model.SavedAnswer
 import com.example.brainxp.domain.model.SessionMode
 import com.example.brainxp.domain.model.SessionReceipt
 
@@ -57,6 +59,14 @@ fun QuizDto.toSession(): QuestionSession =
         questions = questions.sortedBy { it.ordinal }.map { it.toQuestion() },
         createdAt = 0L,
         answeredIds = answeredIds.toSet(),
+        answers = answers.map(AnswerStateDto::toSavedAnswer),
+    )
+
+private fun AnswerStateDto.toSavedAnswer(): SavedAnswer =
+    SavedAnswer(
+        questionId = questionId,
+        chosenIndex = chosenIndex,
+        essayText = essayText,
     )
 
 fun ReceiptDto.toReceipt(): SessionReceipt =

@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">BrainXP</string>
-    <string name="placeholder_home">BrainXP</string>
 
     <string name="action_retry">Coba lagi</string>
     <string name="action_back">Kembali</string>
@@ -71,18 +70,18 @@
     <string name="pair_body">Minta enam angka dari ponsel orang tuamu.</string>
     <string name="pair_note">Setelah kode diterima, aturan, jenjang, dan saldo awal langsung terpasang di ponsel ini.</string>
     <string name="pair_delete">Hapus satu angka</string>
-    <string name="pair_digit">Angka %1$s</string>
 
     <string name="library_title">Pustaka materi</string>
-    <string name="library_intro">Materi dan soalmu tersimpan sampai kamu yang menghapusnya. Belajar ulang tidak menambah banyak waktu, tapi tetap menambah pemahaman.</string>
+    <string name="library_intro">Soalmu tersimpan sampai kamu yang menghapusnya. Mengerjakan ulang tetap menambah pemahaman, tapi rewardnya menyusut tiap kali diulang.</string>
     <string name="library_empty">Belum ada materi. Setor satu, dan soalnya jadi milikmu untuk dipelajari ulang.</string>
     <string name="library_question_count">%1$d soal</string>
     <string name="library_times_studied">dikerjakan %1$d×</string>
-    <string name="library_manage">Kelola</string>
-    <string name="library_manage_hint">Ketuk untuk menghapus berkas dan soalnya</string>
+    <string name="library_never_studied">belum dikerjakan</string>
+    <string name="library_reward">reward %1$s</string>
+    <string name="library_swipe_hint">Geser sebuah materi ke kiri untuk menghapusnya.</string>
     <string name="library_remove">Hapus</string>
-    <string name="library_removing">Menghapus…</string>
-    <string name="library_manage_empty">Belum ada yang bisa dikelola</string>
+    <string name="library_remove_title">Hapus materi ini?</string>
+    <string name="library_remove_body">%1$s beserta %2$d soalnya hilang untuk selamanya. Menit yang sudah kamu kumpulkan dari materi ini tetap utuh.</string>
     <string name="library_remove_failed">Materinya gagal dihapus. Coba lagi.</string>
 
     <string name="progress_title">Kemajuanmu</string>
@@ -246,8 +245,6 @@ kehilangan kontak.</string>
     <string name="home_protection_active">Perlindungan aktif</string>
     <string name="home_protection_degraded">Tidak penuh</string>
     <string name="home_protection_off">Perlindungan mati</string>
-    <string name="home_protection_turn_on">Nyalakan</string>
-    <string name="home_protection_turn_off">Matikan</string>
 
     <string name="home_balance_label">Sisa waktu bermain</string>
     <string name="home_countdown_label">Waktu bermain berjalan</string>
@@ -271,17 +268,7 @@ kehilangan kontak.</string>
 
     <string name="home_library_title">Pustaka materi</string>    <string name="home_library_sub">Soal lama bisa dipelajari ulang</string>
     <string name="home_daily_cap">Jatah main hari ini</string>
-    <string name="home_reset_in">Hari berganti dalam</string>
 
-    <string name="debug_unlock_title">Sesi uji</string>
-    <string name="debug_unlock_subtitle">Hanya ada di build debug. Isi durasinya sependek yang kamu mau, lalu buka aplikasi yang dibatasi.</string>
-    <string name="debug_duration_label">Durasi sesi</string>
-    <string name="debug_warning_label">Peringatan sebelum habis</string>
-    <string name="debug_seconds_suffix">detik</string>
-    <string name="debug_start_session">Mulai sesi</string>
-    <string name="debug_end_session">Akhiri sesi sekarang</string>
-    <string name="debug_hint_title">Cara mengujinya</string>
-    <string name="debug_hint_body">Mulai sesi, lalu buka aplikasi yang kamu batasi. Aplikasinya lolos sampai durasi habis, peringatan muncul di ambang yang kamu isi, dan layar pemblokir kembali pada tick berikutnya.</string>
     <string name="source_title">Setor materi</string>
     <string name="source_hero_label">Sesi ini</string>
     <string name="source_unit">soal</string>
@@ -314,7 +301,7 @@ kehilangan kontak.</string>
     <string name="pin_wrong">PIN salah. Coba lagi.</string>
     <string name="pin_confirm">Buka</string>
     <string name="pin_title_restrictions">Ubah aplikasi yang dikunci</string>
-    <string name="pin_title_mode">Ganti mode</string>
+    <string name="pin_title_mode">Keluar dari mode ini</string>
     <string name="pin_title_protection">Matikan perlindungan</string>
     <string name="pair_failed">Kodenya tidak cocok atau sudah kedaluwarsa. Minta kode baru dari orang tua.</string>
     <string name="done_title">Semua siap</string>
@@ -399,21 +386,54 @@ kehilangan kontak.</string>
     <string name="rejected_deleted">Berkas ini dihapus dalam satu jam dan tidak tersimpan di pustaka.</string>
     <string name="rejected_action">Setor materi lain</string>
 
-    <string name="quiz_title">Sesi belajar</string>
     <string name="quiz_position">Soal %1$d dari %2$d</string>
-    <string name="quiz_jump_to">Lompat ke soal %1$d</string>
     <string name="quiz_filled">%1$d terisi</string>
     <string name="quiz_pending">%1$d menunggu terkirim</string>
     <string name="quiz_jump">Soal %1$d</string>
+    <string name="quiz_jump_doubted">Soal %1$d, ragu-ragu</string>
+    <string name="quiz_guide">Cara mengerjakan</string>
     <string name="quiz_excerpt">Dari materimu: %1$s</string>
     <string name="quiz_answer_label">Jawabanmu</string>
     <string name="quiz_answer_hint">Tulis dengan kalimatmu sendiri, minimal delapan kata.</string>
     <string name="quiz_rubric">Dinilai terhadap %1$d kriteria, lolos di atas 60.</string>
-    <string name="quiz_save">Simpan jawaban</string>
-    <string name="quiz_change">Ganti jawaban</string>
+    <string name="quiz_doubt">Ragu-ragu</string>
+    <string name="quiz_doubt_marked">Ditandai ragu-ragu</string>
     <string name="quiz_submit">Kumpulkan sesi</string>
-    <string name="quiz_hint_partial">Jawaban tersimpan tiap kali disimpan. Boleh dilanjutkan nanti.</string>
+    <string name="quiz_submit_now">Kumpulkan sekarang</string>
+    <string name="quiz_review_again">Periksa lagi</string>
+    <string name="quiz_confirm_doubts">Masih ada %1$d soal bertanda ragu-ragu. Setelah dikumpulkan jawabannya tidak bisa diubah lagi.</string>
+    <string name="quiz_hint_partial">Tersimpan sendiri. Sisa %1$d soal, boleh dilanjutkan nanti.</string>
     <string name="quiz_hint_complete">Semua sudah terisi. Benar salahnya ketahuan setelah dikumpulkan.</string>
+    <string name="tour_title">Latihan sebentar</string>
+    <string name="tour_step">%1$d dari %2$d</string>
+    <string name="tour_next">Lanjut</string>
+    <string name="tour_start">Mulai yang asli</string>
+    <string name="tour_skip">Lewati panduan</string>
+    <string name="tour_wait">Cobain dulu, baru lanjut</string>
+    <string name="tour_q1">Kalau 3x + 5 = 20, berapa nilai x?</string>
+    <string name="tour_q1_a">x = 3</string>
+    <string name="tour_q1_b">x = 5</string>
+    <string name="tour_q1_c">x = 8</string>
+    <string name="tour_q1_d">x = 15</string>
+    <string name="tour_q2">Bentuk 4a + 7a bisa disederhanakan jadi apa?</string>
+    <string name="tour_q2_a">11a</string>
+    <string name="tour_q2_b">28a</string>
+    <string name="tour_q2_c">4a + 7</string>
+    <string name="tour_q2_d">11</string>
+    <string name="tour_answer_title">Coba jawab yang ini</string>
+    <string name="tour_answer_body">Soal aslinya dibikin dari materi yang kamu setor. Sekarang latihan dulu: ketuk salah satu jawaban.</string>
+    <string name="tour_autosave_title">Tersimpan sendiri</string>
+    <string name="tour_autosave_body">Nggak ada tombol simpan. Begitu kamu memilih atau berhenti mengetik sebentar, jawabannya masuk.</string>
+    <string name="tour_doubt_title">Kalau ragu, tandai</string>
+    <string name="tour_doubt_body">Ketuk tombol Ragu-ragu di bawah. Soal bertanda gampang dicari lagi sebelum dikumpulkan.</string>
+    <string name="tour_dots_title">Titiknya berubah kuning</string>
+    <string name="tour_dots_body">Baris titik di atas menunjukkan mana yang sudah terisi dan mana yang kamu tandai ragu.</string>
+    <string name="tour_move_title">Pindah soal</string>
+    <string name="tour_move_body">Geser halamannya ke kiri atau kanan buat maju mundur, titik di atas buat lompat jauh. Coba geser sekarang.</string>
+    <string name="tour_leave_title">Berhenti kapan saja</string>
+    <string name="tour_leave_body">Tekan Kembali buat keluar. Sesinya nunggu di Pustaka materi dan bisa kamu lanjutkan nanti.</string>
+    <string name="tour_receipt_title">Nilainya keluar di akhir</string>
+    <string name="tour_receipt_body">Benar salahnya dan tambahan waktu mainnya baru muncul setelah semua soal dikumpulkan.</string>
 
     <string name="receipt_title">Sesi selesai</string>
     <string name="receipt_correct">%1$d dari %2$d benar</string>
@@ -432,9 +452,6 @@ kehilangan kontak.</string>
     <string name="receipt_home">Kembali ke beranda</string>
     <string name="receipt_library">Lihat pustaka</string>
 
-    <string name="level_easy">mudah</string>
-    <string name="level_medium">sedang</string>
-    <string name="level_hard">sulit</string>
     <string name="void_wrong">salah</string>
     <string name="family_title">Keluarga</string>
     <string name="family_role">Orang tua</string>

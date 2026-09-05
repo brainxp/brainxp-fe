@@ -30,6 +30,9 @@ data class HomeUiState(
     val consumedSeconds: Int = 0,
     val idleDays: Int = 0,
     val idleDaysAllowed: Int = 0,
+    val pinRequired: Boolean = false,
+    val pinVerified: Boolean = false,
+    val pinWrong: Boolean = false,
 ) {
     sealed interface Phase {
         data object Loading : Phase

@@ -32,6 +32,14 @@ data class QuizDto(
     val status: String,
     val questions: List<QuestionDto> = emptyList(),
     @SerialName("answered_ids") val answeredIds: List<String> = emptyList(),
+    val answers: List<AnswerStateDto> = emptyList(),
+)
+
+@Serializable
+data class AnswerStateDto(
+    @SerialName("question_id") val questionId: String,
+    @SerialName("chosen_index") val chosenIndex: Int? = null,
+    @SerialName("essay_text") val essayText: String? = null,
 )
 
 @Serializable

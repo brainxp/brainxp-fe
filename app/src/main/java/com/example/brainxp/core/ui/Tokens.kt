@@ -32,5 +32,10 @@ internal object Tokens {
     val OkSurface = Color(0xFFEFF7F3)
     val OkInk = Color(0xFF16543C)
 
+    val Amber100 = Color(0xFFFDEFD2)
+    val Amber400 = Color(0xFFE3A038)
+    val Amber500 = Color(0xFFC9840F)
+    val Amber700 = Color(0xFF7E5406)
+
     val Page = Color(0xFFEEF1F7)
 }

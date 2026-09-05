@@ -7,6 +7,8 @@ import com.example.brainxp.core.result.AppResult
 import com.example.brainxp.data.repo.AuthRepository
 import com.example.brainxp.data.repo.PolicyRepository
 import com.example.brainxp.data.repo.SubjectPolicy
+import com.example.brainxp.domain.GuardedAction
+import com.example.brainxp.domain.ParentLock
 import com.example.brainxp.domain.model.AcademicLevel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +28,9 @@ data class SettingsUiState(
     val notice: String? = null,
     val error: ApiError? = null,
     val signedOut: Boolean = false,
+    val pinRequired: Boolean = false,
+    val pinVerified: Boolean = false,
+    val pinWrong: Boolean = false,
 )
 
 @HiltViewModel
@@ -34,15 +39,19 @@ class SettingsViewModel
     constructor(
         private val policies: PolicyRepository,
         private val auth: AuthRepository,
+        private val parentLock: ParentLock,
     ) : ViewModel() {
         private val mutableState = MutableStateFlow(SettingsUiState())
         val state: StateFlow<SettingsUiState> = mutableState.asStateFlow()
 
         init {
-            load()
+            retry()
         }
 
-        fun retry() = load()
+        fun retry() {
+            mutableState.update { it.copy(loading = true, error = null) }
+            viewModelScope.launch { reload() }
+        }
 
         fun dismissNotice() = mutableState.update { it.copy(notice = null) }
 
@@ -54,10 +63,24 @@ class SettingsViewModel
 
         fun signOut() {
             viewModelScope.launch {
+                if (!parentLock.allows(GuardedAction.SWITCH_MODE, mutableState.value.pinVerified)) {
+                    mutableState.update { it.copy(pinRequired = true) }
+                    return@launch
+                }
                 auth.signOut()
                 mutableState.update { it.copy(signedOut = true) }
             }
         }
+
+        fun submitPin(pin: String) {
+            viewModelScope.launch {
+                val ok = parentLock.verify(pin)
+                mutableState.update { it.copy(pinVerified = ok, pinRequired = !ok, pinWrong = !ok) }
+                if (ok) signOut()
+            }
+        }
+
+        fun dismissPin() = mutableState.update { it.copy(pinRequired = false, pinWrong = false) }
 
         private fun apply(change: suspend () -> AppResult<com.example.brainxp.data.repo.PolicyChange>) {
             if (mutableState.value.saving) return
@@ -76,11 +99,6 @@ class SettingsViewModel
                     }
                 }
             }
-        }
-
-        private fun load() {
-            mutableState.update { it.copy(loading = true, error = null) }
-            viewModelScope.launch { reload() }
         }
 
         private suspend fun reload() {

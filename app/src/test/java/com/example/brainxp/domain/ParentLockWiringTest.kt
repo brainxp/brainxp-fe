@@ -8,8 +8,8 @@ import org.junit.Test
 private val GUARDED_CALL_SITES =
     mapOf(
         GuardedAction.CHANGE_RESTRICTIONS to "com/example/brainxp/feature/apps/AppPickerViewModel.kt",
-        GuardedAction.SWITCH_MODE to "com/example/brainxp/RootViewModel.kt",
-        GuardedAction.DISABLE_PROTECTION to "com/example/brainxp/RootViewModel.kt",
+        GuardedAction.SWITCH_MODE to "com/example/brainxp/feature/settings/SettingsViewModel.kt",
+        GuardedAction.DISABLE_PROTECTION to "com/example/brainxp/domain/ProtectionSwitch.kt",
     )
 
 private fun sourceOf(relative: String): java.io.File {

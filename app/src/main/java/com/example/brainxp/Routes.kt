@@ -93,12 +93,6 @@ sealed interface MainRoute : NavKey {
     data object PermissionSetup : MainRoute
 
     @Serializable
-    data object DebugMenu : MainRoute
-
-    @Serializable
-    data object DebugUnlock : MainRoute
-
-    @Serializable
     data object FamilyHome : MainRoute
 
     @Serializable

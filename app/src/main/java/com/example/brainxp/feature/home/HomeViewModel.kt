@@ -4,11 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brainxp.blocking.InstalledAppsSource
 import com.example.brainxp.blocking.ProtectionStateHolder
-import com.example.brainxp.data.prefs.SettingsDataStore
 import com.example.brainxp.data.repo.BalanceSource
 import com.example.brainxp.data.repo.ReconciledBalance
 import com.example.brainxp.data.repo.RestrictionRepository
 import com.example.brainxp.data.repo.RewardReconciler
+import com.example.brainxp.domain.ProtectionSwitch
 import com.example.brainxp.domain.UnlockSessionManager
 import com.example.brainxp.domain.model.BlockReason
 import com.example.brainxp.domain.model.UnlockState
@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -32,7 +31,7 @@ class HomeViewModel
         private val unlocks: UnlockSessionManager,
         private val restrictions: RestrictionRepository,
         private val installedApps: InstalledAppsSource,
-        private val settings: SettingsDataStore,
+        private val protectionSwitch: ProtectionSwitch,
         protection: ProtectionStateHolder,
     ) : ViewModel() {
         private companion object {
@@ -89,6 +88,9 @@ class HomeViewModel
                         consumedSeconds = consumedSeconds.toInt(),
                         idleDays = standing?.idleDays ?: 0,
                         idleDaysAllowed = standing?.idleDaysAllowed ?: 0,
+                        pinRequired = mutableState.value.pinRequired,
+                        pinVerified = mutableState.value.pinVerified,
+                        pinWrong = mutableState.value.pinWrong,
                     )
                 }.collect { mutableState.value = it }
             }
@@ -128,10 +130,24 @@ class HomeViewModel
             }
         }
 
+        fun submitPin(pin: String) {
+            viewModelScope.launch {
+                val ok = protectionSwitch.verify(pin)
+                mutableState.value =
+                    mutableState.value.copy(pinVerified = ok, pinRequired = !ok, pinWrong = !ok)
+                if (ok) toggleProtection()
+            }
+        }
+
+        fun dismissPin() {
+            mutableState.value = mutableState.value.copy(pinRequired = false, pinWrong = false)
+        }
+
         private fun toggleProtection() {
             viewModelScope.launch {
-                val current = settings.settings.first().protectionEnabled
-                settings.setProtectionEnabled(!current)
+                if (!protectionSwitch.toggle(mutableState.value.pinVerified)) {
+                    mutableState.value = mutableState.value.copy(pinRequired = true)
+                }
             }
         }
 

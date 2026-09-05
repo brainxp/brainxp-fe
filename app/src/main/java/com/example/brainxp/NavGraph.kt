@@ -25,8 +25,7 @@ import androidx.navigation3.runtime.NavKey
 import com.example.brainxp.core.capture.CameraSession
 import com.example.brainxp.core.ui.ErrorState
 import com.example.brainxp.core.ui.LoadingState
-import com.example.brainxp.core.ui.PlaceholderAction
-import com.example.brainxp.core.ui.PlaceholderScreen
+import com.example.brainxp.core.ui.ParentPinDialog
 import com.example.brainxp.core.ui.levelLabel
 import com.example.brainxp.domain.model.AcademicLevel
 import com.example.brainxp.domain.model.DeviceRole
@@ -46,7 +45,6 @@ import com.example.brainxp.feature.capture.PreparingStage
 import com.example.brainxp.feature.capture.PreparingViewModel
 import com.example.brainxp.feature.capture.RejectedScreen
 import com.example.brainxp.feature.capture.RejectedViewModel
-import com.example.brainxp.feature.debug.DebugUnlockPanel
 import com.example.brainxp.feature.family.BalanceAdjustScreen
 import com.example.brainxp.feature.family.ChildReportScreen
 import com.example.brainxp.feature.family.FamilyHomeScreen
@@ -88,8 +86,8 @@ import com.example.brainxp.feature.progress.ProgressScreen
 import com.example.brainxp.feature.progress.ProgressViewModel
 import com.example.brainxp.feature.questions.QuizEvent
 import com.example.brainxp.feature.questions.QuizScreen
+import com.example.brainxp.feature.questions.QuizTourScreen
 import com.example.brainxp.feature.questions.QuizViewModel
-import com.example.brainxp.feature.questions.recordAnswer
 import com.example.brainxp.feature.results.ReceiptScreen
 import com.example.brainxp.feature.results.ReceiptViewModel
 import com.example.brainxp.feature.settings.SettingsScreen
@@ -175,12 +173,6 @@ internal fun EntryProviderScope<NavKey>.onboardingTailEntries(
     }
 }
 
-internal data class DebugActions(
-    val grantUnlock: (Int) -> Unit,
-    val setWarningLead: (Int) -> Unit,
-    val endUnlock: () -> Unit,
-)
-
 internal fun EntryProviderScope<NavKey>.dailyEntries(backStack: NavBackStack<NavKey>) {
     entry<MainRoute.Home> {
         val viewModel: HomeViewModel = hiltViewModel()
@@ -200,15 +192,19 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(backStack: NavBackStack<Nav
         }
 
         Column {
-            if (BuildConfig.DEBUG) {
-                TextButton(onClick = { backStack.add(MainRoute.DebugMenu) }) {
-                    Text("Debug menu")
-                }
-            }
             HomeScreen(
                 state = homeState,
                 onEvent = viewModel::onEvent,
                 modifier = Modifier.weight(1f),
+            )
+        }
+
+        if (homeState.pinRequired) {
+            ParentPinDialog(
+                title = stringResource(R.string.pin_title_protection),
+                onSubmit = viewModel::submitPin,
+                onDismiss = viewModel::dismissPin,
+                wrong = homeState.pinWrong,
             )
         }
     }
@@ -230,24 +226,6 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(backStack: NavBackStack<Nav
         PermissionSetupRoute(
             onDone = { backStack.popOrIgnore() },
             reentrant = true,
-        )
-    }
-}
-
-internal fun EntryProviderScope<NavKey>.debugEntries(
-    backStack: NavBackStack<NavKey>,
-    onResetSetup: () -> Unit,
-    onToggleProtection: () -> Unit,
-    debug: DebugActions,
-) {
-    entry<MainRoute.DebugMenu> {
-        DebugDestinations(backStack, onResetSetup, onToggleProtection)
-    }
-    entry<MainRoute.DebugUnlock> {
-        DebugUnlockPanel(
-            onGrant = debug.grantUnlock,
-            onSetWarningLead = debug.setWarningLead,
-            onEndUnlock = debug.endUnlock,
         )
     }
 }
@@ -368,46 +346,6 @@ internal fun EntryProviderScope<NavKey>.learningEntries(backStack: NavBackStack<
     entry<MainRoute.Results> { key -> ReceiptEntry(key, backStack) }
 }
 
-private fun action(
-    label: String,
-    backStack: NavBackStack<NavKey>,
-    target: NavKey,
-) = PlaceholderAction(label) { backStack.add(target) }
-
-@Composable
-private fun DebugDestinations(
-    backStack: NavBackStack<NavKey>,
-    onResetSetup: () -> Unit,
-    onToggleProtection: () -> Unit,
-) {
-    PlaceholderScreen(
-        name = "Debug",
-        detail = "Semua tujuan navigasi, hanya di build debug",
-        actions =
-            listOf(
-                action("Restricted apps", backStack, MainRoute.AppPicker),
-                action("Permissions", backStack, MainRoute.PermissionSetup),
-                action("Materials", backStack, MainRoute.MaterialList),
-                action("Capture", backStack, MainRoute.Capture),
-                action("Camera", backStack, MainRoute.CameraCapture),
-                action("Rejected", backStack, MainRoute.Rejected(SAMPLE_MATERIAL_ID)),
-                action("Receipt", backStack, MainRoute.Results("session-1")),
-                action("History", backStack, MainRoute.History),
-                action("Progress", backStack, MainRoute.Progress),
-                action("Activity log", backStack, MainRoute.ActivityLog),
-                action("Family", backStack, MainRoute.FamilyHome),
-                action("New child", backStack, MainRoute.FamilyNewChild),
-                action("Child policy", backStack, MainRoute.FamilyChildPolicy("child-1")),
-                action("Pairing code", backStack, MainRoute.FamilyPairing("child-1")),
-                action("Balance adjust", backStack, MainRoute.FamilyBalance("child-1")),
-                action("Settings", backStack, MainRoute.Settings),
-                action("Sesi uji", backStack, MainRoute.DebugUnlock),
-                PlaceholderAction("Toggle protection", onToggleProtection),
-                PlaceholderAction("Re-run setup", onResetSetup),
-            ),
-    )
-}
-
 private fun launchApp(
     context: Context,
     packageName: String,
@@ -430,40 +368,31 @@ private fun QuestionsEntry(
     val quiz = load.quiz
     when {
         load.error != null -> {
-            ErrorState(error = load.error!!, onRetry = viewModel::retry)
+            ErrorState(error = load.error!!, onRetry = { viewModel.start(key.materialId, restart = true) })
         }
 
         quiz == null -> {
             LoadingState()
         }
 
+        load.tour -> {
+            QuizTourScreen(
+                onDone = { viewModel.showGuide(false) },
+                onSkip = { viewModel.showGuide(false) },
+            )
+        }
+
         else -> {
             QuizScreen(
                 state = quiz,
                 onBack = { backStack.popOrIgnore() },
+                onGuide = { viewModel.showGuide(true) },
                 onEvent = { event ->
-                    when (event) {
-                        is QuizEvent.Jump -> {
-                            viewModel.apply(quiz.copy(index = event.index, chosen = null, draft = ""))
-                        }
-
-                        is QuizEvent.Choose -> {
-                            viewModel.apply(quiz.copy(chosen = event.option))
-                        }
-
-                        is QuizEvent.Draft -> {
-                            viewModel.apply(quiz.copy(draft = event.text))
-                        }
-
-                        QuizEvent.Save -> {
-                            viewModel.save(quiz)
-                        }
-
-                        QuizEvent.Submit -> {
-                            load.sessionId?.let { sessionId ->
-                                backStack.popOrIgnore()
-                                backStack.add(MainRoute.Results(sessionId))
-                            }
+                    viewModel.onEvent(event)
+                    if (event == QuizEvent.Submit) {
+                        load.sessionId?.let { sessionId ->
+                            backStack.popOrIgnore()
+                            backStack.add(MainRoute.Results(sessionId))
                         }
                     }
                 },
@@ -633,6 +562,15 @@ private fun SettingsEntry(backStack: NavBackStack<NavKey>) {
                 notice = state.notice,
             )
         }
+    }
+
+    if (state.pinRequired) {
+        ParentPinDialog(
+            title = stringResource(R.string.pin_title_mode),
+            onSubmit = viewModel::submitPin,
+            onDismiss = viewModel::dismissPin,
+            wrong = state.pinWrong,
+        )
     }
 }
 

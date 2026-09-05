@@ -49,7 +49,7 @@ fun ScreenNav(
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.fillMaxWidth(if (trailing == null) 1f else TITLE_SHARE),
+            modifier = Modifier.weight(1f),
         )
         trailing?.invoke()
     }
@@ -57,7 +57,6 @@ fun ScreenNav(
 
 private val BAR = 46.dp
 private val TAP = 48.dp
-private const val TITLE_SHARE = 0.7f
 
 @Composable
 private fun ScreenNavSample(modifier: Modifier = Modifier) {

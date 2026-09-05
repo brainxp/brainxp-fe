@@ -27,6 +27,7 @@ import com.example.brainxp.core.ui.ReceiptCard
 import com.example.brainxp.core.ui.ReceiptLine
 import com.example.brainxp.core.ui.ScreenNav
 import com.example.brainxp.core.ui.StatusPill
+import com.example.brainxp.core.ui.longDuration
 import com.example.brainxp.core.ui.multiplierText
 import com.example.brainxp.core.ui.shortDuration
 
@@ -96,7 +97,7 @@ fun ReceiptScreen(
             header = stringResource(R.string.receipt_header),
             lines = receiptLines(state),
             totalLabel = stringResource(R.string.receipt_credited),
-            totalValue = "+${shortDuration(state.creditedSeconds)}",
+            totalValue = "+${longDuration(state.creditedSeconds)}",
         )
 
         Text(

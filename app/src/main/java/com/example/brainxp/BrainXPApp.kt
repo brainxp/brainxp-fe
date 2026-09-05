@@ -46,14 +46,6 @@ fun BrainXPApp(
             RootUiState.Main -> {
                 MainNavHost(
                     modifier = content,
-                    onResetSetup = viewModel::resetSetup,
-                    onToggleProtection = viewModel::toggleProtection,
-                    debug =
-                        DebugActions(
-                            grantUnlock = viewModel::grantDebugUnlock,
-                            setWarningLead = viewModel::setWarningLead,
-                            endUnlock = viewModel::endUnlock,
-                        ),
                     deepLink = deepLink ?: parentRoot(role),
                 )
             }
@@ -90,9 +82,6 @@ private fun OnboardingNavHost(
 
 @Composable
 private fun MainNavHost(
-    onResetSetup: () -> Unit,
-    onToggleProtection: () -> Unit,
-    debug: DebugActions,
     modifier: Modifier = Modifier,
     deepLink: NavKey? = null,
 ) {
@@ -111,7 +100,6 @@ private fun MainNavHost(
         entryProvider =
             entryProvider {
                 dailyEntries(backStack)
-                debugEntries(backStack, onResetSetup, onToggleProtection, debug)
                 cameraEntries(backStack)
                 captureEntries(backStack)
                 learningEntries(backStack)

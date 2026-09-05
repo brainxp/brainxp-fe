@@ -36,6 +36,12 @@ sealed interface Question {
     ) : Question
 }
 
+data class SavedAnswer(
+    val questionId: String,
+    val chosenIndex: Int? = null,
+    val essayText: String? = null,
+)
+
 data class QuestionSession(
     val sessionId: String,
     val title: String? = null,
@@ -44,6 +50,7 @@ data class QuestionSession(
     val questions: List<Question>,
     val createdAt: Long,
     val answeredIds: Set<String> = emptySet(),
+    val answers: List<SavedAnswer> = emptyList(),
 )
 
 enum class GenerationStatus {
