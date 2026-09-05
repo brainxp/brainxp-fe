@@ -24,6 +24,7 @@ import androidx.navigation3.runtime.NavKey
 import com.example.brainxp.core.capture.CameraSession
 import com.example.brainxp.core.ui.PlaceholderAction
 import com.example.brainxp.core.ui.PlaceholderScreen
+import com.example.brainxp.feature.DRAFT_ID
 import com.example.brainxp.feature.SAMPLE_ASSESSED_LEVEL
 import com.example.brainxp.feature.SAMPLE_DECLARED_LEVEL
 import com.example.brainxp.feature.SAMPLE_ESTIMATE_SECONDS
@@ -38,6 +39,8 @@ import com.example.brainxp.feature.apps.AppPickerRoute
 import com.example.brainxp.feature.capture.CameraCaptureScreen
 import com.example.brainxp.feature.capture.CaptureMethod
 import com.example.brainxp.feature.capture.CaptureViewModel
+import com.example.brainxp.feature.capture.OcrReviewScreen
+import com.example.brainxp.feature.capture.OcrReviewViewModel
 import com.example.brainxp.feature.capture.PickSourceScreen
 import com.example.brainxp.feature.capture.PreparingScreen
 import com.example.brainxp.feature.capture.PreparingStage
@@ -269,7 +272,7 @@ internal fun EntryProviderScope<NavKey>.cameraEntries(backStack: NavBackStack<Na
             },
             onDelete = viewModel::delete,
             onMove = viewModel::move,
-            onContinue = { backStack.add(MainRoute.Preparing(SAMPLE_MATERIAL_ID)) },
+            onContinue = { backStack.add(MainRoute.OcrReview(DRAFT_ID)) },
         )
     }
 }
@@ -307,6 +310,25 @@ internal fun EntryProviderScope<NavKey>.captureEntries(backStack: NavBackStack<N
     }
 }
 
+internal fun EntryProviderScope<NavKey>.reviewEntries(backStack: NavBackStack<NavKey>) {
+    entry<MainRoute.OcrReview> { key ->
+        val review: OcrReviewViewModel = hiltViewModel()
+        val reviewState by review.state.collectAsStateWithLifecycle()
+
+        LaunchedEffect(key.draftId) {
+            review.start(key.draftId)
+        }
+
+        OcrReviewScreen(
+            state = reviewState,
+            onBack = { backStack.popOrIgnore() },
+            onEdit = review::edit,
+            onGoTo = review::goTo,
+            onUpload = { backStack.add(MainRoute.Preparing(SAMPLE_MATERIAL_ID)) },
+        )
+    }
+}
+
 internal fun EntryProviderScope<NavKey>.learningEntries(backStack: NavBackStack<NavKey>) {
     entry<MainRoute.MaterialList> {
         val viewModel: LibraryViewModel = hiltViewModel()
@@ -340,9 +362,6 @@ internal fun EntryProviderScope<NavKey>.learningEntries(backStack: NavBackStack<
             listOf(action("Start session", backStack, MainRoute.Questions("session-1")))
         }
     }
-    entry<MainRoute.OcrReview> { key ->
-        Placeholder("OCR review", "draftId = ${key.draftId}")
-    }
     entry<MainRoute.Questions> { key ->
         var quiz by remember { mutableStateOf(SAMPLE_QUIZ) }
 
@@ -365,65 +384,6 @@ internal fun EntryProviderScope<NavKey>.learningEntries(backStack: NavBackStack<
             state = SAMPLE_RECEIPT,
             onHome = { backStack.popOrIgnore() },
             onLibrary = { backStack.add(MainRoute.MaterialList) },
-        )
-    }
-}
-
-internal fun EntryProviderScope<NavKey>.familyEntries(backStack: NavBackStack<NavKey>) {
-    entry<MainRoute.FamilyHome> {
-        FamilyHomeScreen(
-            state = SAMPLE_FAMILY,
-            onBack = { backStack.popOrIgnore() },
-            onOpenChild = { backStack.add(MainRoute.FamilyChild(it)) },
-            onNewChild = { backStack.add(MainRoute.FamilyNewChild) },
-            onSelfRules = { backStack.add(MainRoute.FamilyChildPolicy("self")) },
-            onJoinRules = { backStack.add(MainRoute.FamilyChildPolicy("self")) },
-        )
-    }
-    entry<MainRoute.FamilyNewChild> {
-        NewChildScreen(
-            onBack = { backStack.popOrIgnore() },
-            onCreated = { _, _, _ -> backStack.add(MainRoute.FamilyChildPolicy("child-new")) },
-        )
-    }
-    entry<MainRoute.FamilyChild> { key ->
-        ChildReportScreen(
-            state = SAMPLE_REPORT,
-            onBack = { backStack.popOrIgnore() },
-            onEditPolicy = { backStack.add(MainRoute.FamilyChildPolicy(key.childId)) },
-            onIssueCode = { backStack.add(MainRoute.FamilyPairing(key.childId)) },
-            onAdjustBalance = { backStack.add(MainRoute.FamilyBalance(key.childId)) },
-            onRemove = { backStack.popOrIgnore() },
-        )
-    }
-    entry<MainRoute.FamilyChildPolicy> { key ->
-        var policy by remember { mutableStateOf(SAMPLE_POLICY) }
-
-        PolicyEditorScreen(
-            state = policy,
-            onBack = { backStack.popOrIgnore() },
-            onEvent = { event ->
-                when (event) {
-                    PolicyEvent.Save -> backStack.add(MainRoute.FamilyPairing(key.childId))
-                    else -> policy = policy.stepped(event)
-                }
-            },
-        )
-    }
-    entry<MainRoute.FamilyPairing> {
-        PairingCodeScreen(
-            state = SAMPLE_PAIRING_CODE,
-            onBack = { backStack.popOrIgnore() },
-            onDone = { backStack.popOrIgnore() },
-        )
-    }
-    entry<MainRoute.FamilyBalance> {
-        BalanceAdjustScreen(
-            subjectName = SAMPLE_REPORT.subjectName,
-            balanceSeconds = SAMPLE_REPORT.balanceSeconds,
-            idleDaysAllowed = SAMPLE_POLICY.idleDaysAllowed,
-            onBack = { backStack.popOrIgnore() },
-            onApply = { _, _, _ -> backStack.popOrIgnore() },
         )
     }
 }
@@ -459,6 +419,7 @@ private fun DebugDestinations(
                 action("Materials", backStack, MainRoute.MaterialList),
                 action("Capture", backStack, MainRoute.Capture),
                 action("Camera", backStack, MainRoute.CameraCapture),
+                action("OCR review", backStack, MainRoute.OcrReview(DRAFT_ID)),
                 action("Rejected", backStack, MainRoute.Rejected(SAMPLE_MATERIAL_ID)),
                 action("Receipt", backStack, MainRoute.Results("session-1")),
                 action("History", backStack, MainRoute.History),

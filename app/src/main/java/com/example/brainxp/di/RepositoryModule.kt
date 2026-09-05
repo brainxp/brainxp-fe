@@ -6,9 +6,11 @@ import com.example.brainxp.data.repo.ActivityLogRepository
 import com.example.brainxp.data.repo.ConsumptionReporter
 import com.example.brainxp.data.repo.FamilyRepository
 import com.example.brainxp.data.repo.MaterialRepository
+import com.example.brainxp.data.repo.OcrDraftRepository
 import com.example.brainxp.data.repo.RestrictionRepository
 import com.example.brainxp.data.repo.RewardReconciler
 import com.example.brainxp.data.repo.RewardRepository
+import com.example.brainxp.data.repo.RoomOcrDraftRepository
 import com.example.brainxp.data.repo.RoomRestrictionRepository
 import com.example.brainxp.data.repo.RoomUnlockRepository
 import com.example.brainxp.data.repo.SessionRepository
@@ -52,4 +54,7 @@ interface RepositoryModule {
 
     @Binds
     fun bindOcrEngine(impl: MlKitOcrEngine): OcrEngine
+
+    @Binds
+    fun bindOcrDraftRepository(impl: RoomOcrDraftRepository): OcrDraftRepository
 }
