@@ -23,6 +23,8 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.example.brainxp.core.capture.CameraSession
+import com.example.brainxp.core.ui.ErrorState
+import com.example.brainxp.core.ui.LoadingState
 import com.example.brainxp.core.ui.PlaceholderAction
 import com.example.brainxp.core.ui.PlaceholderScreen
 import com.example.brainxp.feature.SAMPLE_ASSESSED_LEVEL
@@ -80,6 +82,7 @@ import com.example.brainxp.feature.progress.ProgressScreen
 import com.example.brainxp.feature.progress.ProgressViewModel
 import com.example.brainxp.feature.questions.QuizEvent
 import com.example.brainxp.feature.questions.QuizScreen
+import com.example.brainxp.feature.questions.QuizViewModel
 import com.example.brainxp.feature.questions.recordAnswer
 import com.example.brainxp.feature.results.ReceiptScreen
 import kotlinx.coroutines.launch
@@ -386,26 +389,10 @@ internal fun EntryProviderScope<NavKey>.learningEntries(backStack: NavBackStack<
     }
     entry<MainRoute.MaterialDetail> { key ->
         Placeholder("Material detail", "materialId = ${key.materialId}") {
-            listOf(action("Start session", backStack, MainRoute.Questions("session-1")))
+            listOf(action("Start session", backStack, MainRoute.Questions(key.materialId)))
         }
     }
-    entry<MainRoute.Questions> { key ->
-        var quiz by remember { mutableStateOf(SAMPLE_QUIZ) }
-
-        QuizScreen(
-            state = quiz,
-            onBack = { backStack.popOrIgnore() },
-            onEvent = { event ->
-                when (event) {
-                    is QuizEvent.Jump -> quiz = quiz.copy(index = event.index, chosen = null, draft = "")
-                    is QuizEvent.Choose -> quiz = quiz.copy(chosen = event.option)
-                    is QuizEvent.Draft -> quiz = quiz.copy(draft = event.text)
-                    QuizEvent.Save -> quiz = quiz.recordAnswer()
-                    QuizEvent.Submit -> backStack.add(MainRoute.Results(key.sessionId))
-                }
-            },
-        )
-    }
+    entry<MainRoute.Questions> { key -> QuestionsEntry(key, backStack) }
     entry<MainRoute.Results> {
         ReceiptScreen(
             state = SAMPLE_RECEIPT,
@@ -471,4 +458,56 @@ private fun launchApp(
     val intent = context.packageManager.getLaunchIntentForPackage(packageName) ?: return
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     context.startActivity(intent)
+}
+
+@Composable
+private fun QuestionsEntry(
+    key: MainRoute.Questions,
+    backStack: NavBackStack<NavKey>,
+) {
+    val viewModel: QuizViewModel = hiltViewModel()
+    val load by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(key.materialId) { viewModel.start(key.materialId) }
+
+    val quiz = load.quiz
+    when {
+        load.error != null -> {
+            ErrorState(error = load.error!!, onRetry = viewModel::retry)
+        }
+
+        quiz == null -> {
+            LoadingState()
+        }
+
+        else -> {
+            QuizScreen(
+                state = quiz,
+                onBack = { backStack.popOrIgnore() },
+                onEvent = { event ->
+                    when (event) {
+                        is QuizEvent.Jump -> {
+                            viewModel.apply(quiz.copy(index = event.index, chosen = null, draft = ""))
+                        }
+
+                        is QuizEvent.Choose -> {
+                            viewModel.apply(quiz.copy(chosen = event.option))
+                        }
+
+                        is QuizEvent.Draft -> {
+                            viewModel.apply(quiz.copy(draft = event.text))
+                        }
+
+                        QuizEvent.Save -> {
+                            viewModel.apply(quiz.recordAnswer())
+                        }
+
+                        QuizEvent.Submit -> {
+                            load.sessionId?.let { backStack.add(MainRoute.Results(it)) }
+                        }
+                    }
+                },
+            )
+        }
+    }
 }

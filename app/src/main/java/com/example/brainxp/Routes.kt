@@ -66,7 +66,7 @@ sealed interface MainRoute : NavKey {
 
     @Serializable
     data class Questions(
-        val sessionId: String,
+        val materialId: String,
     ) : MainRoute
 
     @Serializable
