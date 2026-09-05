@@ -113,6 +113,8 @@
     <string name="error_rate_limited_body">Tunggu sebentar sebelum mencoba lagi.</string>
     <string name="error_rate_limited_body_seconds">Coba lagi dalam %1$d detik.</string>
 
+    <string name="error_timeout_title">Kelamaan menunggu</string>
+    <string name="error_timeout_body">Materimu masih diproses di server. Coba periksa lagi sebentar.</string>
     <string name="error_server_busy_title">Server sedang sibuk</string>
     <string name="error_server_busy_body">Ini dari sisi kami, bukan kamu. Coba lagi sebentar.</string>
 

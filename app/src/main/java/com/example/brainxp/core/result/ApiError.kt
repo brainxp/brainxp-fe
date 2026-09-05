@@ -17,6 +17,10 @@ sealed interface ApiError {
         override val retryable = true
     }
 
+    data object Timeout : ApiError {
+        override val retryable = true
+    }
+
     data object ServerBusy : ApiError {
         override val retryable = true
     }
