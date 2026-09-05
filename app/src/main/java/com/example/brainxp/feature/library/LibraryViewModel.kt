@@ -27,39 +27,57 @@ class LibraryViewModel
         val effects: Flow<LibraryEffect> = effectChannel.receiveAsFlow()
 
         init {
-            load()
+            observeCache()
+            refresh()
+        }
+
+        private fun observeCache() {
+            viewModelScope.launch {
+                materials.observeCached().collect { cached ->
+                    if (cached.isEmpty() && mutableState.value.items.isEmpty()) {
+                        return@collect
+                    }
+                    mutableState.value =
+                        mutableState.value.copy(
+                            phase = LibraryUiState.Phase.Ready,
+                            items = cached,
+                        )
+                }
+            }
+        }
+
+        private fun refresh() {
+            viewModelScope.launch {
+                when (val result = materials.page(cursor = null)) {
+                    is AppResult.Success -> {
+                        mutableState.value =
+                            mutableState.value.copy(
+                                phase = LibraryUiState.Phase.Ready,
+                                items = result.value.items,
+                            )
+                    }
+
+                    is AppResult.Failure -> {
+                        if (mutableState.value.items.isEmpty()) {
+                            mutableState.value =
+                                mutableState.value.copy(
+                                    phase =
+                                        LibraryUiState.Phase.Error(
+                                            result.error,
+                                            result.error.retryable,
+                                        ),
+                                )
+                        }
+                    }
+                }
+            }
         }
 
         fun onEvent(event: LibraryEvent) {
             when (event) {
-                LibraryEvent.Retry -> load()
+                LibraryEvent.Retry -> refresh()
                 is LibraryEvent.Study -> emit(LibraryEffect.OpenMaterial(event.materialId))
                 is LibraryEvent.Remove -> remove(event.materialId)
-            }
-        }
-
-        private fun load() {
-            mutableState.value = mutableState.value.copy(phase = LibraryUiState.Phase.Loading)
-            viewModelScope.launch {
-                mutableState.value =
-                    when (val result = materials.page(cursor = null)) {
-                        is AppResult.Success -> {
-                            LibraryUiState(
-                                phase = LibraryUiState.Phase.Ready,
-                                items = result.value.items,
-                            )
-                        }
-
-                        is AppResult.Failure -> {
-                            LibraryUiState(
-                                phase =
-                                    LibraryUiState.Phase.Error(
-                                        result.error,
-                                        result.error.retryable,
-                                    ),
-                            )
-                        }
-                    }
             }
         }
 
