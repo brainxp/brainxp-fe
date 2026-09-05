@@ -49,6 +49,9 @@ sealed interface MainRoute : NavKey {
     data object Capture : MainRoute
 
     @Serializable
+    data object CameraCapture : MainRoute
+
+    @Serializable
     data class Preparing(
         val materialId: String,
     ) : MainRoute

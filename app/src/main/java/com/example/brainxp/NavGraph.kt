@@ -11,14 +11,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import com.example.brainxp.core.capture.CameraSession
 import com.example.brainxp.core.ui.PlaceholderAction
 import com.example.brainxp.core.ui.PlaceholderScreen
 import com.example.brainxp.feature.SAMPLE_ASSESSED_LEVEL
@@ -32,6 +35,9 @@ import com.example.brainxp.feature.SAMPLE_READY_QUESTIONS
 import com.example.brainxp.feature.SAMPLE_RECEIPT
 import com.example.brainxp.feature.SAMPLE_REJECT_REASON
 import com.example.brainxp.feature.apps.AppPickerRoute
+import com.example.brainxp.feature.capture.CameraCaptureScreen
+import com.example.brainxp.feature.capture.CaptureMethod
+import com.example.brainxp.feature.capture.CaptureViewModel
 import com.example.brainxp.feature.capture.PickSourceScreen
 import com.example.brainxp.feature.capture.PreparingScreen
 import com.example.brainxp.feature.capture.PreparingStage
@@ -70,6 +76,7 @@ import com.example.brainxp.feature.questions.QuizEvent
 import com.example.brainxp.feature.questions.QuizScreen
 import com.example.brainxp.feature.questions.recordAnswer
 import com.example.brainxp.feature.results.ReceiptScreen
+import kotlinx.coroutines.launch
 
 internal fun EntryProviderScope<NavKey>.onboardingEntries(
     backStack: NavBackStack<NavKey>,
@@ -225,13 +232,50 @@ internal fun EntryProviderScope<NavKey>.debugEntries(
     }
 }
 
+internal fun EntryProviderScope<NavKey>.cameraEntries(backStack: NavBackStack<NavKey>) {
+    entry<MainRoute.CameraCapture> {
+        val viewModel: CaptureViewModel = hiltViewModel()
+        val captureState by viewModel.state.collectAsStateWithLifecycle()
+        val context = LocalContext.current
+        val owner = LocalLifecycleOwner.current
+        val session = remember { CameraSession(context) }
+        val scope = rememberCoroutineScope()
+
+        CameraCaptureScreen(
+            state = captureState,
+            onBack = { backStack.popOrIgnore() },
+            bindCamera = { view -> session.bind(owner, view) },
+            onShutter = {
+                if (!captureState.capturing) {
+                    val target = viewModel.newPageFile()
+                    viewModel.beginCapture()
+                    scope.launch {
+                        session
+                            .takePicture(target)
+                            .onSuccess { viewModel.captured(it) }
+                            .onFailure { viewModel.captureFailed(target) }
+                    }
+                }
+            },
+            onDelete = viewModel::delete,
+            onMove = viewModel::move,
+            onContinue = { backStack.add(MainRoute.Preparing(SAMPLE_MATERIAL_ID)) },
+        )
+    }
+}
+
 internal fun EntryProviderScope<NavKey>.captureEntries(backStack: NavBackStack<NavKey>) {
     entry<MainRoute.Capture> {
         PickSourceScreen(
             questionCount = SAMPLE_QUESTION_COUNT,
             estimatedRewardSeconds = SAMPLE_ESTIMATE_SECONDS,
             onBack = { backStack.popOrIgnore() },
-            onPick = { backStack.add(MainRoute.Preparing(SAMPLE_MATERIAL_ID)) },
+            onPick = { method ->
+                when (method) {
+                    CaptureMethod.PHOTO -> backStack.add(MainRoute.CameraCapture)
+                    CaptureMethod.DOCUMENT -> backStack.add(MainRoute.Preparing(SAMPLE_MATERIAL_ID))
+                }
+            },
         )
     }
     entry<MainRoute.Preparing> { key ->
@@ -404,6 +448,7 @@ private fun DebugDestinations(
                 action("Permissions", backStack, MainRoute.PermissionSetup),
                 action("Materials", backStack, MainRoute.MaterialList),
                 action("Capture", backStack, MainRoute.Capture),
+                action("Camera", backStack, MainRoute.CameraCapture),
                 action("Rejected", backStack, MainRoute.Rejected(SAMPLE_MATERIAL_ID)),
                 action("Receipt", backStack, MainRoute.Results("session-1")),
                 action("History", backStack, MainRoute.History),

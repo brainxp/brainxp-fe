@@ -106,6 +106,7 @@ private fun MainNavHost(
             entryProvider {
                 dailyEntries(backStack, onResetSetup, onToggleProtection)
                 debugEntries(backStack, onResetSetup, onToggleProtection, debug)
+                cameraEntries(backStack)
                 captureEntries(backStack)
                 learningEntries(backStack)
                 familyEntries(backStack)
