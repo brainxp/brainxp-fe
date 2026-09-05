@@ -76,6 +76,8 @@ import com.example.brainxp.feature.onboarding.LevelViewModel
 import com.example.brainxp.feature.onboarding.PairDeviceViewModel
 import com.example.brainxp.feature.onboarding.PickModeScreen
 import com.example.brainxp.feature.onboarding.PickRoleScreen
+import com.example.brainxp.feature.onboarding.SetParentPinScreen
+import com.example.brainxp.feature.onboarding.SetParentPinViewModel
 import com.example.brainxp.feature.onboarding.SetupDoneScreen
 import com.example.brainxp.feature.onboarding.SetupMode
 import com.example.brainxp.feature.onboarding.SignInScreen
@@ -141,6 +143,7 @@ internal fun EntryProviderScope<NavKey>.onboardingEntries(backStack: NavBackStac
         )
     }
     entry<OnboardingRoute.PairDevice> { PairDeviceEntry(backStack) }
+    entry<OnboardingRoute.SetParentPin> { SetParentPinEntry(backStack) }
 }
 
 internal fun EntryProviderScope<NavKey>.onboardingTailEntries(
@@ -639,7 +642,7 @@ private fun PairDeviceEntry(backStack: NavBackStack<NavKey>) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(state.paired) {
-        if (state.paired) backStack.add(OnboardingRoute.PermissionSetup)
+        if (state.paired) backStack.add(OnboardingRoute.SetParentPin)
     }
 
     PairDeviceScreen(
@@ -649,5 +652,20 @@ private fun PairDeviceEntry(backStack: NavBackStack<NavKey>) {
         onDelete = viewModel::backspace,
         busy = state.busy,
         error = state.error?.let { stringResource(R.string.pair_failed) },
+    )
+}
+
+@Composable
+private fun SetParentPinEntry(backStack: NavBackStack<NavKey>) {
+    val viewModel: SetParentPinViewModel = hiltViewModel()
+    val saved by viewModel.saved.collectAsStateWithLifecycle()
+
+    LaunchedEffect(saved) {
+        if (saved) backStack.add(OnboardingRoute.PermissionSetup)
+    }
+
+    SetParentPinScreen(
+        onSet = viewModel::set,
+        onSkip = { backStack.add(OnboardingRoute.PermissionSetup) },
     )
 }

@@ -26,6 +26,9 @@ sealed interface OnboardingRoute : NavKey {
     data object Level : OnboardingRoute
 
     @Serializable
+    data object SetParentPin : OnboardingRoute
+
+    @Serializable
     data object PermissionSetup : OnboardingRoute
 
     @Serializable

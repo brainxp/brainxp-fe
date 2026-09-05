@@ -302,6 +302,14 @@ kehilangan kontak.</string>
     <string name="preparing_step_validating">Diperiksa dan dikalibrasi</string>
     <string name="preparing_step_partial">Soal pertama siap</string>
     <string name="preparing_step_ready">Sisa soal disusun</string>
+    <string name="setpin_title">PIN orang tua</string>
+    <string name="setpin_heading">Pasang PIN di HP ini</string>
+    <string name="setpin_body">PIN ini yang menjaga pengaturan di HP anak. Pasang sekarang, selagi kamu yang memegangnya.</string>
+    <string name="setpin_field">PIN 4 angka</string>
+    <string name="setpin_confirm">Ulangi PIN</string>
+    <string name="setpin_note">Tanpa PIN, anak bisa mengubah aplikasi yang dikunci, mengganti mode, dan mematikan perlindungan sendiri.</string>
+    <string name="setpin_save">Pasang PIN</string>
+    <string name="setpin_skip">Nanti saja</string>
     <string name="pin_body">Pengaturan ini dijaga orang tua. Masukkan PIN untuk melanjutkan.</string>
     <string name="pin_label">PIN orang tua</string>
     <string name="pin_wrong">PIN salah. Coba lagi.</string>
