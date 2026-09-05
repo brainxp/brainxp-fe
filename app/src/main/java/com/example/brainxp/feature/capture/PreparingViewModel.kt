@@ -35,6 +35,10 @@ class PreparingViewModel
 
         fun done() = preparation.forget()
 
+        fun retry() {
+            state.value.materialId?.let(preparation::watch)
+        }
+
         private companion object {
             const val STOP_TIMEOUT = 5_000L
         }

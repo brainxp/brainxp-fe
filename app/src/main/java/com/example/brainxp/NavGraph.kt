@@ -336,6 +336,8 @@ internal fun EntryProviderScope<NavKey>.captureEntries(backStack: NavBackStack<N
             materialName = state.materialName,
             stage = state.stage,
             readyQuestions = state.readyQuestions,
+            stalled = state.error != null,
+            onRetry = viewModel::retry,
             onStart = {
                 val id = state.materialId ?: return@PreparingScreen
                 viewModel.done()

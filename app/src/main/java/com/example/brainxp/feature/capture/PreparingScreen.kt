@@ -36,6 +36,8 @@ fun PreparingScreen(
     readyQuestions: Int,
     onStart: () -> Unit,
     modifier: Modifier = Modifier,
+    stalled: Boolean = false,
+    onRetry: () -> Unit = {},
 ) {
     LightSystemBars()
 
@@ -45,6 +47,8 @@ fun PreparingScreen(
             stage = stage,
             readyQuestions = readyQuestions,
             onStart = onStart,
+            stalled = stalled,
+            onRetry = onRetry,
             modifier = modifier,
         )
     }
@@ -56,6 +60,8 @@ private fun PreparingContent(
     stage: PreparingStage,
     readyQuestions: Int,
     onStart: () -> Unit,
+    stalled: Boolean,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val spacing = BrainXPTheme.spacing
@@ -109,7 +115,7 @@ private fun PreparingContent(
             color = Color.White.copy(alpha = NOTE_FILL),
         ) {
             Text(
-                text = stringResource(R.string.preparing_note),
+                text = stringResource(if (stalled) R.string.preparing_stalled else R.string.preparing_note),
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.White.copy(alpha = SECONDARY_INK),
                 modifier = Modifier.padding(spacing.md),
@@ -119,10 +125,14 @@ private fun PreparingContent(
         PrimaryButton(
             text =
                 stringResource(
-                    if (readyQuestions > 0) R.string.preparing_start else R.string.preparing_wait,
+                    when {
+                        stalled -> R.string.preparing_retry
+                        readyQuestions > 0 -> R.string.preparing_start
+                        else -> R.string.preparing_wait
+                    },
                 ),
-            onClick = onStart,
-            enabled = readyQuestions > 0,
+            onClick = if (stalled) onRetry else onStart,
+            enabled = stalled || readyQuestions > 0,
             onDark = true,
         )
     }

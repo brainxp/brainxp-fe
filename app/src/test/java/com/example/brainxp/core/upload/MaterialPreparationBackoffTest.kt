@@ -27,10 +27,10 @@ class MaterialPreparationBackoffTest {
     }
 
     @Test
-    fun `the budget outlasts the slowest gate we have measured`() {
+    fun `the budget survives a slow gate plus a spell in the background`() {
         assertTrue(
-            "a 45s gate must fit inside the budget",
-            PREPARATION_BUDGET_MILLIS > 45_000L,
+            "a 45s gate plus minutes backgrounded must still fit",
+            PREPARATION_BUDGET_MILLIS > 5 * 60_000L,
         )
     }
 
@@ -45,7 +45,7 @@ class MaterialPreparationBackoffTest {
             polls++
         }
 
-        assertEquals(21, polls)
+        assertEquals(123, polls)
     }
 
     @Test

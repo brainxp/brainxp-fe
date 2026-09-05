@@ -302,6 +302,8 @@ kehilangan kontak.</string>
     <string name="preparing_step_validating">Diperiksa dan dikalibrasi</string>
     <string name="preparing_step_partial">Soal pertama siap</string>
     <string name="preparing_step_ready">Sisa soal disusun</string>
+    <string name="preparing_stalled">Server belum menjawab. Materinya mungkin sudah selesai — coba periksa lagi.</string>
+    <string name="preparing_retry">Periksa lagi</string>
     <string name="preparing_note">Mulai saja begitu soal pertama siap. Sisanya menyusul sambil kamu mengerjakan.</string>
     <string name="preparing_wait">Menyiapkan…</string>
     <string name="preparing_start">Mulai kerjakan</string>

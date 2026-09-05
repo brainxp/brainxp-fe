@@ -18,7 +18,7 @@ import javax.inject.Singleton
 
 const val FIRST_DELAY_MILLIS = 1_000L
 const val MAX_DELAY_MILLIS = 5_000L
-const val PREPARATION_BUDGET_MILLIS = 90_000L
+const val PREPARATION_BUDGET_MILLIS = 600_000L
 private const val GROWTH_NUMERATOR = 3
 private const val GROWTH_DENOMINATOR = 2
 
