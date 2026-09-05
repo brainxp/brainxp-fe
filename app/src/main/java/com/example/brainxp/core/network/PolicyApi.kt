@@ -10,6 +10,8 @@ import retrofit2.http.Path
 @Serializable
 data class PolicyPatchDto(
     @SerialName("academic_level") val academicLevel: String? = null,
+    @SerialName("question_language") val questionLanguage: String? = null,
+    @SerialName("questions_per_session") val questionsPerSession: Int? = null,
 )
 
 @Serializable
@@ -25,6 +27,9 @@ data class PolicyDto(
     @SerialName("academic_level") val academicLevel: String? = null,
     @SerialName("question_language") val questionLanguage: String? = null,
     @SerialName("questions_per_session") val questionsPerSession: Int = 0,
+    @SerialName("day_reset_hour") val dayResetHour: Int = 0,
+    @SerialName("idle_days_allowed") val idleDaysAllowed: Int = 0,
+    @SerialName("pending_weaken_at") val pendingWeakenAt: String? = null,
 )
 
 interface PolicyApi {

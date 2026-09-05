@@ -108,7 +108,7 @@ private fun MainNavHost(
         entryDecorators = defaultDecorators(),
         entryProvider =
             entryProvider {
-                dailyEntries(backStack, onResetSetup, onToggleProtection)
+                dailyEntries(backStack)
                 debugEntries(backStack, onResetSetup, onToggleProtection, debug)
                 cameraEntries(backStack)
                 captureEntries(backStack)

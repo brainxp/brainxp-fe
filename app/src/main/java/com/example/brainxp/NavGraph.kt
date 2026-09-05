@@ -75,6 +75,7 @@ import com.example.brainxp.feature.onboarding.LevelScreen
 import com.example.brainxp.feature.onboarding.LevelViewModel
 import com.example.brainxp.feature.onboarding.PickModeScreen
 import com.example.brainxp.feature.onboarding.PickRoleScreen
+import com.example.brainxp.feature.onboarding.SetupDoneScreen
 import com.example.brainxp.feature.onboarding.SetupMode
 import com.example.brainxp.feature.onboarding.SignInScreen
 import com.example.brainxp.feature.onboarding.SignInViewModel
@@ -88,6 +89,8 @@ import com.example.brainxp.feature.questions.QuizViewModel
 import com.example.brainxp.feature.questions.recordAnswer
 import com.example.brainxp.feature.results.ReceiptScreen
 import com.example.brainxp.feature.results.ReceiptViewModel
+import com.example.brainxp.feature.settings.SettingsScreen
+import com.example.brainxp.feature.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
 internal fun EntryProviderScope<NavKey>.onboardingEntries(backStack: NavBackStack<NavKey>) {
@@ -175,9 +178,7 @@ internal fun EntryProviderScope<NavKey>.onboardingTailEntries(
         )
     }
     entry<OnboardingRoute.SetupDone> {
-        Placeholder("Selesai", "OnboardingRoute.SetupDone") {
-            listOf(PlaceholderAction("Finish setup", onSetupComplete))
-        }
+        SetupDoneScreen(onStart = onSetupComplete)
     }
 }
 
@@ -187,11 +188,7 @@ internal data class DebugActions(
     val endUnlock: () -> Unit,
 )
 
-internal fun EntryProviderScope<NavKey>.dailyEntries(
-    backStack: NavBackStack<NavKey>,
-    onResetSetup: () -> Unit,
-    onToggleProtection: () -> Unit,
-) {
+internal fun EntryProviderScope<NavKey>.dailyEntries(backStack: NavBackStack<NavKey>) {
     entry<MainRoute.Home> {
         val viewModel: HomeViewModel = hiltViewModel()
         val homeState by viewModel.state.collectAsStateWithLifecycle()
@@ -235,16 +232,7 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(
         )
     }
     entry<MainRoute.ActivityLog> { ActivityLogEntry(backStack) }
-    entry<MainRoute.Settings> {
-        Placeholder("Settings", "MainRoute.Settings") {
-            listOf(
-                action("Restricted apps", backStack, MainRoute.AppPicker),
-                action("Permissions", backStack, MainRoute.PermissionSetup),
-                PlaceholderAction("Toggle protection", onToggleProtection),
-                PlaceholderAction("Re-run setup", onResetSetup),
-            )
-        }
-    }
+    entry<MainRoute.Settings> { SettingsEntry(backStack) }
     entry<MainRoute.PermissionSetup> {
         PermissionSetupRoute(
             onDone = { backStack.popOrIgnore() },
@@ -385,15 +373,6 @@ internal fun EntryProviderScope<NavKey>.learningEntries(backStack: NavBackStack<
     entry<MainRoute.MaterialDetail> { key -> MaterialDetailEntry(key, backStack) }
     entry<MainRoute.Questions> { key -> QuestionsEntry(key, backStack) }
     entry<MainRoute.Results> { key -> ReceiptEntry(key, backStack) }
-}
-
-@Composable
-private fun Placeholder(
-    name: String,
-    detail: String,
-    actions: () -> List<PlaceholderAction> = { emptyList() },
-) {
-    PlaceholderScreen(name = name, detail = detail, actions = actions())
 }
 
 private fun action(
@@ -627,4 +606,39 @@ private fun ActivityLogEntry(backStack: NavBackStack<NavKey>) {
     val events by viewModel.events.collectAsStateWithLifecycle()
 
     ActivityLogScreen(events = events, onBack = { backStack.popOrIgnore() })
+}
+
+@Composable
+private fun SettingsEntry(backStack: NavBackStack<NavKey>) {
+    val viewModel: SettingsViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(state.signedOut) {
+        if (state.signedOut) backStack.popOrIgnore()
+    }
+
+    val policy = state.policy
+    when {
+        state.error != null && policy == null -> {
+            ErrorState(error = state.error!!, onRetry = viewModel::retry)
+        }
+
+        policy == null -> {
+            LoadingState()
+        }
+
+        else -> {
+            SettingsScreen(
+                policy = policy,
+                onLevel = viewModel::chooseLevel,
+                onLanguage = viewModel::chooseLanguage,
+                onApps = { backStack.add(MainRoute.AppPicker) },
+                onPermissions = { backStack.add(MainRoute.PermissionSetup) },
+                onSignOut = viewModel::signOut,
+                onBack = { backStack.popOrIgnore() },
+                saving = state.saving,
+                notice = state.notice,
+            )
+        }
+    }
 }

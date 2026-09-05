@@ -5,6 +5,7 @@ import com.example.brainxp.core.network.AuthTokenStore
 import com.example.brainxp.core.network.AuthTokens
 import com.example.brainxp.core.network.ErrorMapper
 import com.example.brainxp.core.network.LoginRequestDto
+import com.example.brainxp.core.network.RefreshRequestDto
 import com.example.brainxp.core.network.RegisterRequestDto
 import com.example.brainxp.core.network.TokenDto
 import com.example.brainxp.core.result.AppResult
@@ -49,6 +50,9 @@ class AuthRepository
         ): AppResult<Identity> = call { api.login(LoginRequestDto(email, password)) }
 
         suspend fun signOut() {
+            store.current().refreshToken?.let { refresh ->
+                runCatching { api.logout(RefreshRequestDto(refresh)) }
+            }
             tokens.update(null)
             store.clear()
         }

@@ -37,7 +37,7 @@ data class LoadingStep(
 )
 
 @Composable
-internal fun StepList(
+fun StepList(
     steps: List<LoadingStep>,
     modifier: Modifier = Modifier,
 ) {

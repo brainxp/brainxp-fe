@@ -11,6 +11,15 @@ import com.example.brainxp.domain.model.AcademicLevel
 import javax.inject.Inject
 import javax.inject.Singleton
 
+data class SubjectPolicy(
+    val level: AcademicLevel?,
+    val language: String,
+    val questionsPerSession: Int,
+    val dayResetHour: Int,
+    val idleDaysAllowed: Int,
+    val pendingWeakenAt: String?,
+)
+
 data class PolicyChange(
     val applied: Boolean,
     val pendingUntil: String?,
@@ -25,14 +34,29 @@ class PolicyRepository
         private val auth: AuthDataStore,
         private val errors: ErrorMapper,
     ) {
-        suspend fun level(): AppResult<AcademicLevel?> {
+        suspend fun policy(): AppResult<SubjectPolicy> {
             val subject = auth.current().subjectId ?: return AppResult.Failure(ApiError.Unauthorized)
-            return call { api.policy(subject) }.map { AcademicLevel.fromWire(it.academicLevel) }
+            return call { api.policy(subject) }.map { dto ->
+                SubjectPolicy(
+                    level = AcademicLevel.fromWire(dto.academicLevel),
+                    language = dto.questionLanguage.orEmpty(),
+                    questionsPerSession = dto.questionsPerSession,
+                    dayResetHour = dto.dayResetHour,
+                    idleDaysAllowed = dto.idleDaysAllowed,
+                    pendingWeakenAt = dto.pendingWeakenAt,
+                )
+            }
         }
 
-        suspend fun setLevel(level: AcademicLevel): AppResult<PolicyChange> {
+        suspend fun setLevel(level: AcademicLevel): AppResult<PolicyChange> = patch(PolicyPatchDto(academicLevel = level.wire))
+
+        suspend fun setLanguage(language: String): AppResult<PolicyChange> = patch(PolicyPatchDto(questionLanguage = language))
+
+        suspend fun setQuestionsPerSession(count: Int): AppResult<PolicyChange> = patch(PolicyPatchDto(questionsPerSession = count))
+
+        private suspend fun patch(body: PolicyPatchDto): AppResult<PolicyChange> {
             val subject = auth.current().subjectId ?: return AppResult.Failure(ApiError.Unauthorized)
-            return call { api.update(subject, PolicyPatchDto(academicLevel = level.wire)) }
+            return call { api.update(subject, body) }
                 .map { PolicyChange(applied = it.applied, pendingUntil = it.pendingUntil, message = it.message) }
         }
 
