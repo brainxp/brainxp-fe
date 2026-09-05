@@ -4,10 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brainxp.data.prefs.SettingsDataStore
 import com.example.brainxp.data.repo.RestrictionRepository
+import com.example.brainxp.domain.GuardedAction
+import com.example.brainxp.domain.ParentLock
 import com.example.brainxp.domain.UnlockSessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -29,7 +33,13 @@ class RootViewModel
         private val settings: SettingsDataStore,
         private val restrictions: RestrictionRepository,
         private val unlocks: UnlockSessionManager,
+        private val parentLock: ParentLock,
     ) : ViewModel() {
+        private val mutablePinRequired = MutableStateFlow<GuardedAction?>(null)
+        val pinRequired: StateFlow<GuardedAction?> = mutablePinRequired.asStateFlow()
+
+        private var pinVerified = false
+
         val state: StateFlow<RootUiState> =
             settings.settings
                 .map { snapshot ->
@@ -45,14 +55,37 @@ class RootViewModel
         }
 
         fun resetSetup() {
-            viewModelScope.launch { settings.setOnboardingComplete(false) }
+            viewModelScope.launch {
+                if (!parentLock.allows(GuardedAction.SWITCH_MODE, pinVerified = pinVerified)) {
+                    mutablePinRequired.value = GuardedAction.SWITCH_MODE
+                    return@launch
+                }
+                settings.setOnboardingComplete(false)
+            }
         }
 
         fun toggleProtection() {
             viewModelScope.launch {
                 val current = settings.settings.first().protectionEnabled
+                if (current && !parentLock.allows(GuardedAction.DISABLE_PROTECTION, pinVerified = pinVerified)) {
+                    mutablePinRequired.value = GuardedAction.DISABLE_PROTECTION
+                    return@launch
+                }
                 settings.setProtectionEnabled(!current)
             }
+        }
+
+        fun submitPin(pin: String) {
+            viewModelScope.launch {
+                if (parentLock.verify(pin)) {
+                    pinVerified = true
+                    mutablePinRequired.value = null
+                }
+            }
+        }
+
+        fun dismissPin() {
+            mutablePinRequired.value = null
         }
 
         fun grantDebugUnlock(durationSeconds: Int) {

@@ -9,8 +9,10 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.example.brainxp.domain.model.DeviceRole
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
@@ -33,6 +35,8 @@ data class SettingsSnapshot(
     val detector: DetectorChoice = DetectorChoice.USAGE_STATS,
     val protectionEnabled: Boolean = false,
     val warningLeadSeconds: Int = DEFAULT_WARNING_LEAD_SECONDS,
+    val role: DeviceRole = DeviceRole.PARENT,
+    val parentPinHash: String? = null,
 )
 
 const val DEFAULT_WARNING_LEAD_SECONDS = 60
@@ -58,8 +62,14 @@ class SettingsDataStore(
                             ?: DetectorChoice.USAGE_STATS,
                     protectionEnabled = prefs[KEY_PROTECTION] ?: false,
                     warningLeadSeconds = prefs[KEY_WARNING_LEAD] ?: DEFAULT_WARNING_LEAD_SECONDS,
+                    role = prefs[KEY_ROLE]?.toEnum(DeviceRole.PARENT) ?: DeviceRole.PARENT,
+                    parentPinHash = prefs[KEY_PARENT_PIN],
                 )
             }
+
+    suspend fun setRole(role: DeviceRole) {
+        store.edit { it[KEY_ROLE] = role.name }
+    }
 
     suspend fun setMode(mode: AppMode) {
         store.edit { it[KEY_MODE] = mode.name }
@@ -106,6 +116,8 @@ class SettingsDataStore(
         val KEY_DETECTOR = stringPreferencesKey("detector")
         val KEY_PROTECTION = booleanPreferencesKey("protection_enabled")
         val KEY_WARNING_LEAD = intPreferencesKey("warning_lead_seconds")
+        val KEY_ROLE = stringPreferencesKey("device_role")
+        val KEY_PARENT_PIN = stringPreferencesKey("parent_pin_hash")
 
         fun from(context: Context): DataStore<Preferences> = context.settingsStore
     }

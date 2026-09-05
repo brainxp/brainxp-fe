@@ -6,6 +6,8 @@ import com.example.brainxp.blocking.InstalledApp
 import com.example.brainxp.blocking.InstalledAppsSource
 import com.example.brainxp.blocking.SystemCriticalFilter
 import com.example.brainxp.data.repo.RestrictionRepository
+import com.example.brainxp.domain.GuardedAction
+import com.example.brainxp.domain.ParentLock
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +20,9 @@ data class AppPickerUiState(
     val query: String = "",
     val apps: List<InstalledApp> = emptyList(),
     val restricted: Set<String> = emptySet(),
+    val pinRequired: Boolean = false,
+    val pinVerified: Boolean = false,
+    val pinWrong: Boolean = false,
 ) {
     val visible: List<InstalledApp>
         get() =
@@ -33,6 +38,7 @@ class AppPickerViewModel
     @Inject
     constructor(
         private val source: InstalledAppsSource,
+        private val parentLock: ParentLock,
         private val restrictions: RestrictionRepository,
     ) : ViewModel() {
         private val mutableState = MutableStateFlow(AppPickerUiState())
@@ -50,7 +56,29 @@ class AppPickerViewModel
 
         fun onToggle(packageName: String) {
             val enabled = packageName !in mutableState.value.restricted
-            viewModelScope.launch { restrictions.setRestricted(packageName, enabled) }
+            viewModelScope.launch {
+                if (!parentLock.allows(GuardedAction.CHANGE_RESTRICTIONS, pinVerified = mutableState.value.pinVerified)) {
+                    mutableState.value = mutableState.value.copy(pinRequired = true)
+                    return@launch
+                }
+                restrictions.setRestricted(packageName, enabled)
+            }
+        }
+
+        fun submitPin(pin: String) {
+            viewModelScope.launch {
+                val ok = parentLock.verify(pin)
+                mutableState.value =
+                    mutableState.value.copy(
+                        pinVerified = ok,
+                        pinRequired = !ok,
+                        pinWrong = !ok,
+                    )
+            }
+        }
+
+        fun dismissPin() {
+            mutableState.value = mutableState.value.copy(pinRequired = false, pinWrong = false)
         }
 
         private fun load() {
