@@ -26,7 +26,7 @@ sealed interface OnboardingRoute : NavKey {
     data object PermissionSetup : OnboardingRoute
 
     @Serializable
-    data object OcrPrepare : OnboardingRoute
+    data object SetupDone : OnboardingRoute
 }
 
 @Serializable
@@ -59,11 +59,6 @@ sealed interface MainRoute : NavKey {
     @Serializable
     data class Rejected(
         val materialId: String,
-    ) : MainRoute
-
-    @Serializable
-    data class OcrReview(
-        val draftId: String,
     ) : MainRoute
 
     @Serializable

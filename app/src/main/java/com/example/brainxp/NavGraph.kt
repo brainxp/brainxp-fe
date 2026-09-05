@@ -25,7 +25,6 @@ import androidx.navigation3.runtime.NavKey
 import com.example.brainxp.core.capture.CameraSession
 import com.example.brainxp.core.ui.PlaceholderAction
 import com.example.brainxp.core.ui.PlaceholderScreen
-import com.example.brainxp.feature.DRAFT_ID
 import com.example.brainxp.feature.SAMPLE_ASSESSED_LEVEL
 import com.example.brainxp.feature.SAMPLE_DECLARED_LEVEL
 import com.example.brainxp.feature.SAMPLE_ESTIMATE_SECONDS
@@ -40,8 +39,6 @@ import com.example.brainxp.feature.apps.AppPickerRoute
 import com.example.brainxp.feature.capture.CameraCaptureScreen
 import com.example.brainxp.feature.capture.CaptureMethod
 import com.example.brainxp.feature.capture.CaptureViewModel
-import com.example.brainxp.feature.capture.OcrReviewScreen
-import com.example.brainxp.feature.capture.OcrReviewViewModel
 import com.example.brainxp.feature.capture.PickSourceScreen
 import com.example.brainxp.feature.capture.PickSourceViewModel
 import com.example.brainxp.feature.capture.PreparingScreen
@@ -69,8 +66,6 @@ import com.example.brainxp.feature.library.LibraryEffect
 import com.example.brainxp.feature.library.LibraryScreen
 import com.example.brainxp.feature.library.LibraryViewModel
 import com.example.brainxp.feature.onboarding.DeviceRole
-import com.example.brainxp.feature.onboarding.OcrPrepareScreen
-import com.example.brainxp.feature.onboarding.OcrPrepareViewModel
 import com.example.brainxp.feature.onboarding.PickModeScreen
 import com.example.brainxp.feature.onboarding.PickRoleScreen
 import com.example.brainxp.feature.onboarding.SetupMode
@@ -142,18 +137,13 @@ internal fun EntryProviderScope<NavKey>.onboardingTailEntries(
 ) {
     entry<OnboardingRoute.PermissionSetup> {
         PermissionSetupRoute(
-            onDone = { backStack.add(OnboardingRoute.OcrPrepare) },
+            onDone = { backStack.add(OnboardingRoute.SetupDone) },
         )
     }
-    entry<OnboardingRoute.OcrPrepare> {
-        val viewModel: OcrPrepareViewModel = hiltViewModel()
-        val modelState by viewModel.state.collectAsStateWithLifecycle()
-
-        OcrPrepareScreen(
-            state = modelState,
-            onRetry = viewModel::prepare,
-            onDone = onSetupComplete,
-        )
+    entry<OnboardingRoute.SetupDone> {
+        Placeholder("Selesai", "OnboardingRoute.SetupDone") {
+            listOf(PlaceholderAction("Finish setup", onSetupComplete))
+        }
     }
 }
 
@@ -274,7 +264,10 @@ internal fun EntryProviderScope<NavKey>.cameraEntries(backStack: NavBackStack<Na
             },
             onDelete = viewModel::delete,
             onMove = viewModel::move,
-            onContinue = { backStack.add(MainRoute.OcrReview(DRAFT_ID)) },
+            onContinue = {
+                viewModel.uploadAll()
+                backStack.popOrIgnore()
+            },
         )
     }
 }
@@ -286,7 +279,7 @@ internal fun EntryProviderScope<NavKey>.captureEntries(backStack: NavBackStack<N
 
         PickSourceScreen(
             rejection = rejection?.let { stringResource(it) },
-            onPicked = { uri -> picker.accept(uri) { backStack.add(MainRoute.OcrReview(DRAFT_ID)) } },
+            onPicked = { uri -> picker.accept(uri) { backStack.popOrIgnore() } },
             questionCount = SAMPLE_QUESTION_COUNT,
             estimatedRewardSeconds = SAMPLE_ESTIMATE_SECONDS,
             onBack = { backStack.popOrIgnore() },
@@ -313,25 +306,6 @@ internal fun EntryProviderScope<NavKey>.captureEntries(backStack: NavBackStack<N
             reason = SAMPLE_REJECT_REASON,
             onBack = { backStack.popOrIgnore() },
             onRetry = { backStack.popOrIgnore() },
-        )
-    }
-}
-
-internal fun EntryProviderScope<NavKey>.reviewEntries(backStack: NavBackStack<NavKey>) {
-    entry<MainRoute.OcrReview> { key ->
-        val review: OcrReviewViewModel = hiltViewModel()
-        val reviewState by review.state.collectAsStateWithLifecycle()
-
-        LaunchedEffect(key.draftId) {
-            review.start(key.draftId)
-        }
-
-        OcrReviewScreen(
-            state = reviewState,
-            onBack = { backStack.popOrIgnore() },
-            onEdit = review::edit,
-            onGoTo = review::goTo,
-            onUpload = { backStack.add(MainRoute.Preparing(SAMPLE_MATERIAL_ID)) },
         )
     }
 }
@@ -426,7 +400,6 @@ private fun DebugDestinations(
                 action("Materials", backStack, MainRoute.MaterialList),
                 action("Capture", backStack, MainRoute.Capture),
                 action("Camera", backStack, MainRoute.CameraCapture),
-                action("OCR review", backStack, MainRoute.OcrReview(DRAFT_ID)),
                 action("Rejected", backStack, MainRoute.Rejected(SAMPLE_MATERIAL_ID)),
                 action("Receipt", backStack, MainRoute.Results("session-1")),
                 action("History", backStack, MainRoute.History),

@@ -112,7 +112,6 @@ private fun MainNavHost(
                 debugEntries(backStack, onResetSetup, onToggleProtection, debug)
                 cameraEntries(backStack)
                 captureEntries(backStack)
-                reviewEntries(backStack)
                 learningEntries(backStack)
                 familyEntries(backStack)
             },

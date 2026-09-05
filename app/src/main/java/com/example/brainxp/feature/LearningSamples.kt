@@ -9,7 +9,6 @@ internal const val SAMPLE_QUESTION_COUNT = 6
 internal const val SAMPLE_ESTIMATE_SECONDS = 1_140
 internal const val SAMPLE_READY_QUESTIONS = 3
 internal const val SAMPLE_MATERIAL_ID = "material-1"
-internal const val DRAFT_ID = "draft-current"
 internal const val SAMPLE_MATERIAL_NAME = "Bab 4 — Gerak Lurus.pdf"
 internal const val SAMPLE_ASSESSED_LEVEL = "SD kelas 4"
 internal const val SAMPLE_DECLARED_LEVEL = "SMA kelas 11"
