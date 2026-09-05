@@ -137,9 +137,7 @@ private fun ApiError.bodyText(): String =
         }
 
         is ApiError.Unknown -> {
-            message
-                ?: code?.let { stringResource(R.string.error_unknown_body_code, it) }
-                ?: stringResource(R.string.error_unknown_body)
+            message ?: stringResource(R.string.error_unknown_body)
         }
 
         else -> {

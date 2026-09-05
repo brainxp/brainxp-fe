@@ -56,7 +56,7 @@ fun ScreenNav(
 }
 
 private val BAR = 46.dp
-private val TAP = 34.dp
+private val TAP = 48.dp
 private const val TITLE_SHARE = 0.7f
 
 @Composable

@@ -368,7 +368,7 @@ private fun LockedApps(
 }
 
 private val PILL_ICON = 13.dp
-private val NAV_TAP = 34.dp
+private val NAV_TAP = 48.dp
 
 private val PREVIEW_OPTIONS = listOf(300, 600, 900)
 private const val PREVIEW_BUDGET_MILLIS = 900_000L

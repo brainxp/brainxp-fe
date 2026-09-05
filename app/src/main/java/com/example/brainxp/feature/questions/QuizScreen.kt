@@ -191,15 +191,23 @@ private fun QuestionDots(
             val done = question.id in state.answers
             val here = index == state.index
 
-            Surface(
+            Box(
                 modifier =
                     Modifier
-                        .size(DOT)
-                        .clickable { onEvent(QuizEvent.Jump(index)) },
-                shape = PillShape,
-                color = if (done) scheme.primary else scheme.surfaceContainerHigh,
-                border = if (here) BorderStroke(RING, scheme.primary) else null,
-            ) {}
+                        .size(DOT_TAP)
+                        .clickable(
+                            onClickLabel = stringResource(R.string.quiz_jump_to, index + 1),
+                            onClick = { onEvent(QuizEvent.Jump(index)) },
+                        ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Surface(
+                    modifier = Modifier.size(DOT),
+                    shape = PillShape,
+                    color = if (done) scheme.primary else scheme.surfaceContainerHigh,
+                    border = if (here) BorderStroke(RING, scheme.primary) else null,
+                ) {}
+            }
         }
     }
 }
@@ -296,6 +304,7 @@ private fun OptionRow(
 private const val LETTERS = "ABCDEF"
 private val TRACK = 6.dp
 private val DOT = 12.dp
+private val DOT_TAP = 48.dp
 private val DOT_GAP = 6.dp
 private val RING = 1.5.dp
 private val HAIRLINE = 1.dp

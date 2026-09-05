@@ -2,6 +2,7 @@ package com.example.brainxp
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.brainxp.data.prefs.AuthDataStore
 import com.example.brainxp.data.prefs.SettingsDataStore
 import com.example.brainxp.data.repo.RestrictionRepository
 import com.example.brainxp.domain.GuardedAction
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -35,6 +37,7 @@ class RootViewModel
         private val restrictions: RestrictionRepository,
         private val unlocks: UnlockSessionManager,
         private val parentLock: ParentLock,
+        private val auth: AuthDataStore,
     ) : ViewModel() {
         private val mutablePinRequired = MutableStateFlow<GuardedAction?>(null)
         val pinRequired: StateFlow<GuardedAction?> = mutablePinRequired.asStateFlow()
@@ -47,14 +50,17 @@ class RootViewModel
                 .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
         val state: StateFlow<RootUiState> =
-            settings.settings
-                .map { snapshot ->
-                    if (snapshot.onboardingComplete) RootUiState.Main else RootUiState.Onboarding
-                }.stateIn(
-                    scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT_MS),
-                    initialValue = RootUiState.Loading,
-                )
+            combine(settings.settings, auth.auth) { snapshot, session ->
+                when {
+                    !snapshot.onboardingComplete -> RootUiState.Onboarding
+                    !session.isAuthenticated -> RootUiState.Onboarding
+                    else -> RootUiState.Main
+                }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT_MS),
+                initialValue = RootUiState.Loading,
+            )
 
         fun markSetupComplete() {
             viewModelScope.launch { settings.setOnboardingComplete(true) }
