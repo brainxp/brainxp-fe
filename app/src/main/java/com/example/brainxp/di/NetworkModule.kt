@@ -3,6 +3,7 @@ package com.example.brainxp.di
 import com.example.brainxp.core.network.AuthApi
 import com.example.brainxp.core.network.AuthInterceptor
 import com.example.brainxp.core.network.AuthTokenStore
+import com.example.brainxp.core.network.FamilyApi
 import com.example.brainxp.core.network.MaterialApi
 import com.example.brainxp.core.network.NetworkTokenRefresher
 import com.example.brainxp.core.network.PersistentAuthTokenStore
@@ -49,6 +50,10 @@ object NetworkModule {
     @Provides
     @Singleton
     fun providePolicyApi(retrofit: Retrofit): PolicyApi = retrofit.create(PolicyApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideFamilyApi(retrofit: Retrofit): FamilyApi = retrofit.create(FamilyApi::class.java)
 
     @Provides
     @Singleton

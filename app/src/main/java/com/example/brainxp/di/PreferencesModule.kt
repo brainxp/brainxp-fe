@@ -3,6 +3,7 @@ package com.example.brainxp.di
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import com.example.brainxp.core.device.InstallBinding
 import com.example.brainxp.data.prefs.AuthDataStore
 import com.example.brainxp.data.prefs.DataStoreRewardCache
 import com.example.brainxp.data.prefs.RewardCache
@@ -24,6 +25,19 @@ object PreferencesModule {
     fun provideSettingsStore(
         @ApplicationContext context: Context,
     ): DataStore<Preferences> = SettingsDataStore.from(context)
+
+    @Provides
+    @Singleton
+    @Named("deviceStore")
+    fun provideDeviceStore(
+        @ApplicationContext context: Context,
+    ): DataStore<Preferences> = InstallBinding.from(context)
+
+    @Provides
+    @Singleton
+    fun provideInstallBinding(
+        @Named("deviceStore") store: DataStore<Preferences>,
+    ): InstallBinding = InstallBinding(store)
 
     @Provides
     @Singleton

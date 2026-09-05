@@ -6,6 +6,7 @@ import com.example.brainxp.data.repo.AppLabels
 import com.example.brainxp.data.repo.ConsumptionReporter
 import com.example.brainxp.data.repo.FamilyRepository
 import com.example.brainxp.data.repo.MaterialRepository
+import com.example.brainxp.data.repo.NetworkFamilyRepository
 import com.example.brainxp.data.repo.NetworkMaterialRepository
 import com.example.brainxp.data.repo.NetworkRewardRepository
 import com.example.brainxp.data.repo.RestrictionRepository
@@ -15,7 +16,6 @@ import com.example.brainxp.data.repo.RoomActivityLogRepository
 import com.example.brainxp.data.repo.RoomRestrictionRepository
 import com.example.brainxp.data.repo.RoomUnlockRepository
 import com.example.brainxp.data.repo.UnlockRepository
-import com.example.brainxp.data.repo.fake.FakeFamilyRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -40,7 +40,7 @@ interface RepositoryModule {
     fun bindAppLabels(impl: InstalledAppsSource): AppLabels
 
     @Binds
-    fun bindFamilyRepository(impl: FakeFamilyRepository): FamilyRepository
+    fun bindFamilyRepository(impl: NetworkFamilyRepository): FamilyRepository
 
     @Binds
     fun bindUnlockRepository(impl: RoomUnlockRepository): UnlockRepository

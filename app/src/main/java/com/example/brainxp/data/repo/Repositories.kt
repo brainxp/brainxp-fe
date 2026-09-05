@@ -1,16 +1,18 @@
 package com.example.brainxp.data.repo
 
 import com.example.brainxp.core.result.AppResult
+import com.example.brainxp.domain.model.AcademicLevel
 import com.example.brainxp.domain.model.ActivityEvent
-import com.example.brainxp.domain.model.ChildConfig
 import com.example.brainxp.domain.model.ConsumptionEntry
+import com.example.brainxp.domain.model.DeviceBinding
 import com.example.brainxp.domain.model.FamilyChild
+import com.example.brainxp.domain.model.GuardianStatus
 import com.example.brainxp.domain.model.LedgerDirection
 import com.example.brainxp.domain.model.LedgerEntry
 import com.example.brainxp.domain.model.Material
 import com.example.brainxp.domain.model.MaterialPage
 import com.example.brainxp.domain.model.MaterialType
-import com.example.brainxp.domain.model.PairingResult
+import com.example.brainxp.domain.model.PairingCode
 import com.example.brainxp.domain.model.Progress
 import com.example.brainxp.domain.model.Report
 import com.example.brainxp.domain.model.RestrictedApp
@@ -73,10 +75,17 @@ interface ActivityLogRepository {
 interface FamilyRepository {
     suspend fun children(): AppResult<List<FamilyChild>>
 
-    suspend fun pair(code: String): AppResult<PairingResult>
+    suspend fun createChild(
+        name: String,
+        level: AcademicLevel,
+        language: String,
+    ): AppResult<FamilyChild>
 
-    suspend fun updateConfig(
-        childId: String,
-        config: ChildConfig,
-    ): AppResult<ChildConfig>
+    suspend fun pairingCode(childId: String): AppResult<PairingCode>
+
+    suspend fun pair(code: String): AppResult<Unit>
+
+    suspend fun checkBinding(): AppResult<DeviceBinding>
+
+    suspend fun reportHealth(status: GuardianStatus): AppResult<Unit>
 }
