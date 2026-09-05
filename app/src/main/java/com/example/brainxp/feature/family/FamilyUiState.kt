@@ -159,7 +159,7 @@ private fun List<Int>.cycled(
 private val CAP_STEPS = listOf(0, 30, 60, 90, 120, 180)
 private val GRANT_STEPS = listOf(0, 15, 30, 60)
 
-const val MAX_QUESTIONS_PER_SESSION = 12
+const val MAX_QUESTIONS_PER_SESSION = 10
 const val MAX_IDLE_DAYS = 14
 const val MAX_RESET_HOUR = 23
 private const val PERCENT = 100

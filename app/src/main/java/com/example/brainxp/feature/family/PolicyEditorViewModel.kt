@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.result.AppResult
+import com.example.brainxp.data.repo.FamilyRepository
 import com.example.brainxp.data.repo.PolicyRepository
 import com.example.brainxp.data.repo.SubjectPolicy
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,6 +31,7 @@ class PolicyEditorViewModel
     @Inject
     constructor(
         private val policies: PolicyRepository,
+        private val family: FamilyRepository,
     ) : ViewModel() {
         private val mutableState = MutableStateFlow(PolicyEditorLoad())
         val state: StateFlow<PolicyEditorLoad> = mutableState.asStateFlow()
@@ -69,9 +71,17 @@ class PolicyEditorViewModel
             subjectId: String,
             childName: String,
         ) {
+            val resolved =
+                childName.ifBlank {
+                    (family.children() as? AppResult.Success)
+                        ?.value
+                        ?.firstOrNull { child -> child.childId == subjectId }
+                        ?.name
+                        .orEmpty()
+                }
             mutableState.update {
                 when (val result = policies.policy(subjectId)) {
-                    is AppResult.Success -> it.copy(policy = result.value.toUiState(childName), loading = false)
+                    is AppResult.Success -> it.copy(policy = result.value.toUiState(resolved), loading = false)
                     is AppResult.Failure -> it.copy(loading = false, error = result.error)
                 }
             }

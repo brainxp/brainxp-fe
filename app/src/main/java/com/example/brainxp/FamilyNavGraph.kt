@@ -1,5 +1,6 @@
 package com.example.brainxp
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -10,6 +11,7 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.example.brainxp.core.ui.ErrorState
 import com.example.brainxp.core.ui.LoadingState
+import com.example.brainxp.core.ui.Note
 import com.example.brainxp.feature.family.BalanceAdjustScreen
 import com.example.brainxp.feature.family.BalanceAdjustViewModel
 import com.example.brainxp.feature.family.ChildReportScreen
@@ -128,11 +130,15 @@ private fun ChildPolicyEntry(
         }
 
         else -> {
-            PolicyEditorScreen(
-                state = policy,
-                onBack = { backStack.popOrIgnore() },
-                onEvent = viewModel::onEvent,
-            )
+            Column {
+                load.error?.let { failure -> ErrorState(error = failure) }
+                load.notice?.let { text -> Note(text = text, alert = true) }
+                PolicyEditorScreen(
+                    state = policy,
+                    onBack = { backStack.popOrIgnore() },
+                    onEvent = viewModel::onEvent,
+                )
+            }
         }
     }
 }
