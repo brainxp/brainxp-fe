@@ -17,6 +17,9 @@ fun QuestionDto.toQuestion(): Question =
                 conceptIds = emptyList(),
                 stem = stem,
                 options = options.orEmpty(),
+                difficulty = difficulty,
+                factor = typeFactor * difficultyFactor,
+                sourceExcerpt = sourceExcerpt,
             )
         }
 
@@ -25,6 +28,10 @@ fun QuestionDto.toQuestion(): Question =
                 id = id,
                 conceptIds = emptyList(),
                 stem = stem,
+                difficulty = difficulty,
+                factor = typeFactor * difficultyFactor,
+                sourceExcerpt = sourceExcerpt,
+                rubricCriteria = rubricCriteria.orEmpty().size,
             )
         }
 
@@ -39,6 +46,7 @@ fun QuestionDto.toQuestion(): Question =
 
 fun QuizDto.toSession(): QuestionSession =
     QuestionSession(
+        title = title,
         sessionId = sessionId,
         materialId = materialId,
         mode = SessionMode.NEW,

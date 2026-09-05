@@ -14,6 +14,9 @@ sealed interface Question {
         override val conceptIds: List<String>,
         val stem: String,
         val options: List<String>,
+        val difficulty: String = "",
+        val factor: Double = 1.0,
+        val sourceExcerpt: String? = null,
     ) : Question
 
     data class TrueFalse(
@@ -26,6 +29,10 @@ sealed interface Question {
         override val id: String,
         override val conceptIds: List<String>,
         val stem: String,
+        val difficulty: String = "",
+        val factor: Double = 1.0,
+        val sourceExcerpt: String? = null,
+        val rubricCriteria: Int = 0,
     ) : Question
 
     data class Unsupported(
@@ -37,6 +44,7 @@ sealed interface Question {
 
 data class QuestionSession(
     val sessionId: String,
+    val title: String? = null,
     val materialId: String,
     val mode: SessionMode,
     val questions: List<Question>,
