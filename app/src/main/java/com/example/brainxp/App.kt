@@ -6,6 +6,7 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.Configuration
 import com.example.brainxp.blocking.ProtectionController
 import com.example.brainxp.core.permission.PermissionResumeObserver
+import com.example.brainxp.data.repo.SessionRestorer
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
@@ -22,11 +23,15 @@ class App :
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
+    @Inject
+    lateinit var sessionRestorer: SessionRestorer
+
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder().setWorkerFactory(workerFactory).build()
 
     override fun onCreate() {
         super.onCreate()
+        sessionRestorer.restore()
         ProcessLifecycleOwner.get().lifecycle.addObserver(permissionResumeObserver)
         protectionController.start()
     }
