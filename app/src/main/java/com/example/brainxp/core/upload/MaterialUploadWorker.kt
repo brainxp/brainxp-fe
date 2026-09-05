@@ -76,6 +76,7 @@ class MaterialUploadWorker
         @Assisted context: Context,
         @Assisted params: WorkerParameters,
         private val materials: MaterialRepository,
+        private val preparation: MaterialPreparation,
     ) : CoroutineWorker(context, params) {
         override suspend fun doWork(): Result {
             val path = inputData.getString(KEY_CACHED_PATH) ?: return Result.failure()
@@ -92,6 +93,7 @@ class MaterialUploadWorker
             return when (val result = materials.upload(title, type, path)) {
                 is AppResult.Success -> {
                     file.delete()
+                    preparation.watch(result.value.id)
                     Result.success()
                 }
 

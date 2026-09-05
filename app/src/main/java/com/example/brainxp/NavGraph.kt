@@ -43,6 +43,7 @@ import com.example.brainxp.feature.capture.PickSourceScreen
 import com.example.brainxp.feature.capture.PickSourceViewModel
 import com.example.brainxp.feature.capture.PreparingScreen
 import com.example.brainxp.feature.capture.PreparingStage
+import com.example.brainxp.feature.capture.PreparingViewModel
 import com.example.brainxp.feature.capture.RejectedScreen
 import com.example.brainxp.feature.debug.DebugUnlockPanel
 import com.example.brainxp.feature.family.BalanceAdjustScreen
@@ -299,6 +300,8 @@ internal fun EntryProviderScope<NavKey>.cameraEntries(backStack: NavBackStack<Na
     }
 }
 
+private const val PENDING_MATERIAL = "pending"
+
 internal fun EntryProviderScope<NavKey>.captureEntries(backStack: NavBackStack<NavKey>) {
     entry<MainRoute.Capture> {
         val picker: PickSourceViewModel = hiltViewModel()
@@ -306,7 +309,7 @@ internal fun EntryProviderScope<NavKey>.captureEntries(backStack: NavBackStack<N
 
         PickSourceScreen(
             rejection = rejection?.let { stringResource(it) },
-            onPicked = { uri -> picker.accept(uri) { backStack.popOrIgnore() } },
+            onPicked = { uri -> picker.accept(uri) { backStack.add(MainRoute.Preparing(PENDING_MATERIAL)) } },
             questionCount = SAMPLE_QUESTION_COUNT,
             estimatedRewardSeconds = SAMPLE_ESTIMATE_SECONDS,
             onBack = { backStack.popOrIgnore() },
@@ -318,12 +321,26 @@ internal fun EntryProviderScope<NavKey>.captureEntries(backStack: NavBackStack<N
             },
         )
     }
-    entry<MainRoute.Preparing> { key ->
+    entry<MainRoute.Preparing> {
+        val viewModel: PreparingViewModel = hiltViewModel()
+        val state by viewModel.state.collectAsStateWithLifecycle()
+
+        LaunchedEffect(state.rejected) {
+            if (state.rejected) {
+                viewModel.done()
+                backStack.add(MainRoute.Rejected(state.materialId ?: PENDING_MATERIAL))
+            }
+        }
+
         PreparingScreen(
-            materialName = SAMPLE_MATERIAL_NAME,
-            stage = PreparingStage.PARTIAL,
-            readyQuestions = SAMPLE_READY_QUESTIONS,
-            onStart = { backStack.add(MainRoute.Questions(key.materialId)) },
+            materialName = state.materialName,
+            stage = state.stage,
+            readyQuestions = state.readyQuestions,
+            onStart = {
+                val id = state.materialId ?: return@PreparingScreen
+                viewModel.done()
+                backStack.add(MainRoute.Questions(id))
+            },
         )
     }
     entry<MainRoute.Rejected> {
