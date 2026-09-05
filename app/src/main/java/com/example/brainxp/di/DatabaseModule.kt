@@ -8,6 +8,7 @@ import com.example.brainxp.data.db.BrainXPDatabase
 import com.example.brainxp.data.db.MIGRATION_1_2
 import com.example.brainxp.data.db.MIGRATION_2_3
 import com.example.brainxp.data.db.MIGRATION_3_4
+import com.example.brainxp.data.db.MIGRATION_4_5
 import com.example.brainxp.data.db.MaterialDao
 import com.example.brainxp.data.db.PendingOperationDao
 import com.example.brainxp.data.db.QuestionDao
@@ -31,7 +32,7 @@ object DatabaseModule {
     ): BrainXPDatabase =
         Room
             .databaseBuilder(context, BrainXPDatabase::class.java, BrainXPDatabase.NAME)
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
             .build()
 
     @Provides

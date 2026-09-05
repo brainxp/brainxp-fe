@@ -25,22 +25,10 @@ data class Material(
     val assessedLevel: String? = null,
     val declaredLevel: String? = null,
     val gateReason: String? = null,
+    val topicSummary: String? = null,
 )
 
 data class MaterialPage(
     val items: List<Material>,
     val nextCursor: String?,
-)
-
-data class MaterialDetail(
-    val material: Material,
-    val sessions: List<SessionSummary>,
-)
-
-data class SessionSummary(
-    val sessionId: String,
-    val mode: SessionMode,
-    val createdAt: Long,
-    val score: Double?,
-    val rewardSeconds: Int?,
 )

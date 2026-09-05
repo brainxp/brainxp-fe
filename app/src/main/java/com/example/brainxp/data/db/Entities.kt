@@ -17,6 +17,7 @@ data class MaterialEntity(
     val assessedLevel: String? = null,
     val declaredLevel: String? = null,
     val gateReason: String? = null,
+    val topicSummary: String? = null,
 )
 
 @Entity(

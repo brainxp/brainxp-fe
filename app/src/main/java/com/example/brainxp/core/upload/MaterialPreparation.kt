@@ -88,7 +88,7 @@ class MaterialPreparation
 
                 when (val result = materials.detail(materialId)) {
                     is AppResult.Success -> {
-                        val material = result.value.material
+                        val material = result.value
                         if (settled(material.status)) {
                             mutableState.value = PreparationState.Settled(material)
                             return

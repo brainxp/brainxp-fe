@@ -11,7 +11,6 @@ import com.example.brainxp.data.db.MaterialDao
 import com.example.brainxp.data.db.MaterialEntity
 import com.example.brainxp.data.prefs.AuthDataStore
 import com.example.brainxp.domain.model.Material
-import com.example.brainxp.domain.model.MaterialDetail
 import com.example.brainxp.domain.model.MaterialPage
 import com.example.brainxp.domain.model.MaterialStatus
 import com.example.brainxp.domain.model.MaterialType
@@ -60,12 +59,12 @@ class NetworkMaterialRepository
             return call { api.library(subject) }.map { rows ->
                 val items = rows.map(MaterialDto::toMaterial)
                 dao.upsert(items.map(Material::toEntity))
+                dao.keepOnly(items.map(Material::id))
                 MaterialPage(items = items, nextCursor = null)
             }
         }
 
-        override suspend fun detail(materialId: String): AppResult<MaterialDetail> =
-            detailOf(materialId).map { MaterialDetail(material = it, sessions = emptyList()) }
+        override suspend fun detail(materialId: String): AppResult<Material> = detailOf(materialId)
 
         override suspend fun delete(materialId: String): AppResult<Unit> =
             call { api.delete(materialId) }.map { dao.deleteById(materialId) }
@@ -115,6 +114,7 @@ internal fun MaterialDto.toMaterial(): Material =
         assessedLevel = assessedLevel,
         declaredLevel = declaredLevel,
         gateReason = gateReason,
+        topicSummary = topicSummary,
     )
 
 private fun statusOf(raw: String): MaterialStatus =
@@ -138,6 +138,7 @@ private fun Material.toEntity(): MaterialEntity =
         assessedLevel = assessedLevel,
         declaredLevel = declaredLevel,
         gateReason = gateReason,
+        topicSummary = topicSummary,
     )
 
 private fun MaterialEntity.toMaterial(): Material =
@@ -152,6 +153,7 @@ private fun MaterialEntity.toMaterial(): Material =
         assessedLevel = assessedLevel,
         declaredLevel = declaredLevel,
         gateReason = gateReason,
+        topicSummary = topicSummary,
     )
 
 private const val FALLBACK_TITLE = "Materi"

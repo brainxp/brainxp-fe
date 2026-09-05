@@ -77,11 +77,10 @@ class FakeRepositoriesTest {
         }
 
     @Test
-    fun materialDetailReturnsSessionsAndFailsForUnknownId() =
+    fun materialDetailReturnsTheMaterialAndFailsForUnknownId() =
         runTest {
             val detail = success(materials.detail("mat-1"))
-            assertEquals("mat-1", detail.material.id)
-            assertTrue(detail.sessions.isNotEmpty())
+            assertEquals("mat-1", detail.id)
 
             assertTrue(failure(materials.detail("nope")) is ApiError.Unknown)
 

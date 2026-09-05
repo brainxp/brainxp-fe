@@ -10,7 +10,6 @@ import com.example.brainxp.domain.model.GenerationJob
 import com.example.brainxp.domain.model.LedgerDirection
 import com.example.brainxp.domain.model.LedgerEntry
 import com.example.brainxp.domain.model.Material
-import com.example.brainxp.domain.model.MaterialDetail
 import com.example.brainxp.domain.model.MaterialPage
 import com.example.brainxp.domain.model.MaterialType
 import com.example.brainxp.domain.model.PairingResult
@@ -31,7 +30,7 @@ interface MaterialRepository {
 
     suspend fun page(cursor: String?): AppResult<MaterialPage>
 
-    suspend fun detail(materialId: String): AppResult<MaterialDetail>
+    suspend fun detail(materialId: String): AppResult<Material>
 
     suspend fun delete(materialId: String): AppResult<Unit>
 

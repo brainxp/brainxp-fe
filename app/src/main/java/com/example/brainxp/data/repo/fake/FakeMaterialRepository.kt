@@ -4,7 +4,6 @@ import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.result.AppResult
 import com.example.brainxp.data.repo.MaterialRepository
 import com.example.brainxp.domain.model.Material
-import com.example.brainxp.domain.model.MaterialDetail
 import com.example.brainxp.domain.model.MaterialPage
 import com.example.brainxp.domain.model.MaterialStatus
 import com.example.brainxp.domain.model.MaterialType
@@ -61,13 +60,13 @@ class FakeMaterialRepository
                 cache.value = cache.value.filterNot { it.id == materialId }
             }
 
-        override suspend fun detail(materialId: String): AppResult<MaterialDetail> {
+        override suspend fun detail(materialId: String): AppResult<Material> {
             val material =
                 cache.value.firstOrNull { it.id == materialId }
                     ?: return AppResult.Failure(ApiError.Unknown(NOT_FOUND, "material $materialId"))
 
             return backend.respond(FakeBackend.MATERIAL_DETAIL) {
-                MaterialDetail(material = material, sessions = FakeData.sessionSummaries(materialId))
+                material
             }
         }
 

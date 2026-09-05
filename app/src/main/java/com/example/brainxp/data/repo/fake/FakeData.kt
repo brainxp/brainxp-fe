@@ -13,7 +13,6 @@ import com.example.brainxp.domain.model.Progress
 import com.example.brainxp.domain.model.Question
 import com.example.brainxp.domain.model.RestrictedApp
 import com.example.brainxp.domain.model.SessionMode
-import com.example.brainxp.domain.model.SessionSummary
 
 internal object FakeData {
     const val DAY_MILLIS = 86_400_000L
@@ -57,20 +56,6 @@ internal object FakeData {
                 sessionCount = 2,
             ),
         )
-
-    fun sessionSummaries(materialId: String): List<SessionSummary> =
-        when (materialId) {
-            "mat-1" -> {
-                listOf(
-                    SessionSummary("ses-1", SessionMode.NEW, now - DAY_MILLIS, SCORE_HIGH, REWARD_HIGH_SECONDS),
-                    SessionSummary("ses-2", SessionMode.REVIEW, now - 2 * DAY_MILLIS, SCORE_LOW, REWARD_LOW_SECONDS),
-                )
-            }
-
-            else -> {
-                emptyList()
-            }
-        }
 
     fun questions(): List<Question> =
         listOf(
@@ -145,8 +130,6 @@ internal object FakeData {
             rewardPerSessionMinutes = DEFAULT_REWARD_MINUTES,
         )
 
-    private const val SCORE_HIGH = 0.8
-    private const val SCORE_LOW = 0.6
     private const val UNLOCK_STARTED_AGO = 90 * MINUTE_MILLIS
     private const val REWARD_EARNED_AGO = 95 * MINUTE_MILLIS
 
@@ -177,8 +160,6 @@ internal object FakeData {
     private const val TOTAL_ESSAYS = 3
     private const val SAMPLE_FREEZE_TOKENS = 1
     private const val SESSION_DONE_AGO = 96 * MINUTE_MILLIS
-    private const val REWARD_HIGH_SECONDS = 900
-    private const val REWARD_LOW_SECONDS = 600
     private const val RANI_MINUTES = 25
     private const val RANI_SESSIONS = 6
     private const val RANI_ACCURACY = 0.78

@@ -47,3 +47,10 @@ val MIGRATION_3_4 =
             db.execSQL("ALTER TABLE `materials_new` RENAME TO `materials`")
         }
     }
+
+val MIGRATION_4_5 =
+    object : Migration(4, 5) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE `materials` ADD COLUMN `topicSummary` TEXT")
+        }
+    }

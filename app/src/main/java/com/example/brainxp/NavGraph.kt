@@ -71,6 +71,8 @@ import com.example.brainxp.feature.home.HomeViewModel
 import com.example.brainxp.feature.library.LibraryEffect
 import com.example.brainxp.feature.library.LibraryScreen
 import com.example.brainxp.feature.library.LibraryViewModel
+import com.example.brainxp.feature.library.MaterialDetailScreen
+import com.example.brainxp.feature.library.MaterialDetailViewModel
 import com.example.brainxp.feature.onboarding.DeviceRole
 import com.example.brainxp.feature.onboarding.LevelScreen
 import com.example.brainxp.feature.onboarding.LevelViewModel
@@ -382,11 +384,7 @@ internal fun EntryProviderScope<NavKey>.learningEntries(backStack: NavBackStack<
             onBack = { backStack.popOrIgnore() },
         )
     }
-    entry<MainRoute.MaterialDetail> { key ->
-        Placeholder("Material detail", "materialId = ${key.materialId}") {
-            listOf(action("Start session", backStack, MainRoute.Questions(key.materialId)))
-        }
-    }
+    entry<MainRoute.MaterialDetail> { key -> MaterialDetailEntry(key, backStack) }
     entry<MainRoute.Questions> { key -> QuestionsEntry(key, backStack) }
     entry<MainRoute.Results> {
         ReceiptScreen(
@@ -552,3 +550,36 @@ private fun reasonText(code: String?): String =
         code.contains(' ') -> code
         else -> stringResource(R.string.reject_reason_unknown)
     }
+
+@Composable
+private fun MaterialDetailEntry(
+    key: MainRoute.MaterialDetail,
+    backStack: NavBackStack<NavKey>,
+) {
+    val viewModel: MaterialDetailViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(key.materialId) { viewModel.load(key.materialId) }
+    LaunchedEffect(state.deleted) { if (state.deleted) backStack.popOrIgnore() }
+
+    val material = state.material
+    when {
+        state.error != null && material == null -> {
+            ErrorState(error = state.error!!, onRetry = viewModel::retry)
+        }
+
+        material == null -> {
+            LoadingState()
+        }
+
+        else -> {
+            MaterialDetailScreen(
+                material = material,
+                onStart = { backStack.add(MainRoute.Questions(key.materialId)) },
+                onDelete = viewModel::delete,
+                onBack = { backStack.popOrIgnore() },
+                deleting = state.deleting,
+            )
+        }
+    }
+}
