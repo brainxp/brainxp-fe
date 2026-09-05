@@ -1,5 +1,7 @@
 package com.example.brainxp.feature.family
 
+import com.example.brainxp.domain.model.AcademicLevel
+
 internal val SAMPLE_FAMILY =
     FamilyHomeUiState(
         children =

@@ -48,6 +48,18 @@
     <string name="signin_password">Kata sandi</string>
     <string name="signin_password_hint">Minimal 10 karakter</string>
     <string name="signin_submit_login">Masuk</string>
+    <string name="level_title">Jenjang</string>
+    <string name="level_heading">Kamu ada di jenjang apa?</string>
+    <string name="level_body">Ini menentukan seberapa dalam soal yang dibuat dari materimu.</string>
+    <string name="level_sd">SD</string>
+    <string name="level_smp">SMP</string>
+    <string name="level_sma">SMA</string>
+    <string name="level_kuliah">Kuliah</string>
+    <string name="level_umum">Umum</string>
+    <string name="level_note">Jenjang dipakai untuk menolak materi yang jauh di bawah kemampuanmu, bukan untuk membatasi apa yang boleh kamu pelajari.</string>
+    <string name="level_submit">Lanjut</string>
+    <string name="level_error_session_title">Sesi berakhir</string>
+    <string name="level_error_session_body">Masuk ulang untuk melanjutkan.</string>
     <string name="signin_error_credentials_title">Email atau sandi salah</string>
     <string name="signin_error_credentials_body">Periksa lagi email dan kata sandinya, lalu coba sekali lagi.</string>
     <string name="signin_submit_register">Daftar</string>
@@ -435,9 +447,6 @@ kehilangan kontak.</string>
     <string name="adjust_apply_grant">Tambah %1$s</string>
     <string name="adjust_apply_redeem">Kurangi %1$s</string>
 
-    <string name="level_sd">SD</string>
-    <string name="level_smp">SMP</string>
-    <string name="level_sma">SMA</string>
     <string name="lang_id">Indonesia</string>
     <string name="lang_en">Inggris</string>
     <string name="camera_title">Foto catatan</string>

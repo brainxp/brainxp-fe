@@ -1,10 +1,6 @@
 package com.example.brainxp.feature.family
 
-enum class AcademicLevel {
-    SD,
-    SMP,
-    SMA,
-}
+import com.example.brainxp.domain.model.AcademicLevel
 
 enum class QuestionLanguage {
     ID,

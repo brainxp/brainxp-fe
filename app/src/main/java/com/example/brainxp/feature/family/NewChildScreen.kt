@@ -28,6 +28,8 @@ import com.example.brainxp.core.ui.PrimaryButton
 import com.example.brainxp.core.ui.ScreenNav
 import com.example.brainxp.core.ui.SegmentedControl
 import com.example.brainxp.core.ui.StatusPill
+import com.example.brainxp.core.ui.levelLabel
+import com.example.brainxp.domain.model.AcademicLevel
 
 @Composable
 fun NewChildScreen(

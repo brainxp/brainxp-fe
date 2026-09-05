@@ -30,7 +30,9 @@ import com.example.brainxp.core.ui.PillTone
 import com.example.brainxp.core.ui.RowGroup
 import com.example.brainxp.core.ui.ScreenNav
 import com.example.brainxp.core.ui.StatusPill
+import com.example.brainxp.core.ui.levelLabel
 import com.example.brainxp.core.ui.shortDuration
+import com.example.brainxp.domain.model.AcademicLevel
 
 @Composable
 fun FamilyHomeScreen(
@@ -145,16 +147,6 @@ internal fun RowIcon(vector: ImageVector) {
         tint = MaterialTheme.colorScheme.onSurfaceVariant,
     )
 }
-
-@Composable
-internal fun levelLabel(level: AcademicLevel): String =
-    stringResource(
-        when (level) {
-            AcademicLevel.SD -> R.string.level_sd
-            AcademicLevel.SMP -> R.string.level_smp
-            AcademicLevel.SMA -> R.string.level_sma
-        },
-    )
 
 @Preview(name = "FamilyHome", showBackground = true, heightDp = 900)
 @Composable
