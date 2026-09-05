@@ -37,8 +37,20 @@ import com.example.brainxp.feature.capture.PreparingScreen
 import com.example.brainxp.feature.capture.PreparingStage
 import com.example.brainxp.feature.capture.RejectedScreen
 import com.example.brainxp.feature.debug.DebugUnlockPanel
+import com.example.brainxp.feature.family.BalanceAdjustScreen
+import com.example.brainxp.feature.family.ChildReportScreen
+import com.example.brainxp.feature.family.FamilyHomeScreen
+import com.example.brainxp.feature.family.NewChildScreen
 import com.example.brainxp.feature.family.PAIRING_CODE_LENGTH
 import com.example.brainxp.feature.family.PairDeviceScreen
+import com.example.brainxp.feature.family.PairingCodeScreen
+import com.example.brainxp.feature.family.PolicyEditorScreen
+import com.example.brainxp.feature.family.PolicyEvent
+import com.example.brainxp.feature.family.SAMPLE_FAMILY
+import com.example.brainxp.feature.family.SAMPLE_PAIRING_CODE
+import com.example.brainxp.feature.family.SAMPLE_POLICY
+import com.example.brainxp.feature.family.SAMPLE_REPORT
+import com.example.brainxp.feature.family.stepped
 import com.example.brainxp.feature.home.HomeEffect
 import com.example.brainxp.feature.home.HomeScreen
 import com.example.brainxp.feature.home.HomeViewModel
@@ -305,22 +317,61 @@ internal fun EntryProviderScope<NavKey>.learningEntries(backStack: NavBackStack<
 
 internal fun EntryProviderScope<NavKey>.familyEntries(backStack: NavBackStack<NavKey>) {
     entry<MainRoute.FamilyHome> {
-        Placeholder("Family", "MainRoute.FamilyHome") {
-            listOf(
-                action("Pair a device", backStack, MainRoute.FamilyPairing),
-                action("Open child", backStack, MainRoute.FamilyChild("child-1")),
-            )
-        }
+        FamilyHomeScreen(
+            state = SAMPLE_FAMILY,
+            onBack = { backStack.popOrIgnore() },
+            onOpenChild = { backStack.add(MainRoute.FamilyChild(it)) },
+            onNewChild = { backStack.add(MainRoute.FamilyNewChild) },
+            onSelfRules = { backStack.add(MainRoute.FamilyChildPolicy("self")) },
+            onJoinRules = { backStack.add(MainRoute.FamilyChildPolicy("self")) },
+        )
+    }
+    entry<MainRoute.FamilyNewChild> {
+        NewChildScreen(
+            onBack = { backStack.popOrIgnore() },
+            onCreated = { _, _, _ -> backStack.add(MainRoute.FamilyChildPolicy("child-new")) },
+        )
     }
     entry<MainRoute.FamilyChild> { key ->
-        Placeholder("Child detail", "childId = ${key.childId}") {
-            listOf(action("Edit policy", backStack, MainRoute.FamilyChildPolicy(key.childId)))
-        }
+        ChildReportScreen(
+            state = SAMPLE_REPORT,
+            onBack = { backStack.popOrIgnore() },
+            onEditPolicy = { backStack.add(MainRoute.FamilyChildPolicy(key.childId)) },
+            onIssueCode = { backStack.add(MainRoute.FamilyPairing(key.childId)) },
+            onAdjustBalance = { backStack.add(MainRoute.FamilyBalance(key.childId)) },
+            onRemove = { backStack.popOrIgnore() },
+        )
     }
     entry<MainRoute.FamilyChildPolicy> { key ->
-        Placeholder("Child policy", "childId = ${key.childId}")
+        var policy by remember { mutableStateOf(SAMPLE_POLICY) }
+
+        PolicyEditorScreen(
+            state = policy,
+            onBack = { backStack.popOrIgnore() },
+            onEvent = { event ->
+                when (event) {
+                    PolicyEvent.Save -> backStack.add(MainRoute.FamilyPairing(key.childId))
+                    else -> policy = policy.stepped(event)
+                }
+            },
+        )
     }
-    entry<MainRoute.FamilyPairing> { Placeholder("Pairing", "MainRoute.FamilyPairing") }
+    entry<MainRoute.FamilyPairing> {
+        PairingCodeScreen(
+            state = SAMPLE_PAIRING_CODE,
+            onBack = { backStack.popOrIgnore() },
+            onDone = { backStack.popOrIgnore() },
+        )
+    }
+    entry<MainRoute.FamilyBalance> {
+        BalanceAdjustScreen(
+            subjectName = SAMPLE_REPORT.subjectName,
+            balanceSeconds = SAMPLE_REPORT.balanceSeconds,
+            idleDaysAllowed = SAMPLE_POLICY.idleDaysAllowed,
+            onBack = { backStack.popOrIgnore() },
+            onApply = { _, _, _ -> backStack.popOrIgnore() },
+        )
+    }
 }
 
 @Composable
@@ -359,6 +410,10 @@ private fun DebugDestinations(
                 action("Progress", backStack, MainRoute.Progress),
                 action("Activity log", backStack, MainRoute.ActivityLog),
                 action("Family", backStack, MainRoute.FamilyHome),
+                action("New child", backStack, MainRoute.FamilyNewChild),
+                action("Child policy", backStack, MainRoute.FamilyChildPolicy("child-1")),
+                action("Pairing code", backStack, MainRoute.FamilyPairing("child-1")),
+                action("Balance adjust", backStack, MainRoute.FamilyBalance("child-1")),
                 action("Settings", backStack, MainRoute.Settings),
                 action("Sesi uji", backStack, MainRoute.DebugUnlock),
                 PlaceholderAction("Toggle protection", onToggleProtection),
