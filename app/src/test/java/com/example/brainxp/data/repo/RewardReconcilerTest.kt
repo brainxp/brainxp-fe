@@ -10,6 +10,7 @@ import com.example.brainxp.domain.model.ConsumptionEntry
 import com.example.brainxp.domain.model.LedgerDirection
 import com.example.brainxp.domain.model.LedgerEntry
 import com.example.brainxp.domain.model.Progress
+import com.example.brainxp.domain.model.Report
 import com.example.brainxp.domain.model.Standing
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,13 +26,11 @@ private fun standing(balanceSeconds: Int) =
     Standing(
         balanceSeconds = balanceSeconds,
         playableSeconds = balanceSeconds,
-        ceilingSeconds = 7_200,
         dailyCapSeconds = 5_400,
         spentTodaySeconds = 0,
         secondsUntilReset = 18_000,
         blockReason = BlockReason.NONE,
         streakCurrent = 0,
-        points = 0,
         freezeTokens = 0,
     )
 
@@ -56,6 +55,19 @@ private class StubRewardRepository : RewardRepository {
     override suspend fun reportConsumption(entries: List<ConsumptionEntry>): AppResult<Standing> = result
 
     override suspend fun history(): AppResult<List<LedgerEntry>> = AppResult.Success(emptyList())
+
+    override suspend fun report(days: Int): AppResult<Report> =
+        AppResult.Success(
+            Report(
+                standing = standing(0),
+                days = emptyList(),
+                materialsStudied = 0,
+                correctTotal = 0,
+                essayPassed = 0,
+                recent = emptyList(),
+                guardianAlerts = emptyList(),
+            ),
+        )
 
     override suspend fun adjust(
         direction: LedgerDirection,

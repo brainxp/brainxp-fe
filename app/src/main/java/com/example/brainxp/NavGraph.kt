@@ -32,6 +32,8 @@ import com.example.brainxp.domain.model.AcademicLevel
 import com.example.brainxp.feature.SAMPLE_ESTIMATE_SECONDS
 import com.example.brainxp.feature.SAMPLE_MATERIAL_ID
 import com.example.brainxp.feature.SAMPLE_QUESTION_COUNT
+import com.example.brainxp.feature.activity.ActivityLogScreen
+import com.example.brainxp.feature.activity.ActivityLogViewModel
 import com.example.brainxp.feature.apps.AppPickerRoute
 import com.example.brainxp.feature.capture.CameraCaptureScreen
 import com.example.brainxp.feature.capture.CaptureMethod
@@ -58,6 +60,8 @@ import com.example.brainxp.feature.family.SAMPLE_PAIRING_CODE
 import com.example.brainxp.feature.family.SAMPLE_POLICY
 import com.example.brainxp.feature.family.SAMPLE_REPORT
 import com.example.brainxp.feature.family.stepped
+import com.example.brainxp.feature.history.HistoryScreen
+import com.example.brainxp.feature.history.HistoryViewModel
 import com.example.brainxp.feature.home.HomeEffect
 import com.example.brainxp.feature.home.HomeScreen
 import com.example.brainxp.feature.home.HomeViewModel
@@ -219,7 +223,7 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(
         }
     }
     entry<MainRoute.AppPicker> { AppPickerRoute() }
-    entry<MainRoute.History> { Placeholder("History", "MainRoute.History") }
+    entry<MainRoute.History> { HistoryEntry(backStack) }
     entry<MainRoute.Progress> {
         val viewModel: ProgressViewModel = hiltViewModel()
         val progressState by viewModel.state.collectAsStateWithLifecycle()
@@ -230,7 +234,7 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(
             onBack = { backStack.popOrIgnore() },
         )
     }
-    entry<MainRoute.ActivityLog> { Placeholder("Activity log", "MainRoute.ActivityLog") }
+    entry<MainRoute.ActivityLog> { ActivityLogEntry(backStack) }
     entry<MainRoute.Settings> {
         Placeholder("Settings", "MainRoute.Settings") {
             listOf(
@@ -603,4 +607,24 @@ private fun ReceiptEntry(
             )
         }
     }
+}
+
+@Composable
+private fun HistoryEntry(backStack: NavBackStack<NavKey>) {
+    val viewModel: HistoryViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    when {
+        state.error != null -> ErrorState(error = state.error!!, onRetry = viewModel::retry)
+        state.loading -> LoadingState()
+        else -> HistoryScreen(entries = state.entries, onBack = { backStack.popOrIgnore() })
+    }
+}
+
+@Composable
+private fun ActivityLogEntry(backStack: NavBackStack<NavKey>) {
+    val viewModel: ActivityLogViewModel = hiltViewModel()
+    val events by viewModel.events.collectAsStateWithLifecycle()
+
+    ActivityLogScreen(events = events, onBack = { backStack.popOrIgnore() })
 }

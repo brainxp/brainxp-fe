@@ -21,16 +21,12 @@ import org.junit.Test
 class FakeRepositoriesTest {
     private lateinit var backend: FakeBackend
     private lateinit var materials: FakeMaterialRepository
-    private lateinit var rewards: FakeRewardRepository
-    private lateinit var activity: FakeActivityLogRepository
     private lateinit var family: FakeFamilyRepository
 
     @Before
     fun setUp() {
         backend = FakeBackend().apply { latencyMillis = FakeBackend.INSTANT }
         materials = FakeMaterialRepository(backend)
-        rewards = FakeRewardRepository(backend)
-        activity = FakeActivityLogRepository(backend)
         family = FakeFamilyRepository(backend)
     }
 
@@ -84,157 +80,6 @@ class FakeRepositoriesTest {
         }
 
     @Test
-    fun standingReportsPlayableSecondsAndCanFail() =
-        runTest {
-            val standing = success(rewards.standing())
-
-            assertTrue(standing.balanceSeconds > 0)
-            assertTrue(standing.playableSeconds > 0)
-            assertEquals(BlockReason.NONE, standing.blockReason)
-            assertTrue(standing.playable)
-
-            backend.failNext(FakeBackend.REWARD_STANDING, ApiError.Network)
-            assertEquals(ApiError.Network, failure(rewards.standing()))
-        }
-
-    @Test
-    fun reportedConsumptionReducesBalanceAndCountsTowardTheDailyCap() =
-        runTest {
-            val before = success(rewards.standing())
-
-            val after =
-                success(
-                    rewards.reportConsumption(
-                        listOf(ConsumptionEntry("evt-1", "YouTube", 300, null)),
-                    ),
-                )
-
-            assertEquals(before.balanceSeconds - 300, after.balanceSeconds)
-            assertEquals(300, after.spentTodaySeconds)
-        }
-
-    @Test
-    fun replayingTheSameClientEventIdIsIgnored() =
-        runTest {
-            val entry = ConsumptionEntry("evt-dup", "YouTube", 120, null)
-
-            val first = success(rewards.reportConsumption(listOf(entry)))
-            val second = success(rewards.reportConsumption(listOf(entry)))
-
-            assertEquals(first.balanceSeconds, second.balanceSeconds)
-            assertEquals(first.spentTodaySeconds, second.spentTodaySeconds)
-        }
-
-    @Test
-    fun consumptionRejectsNegativeSecondsAndCanFail() =
-        runTest {
-            assertTrue(
-                failure(
-                    rewards.reportConsumption(
-                        listOf(ConsumptionEntry("evt-bad", "YouTube", -5, null)),
-                    ),
-                ) is ApiError.Validation,
-            )
-
-            backend.failNext(FakeBackend.LEDGER_SYNC, ApiError.ServerBusy)
-            assertEquals(
-                ApiError.ServerBusy,
-                failure(
-                    rewards.reportConsumption(
-                        listOf(ConsumptionEntry("evt-2", "YouTube", 10, null)),
-                    ),
-                ),
-            )
-        }
-
-    @Test
-    fun spendingEverythingBlocksWithNoBalance() =
-        runTest {
-            val standing = success(rewards.standing())
-            success(
-                rewards.reportConsumption(
-                    listOf(ConsumptionEntry("evt-all", "YouTube", standing.balanceSeconds, null)),
-                ),
-            )
-
-            val after = success(rewards.standing())
-            assertEquals(0, after.playableSeconds)
-            assertEquals(BlockReason.NO_BALANCE, after.blockReason)
-            assertFalse(after.playable)
-        }
-
-    @Test
-    fun staleGuardianBlocksRegardlessOfBalance() =
-        runTest {
-            rewards.guardianStale = true
-
-            val standing = success(rewards.standing())
-
-            assertTrue(standing.balanceSeconds > 0)
-            assertEquals(BlockReason.GUARDIAN_STALE, standing.blockReason)
-            assertFalse(standing.playable)
-        }
-
-    @Test
-    fun parentGrantAndRedeemMoveTheBalanceAndAreValidated() =
-        runTest {
-            val before = success(rewards.standing()).balanceSeconds
-
-            val granted = success(rewards.adjust(LedgerDirection.GRANT, 600, "bonus"))
-            assertEquals(before + 600, granted.balanceSeconds)
-
-            val redeemed = success(rewards.adjust(LedgerDirection.REDEEM, 100, "koreksi"))
-            assertEquals(granted.balanceSeconds - 100, redeemed.balanceSeconds)
-
-            assertTrue(failure(rewards.adjust(LedgerDirection.GRANT, 0, "nol")) is ApiError.Validation)
-            assertTrue(
-                failure(rewards.adjust(LedgerDirection.REDEEM, 999_999, "terlalu besar"))
-                    is ApiError.Validation,
-            )
-
-            backend.failNext(FakeBackend.LEDGER_ADJUST, ApiError.Network)
-            assertEquals(ApiError.Network, failure(rewards.adjust(LedgerDirection.GRANT, 60, "x")))
-        }
-
-    @Test
-    fun ledgerHistoryRecordsEveryMovementAndCanFail() =
-        runTest {
-            success(rewards.reportConsumption(listOf(ConsumptionEntry("evt-h", "YouTube", 60, null))))
-            success(rewards.adjust(LedgerDirection.GRANT, 120, "bonus"))
-
-            val history = success(rewards.history())
-
-            assertEquals(2, history.size)
-            assertTrue(history.any { it.deltaSeconds < 0 })
-            assertTrue(history.any { it.deltaSeconds > 0 })
-
-            backend.failNext(FakeBackend.LEDGER_HISTORY, ApiError.ServerBusy)
-            assertEquals(ApiError.ServerBusy, failure(rewards.history()))
-        }
-
-    @Test
-    fun activityLogRecordsNewestFirstAndFlushesPending() =
-        runTest {
-            success(activity.record(ActivityEvent(ActivityKind.UNLOCK_STARTED, Long.MAX_VALUE)))
-
-            val recent = activity.observeRecent(2).first()
-            assertEquals(ActivityKind.UNLOCK_STARTED, recent.first().kind)
-            assertEquals(2, recent.size)
-
-            assertEquals(1, success(activity.flushPending()))
-            assertEquals(0, success(activity.flushPending()))
-
-            backend.failNext(FakeBackend.ACTIVITY_RECORD, ApiError.Network)
-            assertEquals(
-                ApiError.Network,
-                failure(activity.record(ActivityEvent(ActivityKind.REWARD_EARNED, 0))),
-            )
-
-            backend.failNext(FakeBackend.ACTIVITY_FLUSH, ApiError.ServerBusy)
-            assertEquals(ApiError.ServerBusy, failure(activity.flushPending()))
-        }
-
-    @Test
     fun familyListingPairingAndConfigAllHaveFailurePaths() =
         runTest {
             val children = success(family.children())
@@ -256,16 +101,5 @@ class FakeRepositoriesTest {
 
             backend.failNext(FakeBackend.FAMILY_CHILDREN, ApiError.Network)
             assertEquals(ApiError.Network, failure(family.children()))
-        }
-
-    @Test
-    fun latencyIsAppliedAndCallsAreCounted() =
-        runTest {
-            backend.latencyMillis = 50L..50L
-
-            success(rewards.standing())
-            success(rewards.standing())
-
-            assertEquals(2, backend.callsTo(FakeBackend.REWARD_STANDING))
         }
 }

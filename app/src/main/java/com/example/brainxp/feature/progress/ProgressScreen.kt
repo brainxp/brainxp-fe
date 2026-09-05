@@ -26,6 +26,8 @@ import com.example.brainxp.core.ui.BrainXPTheme
 import com.example.brainxp.core.ui.ErrorState
 import com.example.brainxp.core.ui.HeroCard
 import com.example.brainxp.core.ui.LoadingState
+import com.example.brainxp.core.ui.MiniBarChart
+import com.example.brainxp.core.ui.Note
 import com.example.brainxp.core.ui.PillShape
 import com.example.brainxp.core.ui.RowGroup
 import com.example.brainxp.core.ui.ScreenNav
@@ -66,14 +68,17 @@ fun ProgressScreen(
             }
 
             ProgressUiState.Phase.Ready -> {
-                state.progress?.let { ReadyProgress(progress = it) }
+                state.progress?.let { ReadyProgress(progress = it, state = state) }
             }
         }
     }
 }
 
 @Composable
-private fun ReadyProgress(progress: Progress) {
+private fun ReadyProgress(
+    progress: Progress,
+    state: ProgressUiState,
+) {
     val spacing = BrainXPTheme.spacing
 
     HeroCard(
@@ -81,6 +86,16 @@ private fun ReadyProgress(progress: Progress) {
         value = progress.streakCurrent.toString(),
         unit = stringResource(R.string.progress_days),
     )
+
+    if (state.chartWorthShowing) {
+        MiniBarChart(
+            values = state.days.map { it.earnedSeconds / SECONDS_PER_MINUTE },
+            title = stringResource(R.string.progress_chart_title),
+            caption = stringResource(R.string.progress_chart_caption, state.activeDays),
+        )
+    } else {
+        Note(text = stringResource(R.string.progress_chart_too_early, MIN_ACTIVE_DAYS_FOR_CHART))
+    }
 
     RowGroup {
         item(
@@ -223,3 +238,5 @@ private fun ProgressPreview() {
         )
     }
 }
+
+private const val SECONDS_PER_MINUTE = 60

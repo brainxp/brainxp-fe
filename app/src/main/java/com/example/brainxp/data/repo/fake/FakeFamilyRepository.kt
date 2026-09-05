@@ -18,32 +18,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class FakeActivityLogRepository
-    @Inject
-    constructor(
-        private val backend: FakeBackend,
-    ) : ActivityLogRepository {
-        private val log = MutableStateFlow(FakeData.activityLog())
-        private var pending = 0
-
-        override fun observeRecent(limit: Int): Flow<List<ActivityEvent>> =
-            log.asStateFlow().map { events -> events.sortedByDescending { it.timestamp }.take(limit) }
-
-        override suspend fun record(event: ActivityEvent): AppResult<Unit> =
-            backend.respond(FakeBackend.ACTIVITY_RECORD) {
-                log.update { listOf(event) + it }
-                pending++
-            }
-
-        override suspend fun flushPending(): AppResult<Int> =
-            backend.respond(FakeBackend.ACTIVITY_FLUSH) {
-                val flushed = pending
-                pending = 0
-                flushed
-            }
-    }
-
-@Singleton
 class FakeFamilyRepository
     @Inject
     constructor(
