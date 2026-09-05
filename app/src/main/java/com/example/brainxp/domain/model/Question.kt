@@ -19,12 +19,6 @@ sealed interface Question {
         val sourceExcerpt: String? = null,
     ) : Question
 
-    data class TrueFalse(
-        override val id: String,
-        override val conceptIds: List<String>,
-        val stem: String,
-    ) : Question
-
     data class ShortAnswer(
         override val id: String,
         override val conceptIds: List<String>,

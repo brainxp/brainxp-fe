@@ -65,11 +65,6 @@ internal object FakeData {
                 stem = "Sebuah mobil bergerak 60 km/jam selama 2 jam. Berapa jarak tempuhnya?",
                 options = listOf("30 km", "60 km", "120 km", "180 km"),
             ),
-            Question.TrueFalse(
-                id = "q-2",
-                conceptIds = listOf("kinematika", "kecepatan"),
-                stem = "Kecepatan rata-rata selalu sama dengan kecepatan sesaat.",
-            ),
             Question.ShortAnswer(
                 id = "q-3",
                 conceptIds = listOf("percepatan"),

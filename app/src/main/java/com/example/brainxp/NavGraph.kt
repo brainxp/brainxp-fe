@@ -484,7 +484,10 @@ private fun QuestionsEntry(
                         }
 
                         QuizEvent.Submit -> {
-                            load.sessionId?.let { backStack.add(MainRoute.Results(it)) }
+                            load.sessionId?.let { sessionId ->
+                                backStack.popOrIgnore()
+                                backStack.add(MainRoute.Results(sessionId))
+                            }
                         }
                     }
                 },
