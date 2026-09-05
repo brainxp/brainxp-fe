@@ -64,6 +64,8 @@ import com.example.brainxp.feature.library.LibraryEffect
 import com.example.brainxp.feature.library.LibraryScreen
 import com.example.brainxp.feature.library.LibraryViewModel
 import com.example.brainxp.feature.onboarding.DeviceRole
+import com.example.brainxp.feature.onboarding.OcrPrepareScreen
+import com.example.brainxp.feature.onboarding.OcrPrepareViewModel
 import com.example.brainxp.feature.onboarding.PickModeScreen
 import com.example.brainxp.feature.onboarding.PickRoleScreen
 import com.example.brainxp.feature.onboarding.SetupMode
@@ -78,10 +80,7 @@ import com.example.brainxp.feature.questions.recordAnswer
 import com.example.brainxp.feature.results.ReceiptScreen
 import kotlinx.coroutines.launch
 
-internal fun EntryProviderScope<NavKey>.onboardingEntries(
-    backStack: NavBackStack<NavKey>,
-    onSetupComplete: () -> Unit,
-) {
+internal fun EntryProviderScope<NavKey>.onboardingEntries(backStack: NavBackStack<NavKey>) {
     entry<OnboardingRoute.Welcome> {
         WelcomeScreen(onStart = { backStack.add(OnboardingRoute.ModeSelect) })
     }
@@ -130,15 +129,26 @@ internal fun EntryProviderScope<NavKey>.onboardingEntries(
             onDelete = { digits = digits.dropLast(1) },
         )
     }
+}
+
+internal fun EntryProviderScope<NavKey>.onboardingTailEntries(
+    backStack: NavBackStack<NavKey>,
+    onSetupComplete: () -> Unit,
+) {
     entry<OnboardingRoute.PermissionSetup> {
         PermissionSetupRoute(
             onDone = { backStack.add(OnboardingRoute.OcrPrepare) },
         )
     }
     entry<OnboardingRoute.OcrPrepare> {
-        Placeholder("OCR prepare", "OnboardingRoute.OcrPrepare") {
-            listOf(PlaceholderAction("Finish setup", onSetupComplete))
-        }
+        val viewModel: OcrPrepareViewModel = hiltViewModel()
+        val modelState by viewModel.state.collectAsStateWithLifecycle()
+
+        OcrPrepareScreen(
+            state = modelState,
+            onRetry = viewModel::prepare,
+            onDone = onSetupComplete,
+        )
     }
 }
 

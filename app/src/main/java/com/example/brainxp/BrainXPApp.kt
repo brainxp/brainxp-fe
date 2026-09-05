@@ -78,7 +78,11 @@ private fun OnboardingNavHost(
         modifier = modifier,
         onBack = { backStack.popOrIgnore() },
         entryDecorators = defaultDecorators(),
-        entryProvider = entryProvider { onboardingEntries(backStack, onSetupComplete) },
+        entryProvider =
+            entryProvider {
+                onboardingEntries(backStack)
+                onboardingTailEntries(backStack, onSetupComplete)
+            },
     )
 }
 

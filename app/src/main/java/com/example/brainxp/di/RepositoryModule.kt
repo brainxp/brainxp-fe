@@ -1,5 +1,7 @@
 package com.example.brainxp.di
 
+import com.example.brainxp.core.ocr.MlKitOcrEngine
+import com.example.brainxp.core.ocr.OcrEngine
 import com.example.brainxp.data.repo.ActivityLogRepository
 import com.example.brainxp.data.repo.ConsumptionReporter
 import com.example.brainxp.data.repo.FamilyRepository
@@ -47,4 +49,7 @@ interface RepositoryModule {
 
     @Binds
     fun bindConsumptionReporter(impl: RewardReconciler): ConsumptionReporter
+
+    @Binds
+    fun bindOcrEngine(impl: MlKitOcrEngine): OcrEngine
 }
