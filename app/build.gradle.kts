@@ -62,8 +62,6 @@ dependencies {
     implementation(libs.androidx.exifinterface)
     implementation(libs.androidx.hilt.work)
     implementation(libs.androidx.work.runtime.ktx)
-    implementation(libs.play.services.base)
-    implementation(libs.play.services.mlkit.text.recognition)
     implementation(libs.icons.lucide)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.hilt.navigation.compose)
