@@ -2,7 +2,6 @@ package com.example.brainxp.feature.capture
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,7 +19,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.composables.icons.lucide.Camera
 import com.composables.icons.lucide.FileText
-import com.composables.icons.lucide.Image
 import com.composables.icons.lucide.Lucide
 import com.example.brainxp.R
 import com.example.brainxp.core.capture.DOCUMENT_MIME_TYPES
@@ -42,11 +40,6 @@ fun PickSourceScreen(
     rejection: String? = null,
 ) {
     val spacing = BrainXPTheme.spacing
-
-    val pickImage =
-        rememberLauncherForActivityResult(
-            ActivityResultContracts.PickVisualMedia(),
-        ) { uri -> uri?.let(onPicked) }
 
     val pickDocument =
         rememberLauncherForActivityResult(
@@ -96,16 +89,6 @@ fun PickSourceScreen(
                 icon = Lucide.Camera,
                 highlight = true,
                 onClick = { onPick(CaptureMethod.PHOTO) },
-            )
-            ChoiceRow(
-                title = stringResource(R.string.source_gallery),
-                subtitle = stringResource(R.string.source_gallery_sub),
-                icon = Lucide.Image,
-                onClick = {
-                    pickImage.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
-                    )
-                },
             )
             ChoiceRow(
                 title = stringResource(R.string.source_document),

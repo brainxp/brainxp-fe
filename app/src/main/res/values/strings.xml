@@ -275,7 +275,7 @@ kehilangan kontak.</string>
     <string name="source_photo">Foto catatan</string>
     <string name="source_photo_sub">Buku, papan tulis, tulisan tangan. Rumus dan diagram terbaca.</string>
     <string name="source_document">Kirim dokumen</string>
-    <string name="source_document_sub">PDF, DOCX, PPTX, ODT, ODP, TXT — sampai 32 MB.</string>
+    <string name="source_document_sub">PDF, DOCX, PPTX, TXT, atau foto yang sudah ada — sampai 32 MB.</string>
     <string name="source_note">Materi diproses layanan AI dan tidak dipakai melatih model. Materi yang sama diunggah ulang tetap boleh dipelajari, tapi hadiahnya menurun.</string>
 
     <string name="preparing_title">Menyiapkan soal</string>
@@ -450,8 +450,6 @@ kehilangan kontak.</string>
     <string name="camera_move_right">Geser ke kanan</string>
     <string name="camera_delete_page">Hapus halaman</string>
 
-    <string name="source_gallery">Pilih dari galeri</string>
-    <string name="source_gallery_sub">Foto yang sudah ada. Tidak perlu izin akses penyimpanan.</string>
     <string name="source_too_large">Berkasnya lebih dari 32 MB. Pilih yang lebih kecil.</string>
     <string name="source_unreadable">Berkasnya tidak bisa dibaca. Coba pilih ulang.</string>
 </resources>

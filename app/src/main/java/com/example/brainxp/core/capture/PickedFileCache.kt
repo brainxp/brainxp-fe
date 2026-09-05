@@ -42,6 +42,9 @@ val DOCUMENT_MIME_TYPES =
         "application/vnd.oasis.opendocument.presentation",
         "text/plain",
         "text/markdown",
+        "image/jpeg",
+        "image/png",
+        "image/webp",
     )
 
 @Singleton
