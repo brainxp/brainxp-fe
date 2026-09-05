@@ -6,17 +6,14 @@ import com.example.brainxp.domain.model.ActivityEvent
 import com.example.brainxp.domain.model.ActivityKind
 import com.example.brainxp.domain.model.BlockReason
 import com.example.brainxp.domain.model.ConsumptionEntry
-import com.example.brainxp.domain.model.GenerationStatus
 import com.example.brainxp.domain.model.LedgerDirection
 import com.example.brainxp.domain.model.MaterialType
 import com.example.brainxp.domain.model.Question
-import com.example.brainxp.domain.model.SessionMode
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -24,7 +21,6 @@ import org.junit.Test
 class FakeRepositoriesTest {
     private lateinit var backend: FakeBackend
     private lateinit var materials: FakeMaterialRepository
-    private lateinit var sessions: FakeSessionRepository
     private lateinit var rewards: FakeRewardRepository
     private lateinit var activity: FakeActivityLogRepository
     private lateinit var family: FakeFamilyRepository
@@ -33,7 +29,6 @@ class FakeRepositoriesTest {
     fun setUp() {
         backend = FakeBackend().apply { latencyMillis = FakeBackend.INSTANT }
         materials = FakeMaterialRepository(backend)
-        sessions = FakeSessionRepository(backend)
         rewards = FakeRewardRepository(backend)
         activity = FakeActivityLogRepository(backend)
         family = FakeFamilyRepository(backend)
@@ -86,99 +81,6 @@ class FakeRepositoriesTest {
 
             backend.failNext(FakeBackend.MATERIAL_DETAIL, ApiError.Network)
             assertEquals(ApiError.Network, failure(materials.detail("mat-1")))
-        }
-
-    @Test
-    fun generationJobStaysPendingThenBecomesReady() =
-        runTest {
-            sessions.pollsBeforeReady = 3
-            val job = success(sessions.requestGeneration("mat-1", 5, SessionMode.NEW))
-            assertEquals(GenerationStatus.PENDING, job.status)
-            assertNull(job.sessionId)
-
-            assertEquals(GenerationStatus.PENDING, success(sessions.pollGeneration(job.jobId)).status)
-            assertEquals(GenerationStatus.PENDING, success(sessions.pollGeneration(job.jobId)).status)
-
-            val ready = success(sessions.pollGeneration(job.jobId))
-            assertEquals(GenerationStatus.READY, ready.status)
-            assertNotNull(ready.sessionId)
-        }
-
-    @Test
-    fun generationRequestAndPollBothHaveFailurePaths() =
-        runTest {
-            backend.failNext(FakeBackend.SESSION_REQUEST, ApiError.ServerBusy)
-            assertEquals(
-                ApiError.ServerBusy,
-                failure(sessions.requestGeneration("mat-1", 5, SessionMode.NEW)),
-            )
-
-            val job = success(sessions.requestGeneration("mat-1", 5, SessionMode.NEW))
-            backend.failNext(FakeBackend.SESSION_POLL, ApiError.RateLimited(5))
-            assertEquals(ApiError.RateLimited(5), failure(sessions.pollGeneration(job.jobId)))
-
-            assertTrue(failure(sessions.pollGeneration("job-missing")) is ApiError.Unknown)
-        }
-
-    @Test
-    fun sessionIncludesAnUnsupportedQuestionType() =
-        runTest {
-            val session = success(sessions.session("ses-1"))
-
-            assertTrue(session.questions.any { it is Question.Unsupported })
-            assertTrue(session.questions.any { it is Question.MultipleChoice })
-            assertTrue(session.questions.any { it is Question.TrueFalse })
-
-            backend.failNext(FakeBackend.SESSION_GET, ApiError.Network)
-            assertEquals(ApiError.Network, failure(sessions.session("ses-1")))
-        }
-
-    @Test
-    fun answerCorrectnessComesFromTheFakeServerNotTheCaller() =
-        runTest {
-            success(sessions.session("ses-2"))
-
-            val right = success(sessions.submitAnswer("ses-2", "q-1", "120 km", 0))
-            assertTrue(right.correct)
-            assertNotNull(right.explanation)
-
-            val wrong = success(sessions.submitAnswer("ses-2", "q-1", "60 km", 0))
-            assertFalse(wrong.correct)
-
-            backend.failNext(FakeBackend.SESSION_ANSWER, ApiError.Network)
-            assertEquals(ApiError.Network, failure(sessions.submitAnswer("ses-2", "q-2", "false", 0)))
-        }
-
-    @Test
-    fun completeRefusesRewardWhenScoreIsTooLow() =
-        runTest {
-            success(sessions.session("ses-3"))
-            success(sessions.submitAnswer("ses-3", "q-1", "salah", 0))
-
-            val result = success(sessions.complete("ses-3"))
-
-            assertFalse(result.rewardGranted)
-            assertEquals(0, result.rewardSeconds)
-            assertNotNull(result.reason)
-            assertTrue(result.coverage.isNotEmpty())
-        }
-
-    @Test
-    fun completeGrantsRewardWhenEnoughAnswersAreRight() =
-        runTest {
-            success(sessions.session("ses-4"))
-            success(sessions.submitAnswer("ses-4", "q-1", "120 km", 0))
-            success(sessions.submitAnswer("ses-4", "q-2", "false", 0))
-            success(sessions.submitAnswer("ses-4", "q-3", "m/s^2", 0))
-
-            val result = success(sessions.complete("ses-4"))
-
-            assertTrue(result.rewardGranted)
-            assertTrue(result.rewardSeconds > 0)
-            assertNull(result.reason)
-
-            backend.failNext(FakeBackend.SESSION_COMPLETE, ApiError.ServerBusy)
-            assertEquals(ApiError.ServerBusy, failure(sessions.complete("ses-4")))
         }
 
     @Test

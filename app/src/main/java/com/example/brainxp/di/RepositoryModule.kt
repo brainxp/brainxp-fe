@@ -10,12 +10,10 @@ import com.example.brainxp.data.repo.RewardReconciler
 import com.example.brainxp.data.repo.RewardRepository
 import com.example.brainxp.data.repo.RoomRestrictionRepository
 import com.example.brainxp.data.repo.RoomUnlockRepository
-import com.example.brainxp.data.repo.SessionRepository
 import com.example.brainxp.data.repo.UnlockRepository
 import com.example.brainxp.data.repo.fake.FakeActivityLogRepository
 import com.example.brainxp.data.repo.fake.FakeFamilyRepository
 import com.example.brainxp.data.repo.fake.FakeRewardRepository
-import com.example.brainxp.data.repo.fake.FakeSessionRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -26,9 +24,6 @@ import dagger.hilt.components.SingletonComponent
 interface RepositoryModule {
     @Binds
     fun bindMaterialRepository(impl: NetworkMaterialRepository): MaterialRepository
-
-    @Binds
-    fun bindSessionRepository(impl: FakeSessionRepository): SessionRepository
 
     @Binds
     fun bindRewardRepository(impl: FakeRewardRepository): RewardRepository

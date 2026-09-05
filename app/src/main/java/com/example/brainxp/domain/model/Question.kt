@@ -64,11 +64,10 @@ data class GenerationJob(
     val error: String?,
 )
 
-data class AnswerVerdict(
+data class AnswerSaved(
     val questionId: String,
-    val correct: Boolean,
-    val explanation: String?,
-    val conceptIds: List<String>,
+    val answeredCount: Int,
+    val totalCount: Int,
 )
 
 data class ConceptCoverage(

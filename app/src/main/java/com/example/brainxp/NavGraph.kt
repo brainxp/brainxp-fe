@@ -492,7 +492,7 @@ private fun QuestionsEntry(
                         }
 
                         QuizEvent.Save -> {
-                            viewModel.apply(quiz.recordAnswer())
+                            viewModel.save(quiz)
                         }
 
                         QuizEvent.Submit -> {

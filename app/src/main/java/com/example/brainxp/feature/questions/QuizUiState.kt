@@ -20,6 +20,7 @@ data class QuizUiState(
     val chosen: Int? = null,
     val draft: String = "",
     val busy: Boolean = false,
+    val pending: Set<String> = emptySet(),
 ) {
     val current: QuizQuestion? get() = questions.getOrNull(index)
 

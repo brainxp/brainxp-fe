@@ -162,7 +162,12 @@ private fun ProgressStrip(
             )
         }
         Text(
-            text = stringResource(R.string.quiz_filled, state.filled),
+            text =
+                if (state.pending.isEmpty()) {
+                    stringResource(R.string.quiz_filled, state.filled)
+                } else {
+                    stringResource(R.string.quiz_pending, state.pending.size)
+                },
             style = MaterialTheme.typography.bodySmall,
             color = scheme.onSurfaceVariant,
         )

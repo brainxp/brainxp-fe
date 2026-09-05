@@ -340,6 +340,7 @@ kehilangan kontak.</string>
     <string name="quiz_title">Sesi belajar</string>
     <string name="quiz_position">Soal %1$d dari %2$d</string>
     <string name="quiz_filled">%1$d terisi</string>
+    <string name="quiz_pending">%1$d menunggu terkirim</string>
     <string name="quiz_jump">Soal %1$d</string>
     <string name="quiz_excerpt">Dari materimu: %1$s</string>
     <string name="quiz_answer_label">Jawabanmu</string>

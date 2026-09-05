@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.result.AppResult
+import com.example.brainxp.core.upload.AnswerFlushScheduler
+import com.example.brainxp.data.repo.AnswerQueue
+import com.example.brainxp.data.repo.QueuedAnswer
 import com.example.brainxp.data.repo.QuizRepository
 import com.example.brainxp.domain.model.Question
 import com.example.brainxp.domain.model.QuestionSession
@@ -27,6 +30,8 @@ class QuizViewModel
     @Inject
     constructor(
         private val quizzes: QuizRepository,
+        private val answers: AnswerQueue,
+        private val flushes: AnswerFlushScheduler,
     ) : ViewModel() {
         private val mutableState = MutableStateFlow(QuizLoad())
         val state: StateFlow<QuizLoad> = mutableState.asStateFlow()
@@ -63,6 +68,46 @@ class QuizViewModel
         }
 
         fun apply(quiz: QuizUiState) = mutableState.update { it.copy(quiz = quiz) }
+
+        fun save(quiz: QuizUiState) {
+            val question = quiz.current ?: return
+            val sessionId = mutableState.value.sessionId ?: return
+            val queued =
+                QueuedAnswer(
+                    sessionId = sessionId,
+                    questionId = question.id,
+                    chosenIndex = if (question.essay) null else quiz.chosen,
+                    essayText = if (question.essay) quiz.draft.trim() else null,
+                )
+
+            val advanced = quiz.recordAnswer()
+            apply(advanced.copy(pending = advanced.pending + question.id))
+
+            viewModelScope.launch {
+                val settled = answers.send(queued)
+                val queuedForLater = settled is AppResult.Failure && settled.error.retryable
+                if (queuedForLater) flushes.schedule()
+                if (!queuedForLater) {
+                    mutableState.update { now ->
+                        val current = now.quiz ?: return@update now
+                        now.copy(quiz = current.copy(pending = current.pending - question.id))
+                    }
+                }
+                if (settled is AppResult.Failure && !settled.error.retryable) {
+                    mutableState.update { it.copy(error = settled.error) }
+                }
+            }
+        }
+
+        fun flushQueue() {
+            viewModelScope.launch {
+                if (answers.flush() == 0) return@launch
+                mutableState.update { now ->
+                    val current = now.quiz ?: return@update now
+                    now.copy(quiz = current.copy(pending = emptySet()))
+                }
+            }
+        }
     }
 
 internal fun QuestionSession.toUiState(): QuizUiState =
