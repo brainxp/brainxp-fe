@@ -112,6 +112,7 @@ internal fun MaterialDto.toMaterial(): Material =
         charCount = 0,
         createdAt = epochOf(createdAt),
         sessionCount = timesStudied,
+        questionCount = questionCount,
     )
 
 private fun statusOf(raw: String): MaterialStatus =

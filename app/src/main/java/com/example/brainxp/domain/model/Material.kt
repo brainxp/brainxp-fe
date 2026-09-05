@@ -22,6 +22,7 @@ data class Material(
     val charCount: Int,
     val createdAt: Long,
     val sessionCount: Int,
+    val questionCount: Int = 0,
 )
 
 data class MaterialPage(
