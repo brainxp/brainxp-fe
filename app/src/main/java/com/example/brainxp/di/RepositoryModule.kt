@@ -1,6 +1,8 @@
 package com.example.brainxp.di
 
+import com.example.brainxp.blocking.InstalledAppsSource
 import com.example.brainxp.data.repo.ActivityLogRepository
+import com.example.brainxp.data.repo.AppLabels
 import com.example.brainxp.data.repo.ConsumptionReporter
 import com.example.brainxp.data.repo.FamilyRepository
 import com.example.brainxp.data.repo.MaterialRepository
@@ -33,6 +35,9 @@ interface RepositoryModule {
 
     @Binds
     fun bindActivityLogRepository(impl: RoomActivityLogRepository): ActivityLogRepository
+
+    @Binds
+    fun bindAppLabels(impl: InstalledAppsSource): AppLabels
 
     @Binds
     fun bindFamilyRepository(impl: FakeFamilyRepository): FamilyRepository

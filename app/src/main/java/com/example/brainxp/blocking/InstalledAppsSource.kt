@@ -6,6 +6,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.provider.Settings
 import android.telecom.TelecomManager
+import com.example.brainxp.data.repo.AppLabels
 import com.example.brainxp.di.IoDispatcher
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
@@ -19,7 +20,15 @@ class InstalledAppsSource
     constructor(
         @ApplicationContext private val context: Context,
         @IoDispatcher private val io: CoroutineDispatcher,
-    ) {
+    ) : AppLabels {
+        override suspend fun label(packageName: String): String =
+            withContext(io) {
+                runCatching {
+                    val manager = context.packageManager
+                    manager.getApplicationLabel(manager.getApplicationInfo(packageName, 0)).toString()
+                }.getOrDefault(packageName)
+            }
+
         suspend fun launchableApps(): List<InstalledApp> =
             withContext(io) {
                 val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)

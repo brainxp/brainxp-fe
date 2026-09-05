@@ -34,6 +34,10 @@ private fun standing(balanceSeconds: Int) =
         freezeTokens = 0,
     )
 
+private class StubAppLabels : AppLabels {
+    override suspend fun label(packageName: String): String = packageName
+}
+
 private class StubRewardRepository : RewardRepository {
     var result: AppResult<Standing> = AppResult.Success(standing(0))
 
@@ -94,7 +98,7 @@ class RewardReconcilerTest {
     private val repository = StubRewardRepository()
     private val cache = InMemoryRewardCache()
     private val clock = FakeAppClock()
-    private val reconciler = RewardReconciler(repository, cache, clock)
+    private val reconciler = RewardReconciler(repository, cache, clock, StubAppLabels())
 
     @Test
     fun `the server balance wins when it disagrees with the cache`() =

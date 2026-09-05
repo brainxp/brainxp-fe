@@ -85,7 +85,7 @@ private fun signedDuration(seconds: Int): String = if (seconds < 0) "−${shortD
 private fun entryLabel(entryType: String): Int =
     when (entryType) {
         "earned", "earn" -> R.string.history_type_earn
-        "spent", "spend" -> R.string.history_type_spend
+        "consumed", "spent", "spend" -> R.string.history_type_spend
         "granted", "grant" -> R.string.history_type_grant
         "redeemed", "redeem" -> R.string.history_type_redeem
         "expired", "expire" -> R.string.history_type_expire

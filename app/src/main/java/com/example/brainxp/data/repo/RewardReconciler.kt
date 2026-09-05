@@ -32,6 +32,10 @@ data class ReconciledBalance(
     val spendable: Boolean get() = source != BalanceSource.NONE && balanceSeconds > 0
 }
 
+interface AppLabels {
+    suspend fun label(packageName: String): String
+}
+
 interface ConsumptionReporter {
     suspend fun report(secondsByPackage: Map<String, Int>): AppResult<ReconciledBalance>
 }
@@ -43,6 +47,7 @@ class RewardReconciler
         private val rewards: RewardRepository,
         private val cache: RewardCache,
         private val clock: AppClock,
+        private val appLabels: AppLabels,
     ) : ConsumptionReporter {
         private val mutableState = MutableStateFlow(ReconciledBalance())
 
@@ -63,7 +68,7 @@ class RewardReconciler
                 secondsByPackage.filterValues { it > 0 }.map { (packageName, seconds) ->
                     ConsumptionEntry(
                         clientEventId = UUID.randomUUID().toString(),
-                        appLabel = packageName,
+                        appLabel = appLabels.label(packageName),
                         seconds = seconds,
                         occurredAtWallClock = clock.wallClock(),
                     )
