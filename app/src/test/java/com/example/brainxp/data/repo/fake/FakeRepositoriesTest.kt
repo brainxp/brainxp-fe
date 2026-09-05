@@ -54,12 +54,12 @@ class FakeRepositoriesTest {
         runTest {
             val before = materials.observeCached().first().size
 
-            val created = success(materials.upload("Bab 5", MaterialType.TEXT, null, "abc"))
+            val created = success(materials.upload("Bab 5", MaterialType.TEXT, null))
             assertEquals(before + 1, materials.observeCached().first().size)
             assertEquals("Bab 5", created.title)
 
             backend.failNext(FakeBackend.MATERIAL_UPLOAD, ApiError.Network)
-            assertEquals(ApiError.Network, failure(materials.upload("Bab 6", MaterialType.TEXT, null, null)))
+            assertEquals(ApiError.Network, failure(materials.upload("Bab 6", MaterialType.TEXT, null)))
         }
 
     @Test

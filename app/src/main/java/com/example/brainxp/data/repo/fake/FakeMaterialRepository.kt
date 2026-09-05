@@ -30,7 +30,6 @@ class FakeMaterialRepository
             title: String,
             type: MaterialType,
             contentUri: String?,
-            ocrText: String?,
         ): AppResult<Material> =
             backend.respond(FakeBackend.MATERIAL_UPLOAD) {
                 val material =
@@ -39,7 +38,7 @@ class FakeMaterialRepository
                         title = title.ifBlank { "Materi tanpa judul" },
                         type = type,
                         status = MaterialStatus.PROCESSING,
-                        charCount = ocrText?.length ?: 0,
+                        charCount = 0,
                         createdAt = FakeData.now,
                         sessionCount = 0,
                     )

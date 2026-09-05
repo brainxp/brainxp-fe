@@ -27,7 +27,6 @@ interface MaterialRepository {
         title: String,
         type: MaterialType,
         contentUri: String?,
-        ocrText: String?,
     ): AppResult<Material>
 
     suspend fun page(cursor: String?): AppResult<MaterialPage>

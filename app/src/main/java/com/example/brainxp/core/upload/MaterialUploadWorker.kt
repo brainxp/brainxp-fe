@@ -24,7 +24,6 @@ import javax.inject.Singleton
 const val KEY_CACHED_PATH = "cachedPath"
 const val KEY_TITLE = "title"
 const val KEY_TYPE = "type"
-const val KEY_OCR_TEXT = "ocrText"
 
 @Singleton
 class UploadQueue
@@ -36,7 +35,6 @@ class UploadQueue
             cachedPath: String,
             title: String,
             type: MaterialType,
-            ocrText: String?,
         ): String {
             val request =
                 OneTimeWorkRequestBuilder<MaterialUploadWorker>()
@@ -45,7 +43,6 @@ class UploadQueue
                             KEY_CACHED_PATH to cachedPath,
                             KEY_TITLE to title,
                             KEY_TYPE to type.name,
-                            KEY_OCR_TEXT to ocrText,
                         ),
                     ).setConstraints(
                         Constraints
@@ -91,9 +88,8 @@ class MaterialUploadWorker
             val type =
                 runCatching { MaterialType.valueOf(inputData.getString(KEY_TYPE).orEmpty()) }
                     .getOrDefault(MaterialType.DOCUMENT)
-            val ocrText = inputData.getString(KEY_OCR_TEXT)
 
-            return when (val result = materials.upload(title, type, path, ocrText)) {
+            return when (val result = materials.upload(title, type, path)) {
                 is AppResult.Success -> {
                     file.delete()
                     Result.success()
