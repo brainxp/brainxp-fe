@@ -1,5 +1,6 @@
 package com.example.brainxp.di
 
+import com.example.brainxp.core.network.AuthApi
 import com.example.brainxp.core.network.AuthInterceptor
 import com.example.brainxp.core.network.AuthTokenStore
 import com.example.brainxp.core.network.InMemoryAuthTokenStore
@@ -37,6 +38,10 @@ object NetworkModule {
             encodeDefaults = true
             isLenient = true
         }
+
+    @Provides
+    @Singleton
+    fun provideAuthApi(retrofit: Retrofit): AuthApi = retrofit.create(AuthApi::class.java)
 
     @Provides
     @Singleton
