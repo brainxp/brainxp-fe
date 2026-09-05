@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
@@ -42,6 +43,7 @@ import com.example.brainxp.feature.capture.CaptureViewModel
 import com.example.brainxp.feature.capture.OcrReviewScreen
 import com.example.brainxp.feature.capture.OcrReviewViewModel
 import com.example.brainxp.feature.capture.PickSourceScreen
+import com.example.brainxp.feature.capture.PickSourceViewModel
 import com.example.brainxp.feature.capture.PreparingScreen
 import com.example.brainxp.feature.capture.PreparingStage
 import com.example.brainxp.feature.capture.RejectedScreen
@@ -279,7 +281,12 @@ internal fun EntryProviderScope<NavKey>.cameraEntries(backStack: NavBackStack<Na
 
 internal fun EntryProviderScope<NavKey>.captureEntries(backStack: NavBackStack<NavKey>) {
     entry<MainRoute.Capture> {
+        val picker: PickSourceViewModel = hiltViewModel()
+        val rejection by picker.rejection.collectAsStateWithLifecycle()
+
         PickSourceScreen(
+            rejection = rejection?.let { stringResource(it) },
+            onPicked = { uri -> picker.accept(uri) { backStack.add(MainRoute.OcrReview(DRAFT_ID)) } },
             questionCount = SAMPLE_QUESTION_COUNT,
             estimatedRewardSeconds = SAMPLE_ESTIMATE_SECONDS,
             onBack = { backStack.popOrIgnore() },
