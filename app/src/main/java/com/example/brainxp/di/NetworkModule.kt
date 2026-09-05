@@ -3,13 +3,13 @@ package com.example.brainxp.di
 import com.example.brainxp.core.network.AuthApi
 import com.example.brainxp.core.network.AuthInterceptor
 import com.example.brainxp.core.network.AuthTokenStore
-import com.example.brainxp.core.network.InMemoryAuthTokenStore
 import com.example.brainxp.core.network.MaterialApi
+import com.example.brainxp.core.network.NetworkTokenRefresher
+import com.example.brainxp.core.network.PersistentAuthTokenStore
 import com.example.brainxp.core.network.PolicyApi
 import com.example.brainxp.core.network.QuizApi
 import com.example.brainxp.core.network.TokenAuthenticator
 import com.example.brainxp.core.network.TokenRefresher
-import com.example.brainxp.core.network.UnavailableTokenRefresher
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -94,8 +94,8 @@ object NetworkModule {
 @InstallIn(SingletonComponent::class)
 interface NetworkBindings {
     @Binds
-    fun bindAuthTokenStore(impl: InMemoryAuthTokenStore): AuthTokenStore
+    fun bindAuthTokenStore(impl: PersistentAuthTokenStore): AuthTokenStore
 
     @Binds
-    fun bindTokenRefresher(impl: UnavailableTokenRefresher): TokenRefresher
+    fun bindTokenRefresher(impl: NetworkTokenRefresher): TokenRefresher
 }

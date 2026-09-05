@@ -20,6 +20,11 @@ data class LoginRequestDto(
 )
 
 @Serializable
+data class RefreshRequestDto(
+    @SerialName("refresh_token") val refreshToken: String,
+)
+
+@Serializable
 data class TokenDto(
     @SerialName("access_token") val accessToken: String,
     @SerialName("refresh_token") val refreshToken: String,
@@ -35,6 +40,11 @@ interface AuthApi {
     @POST("auth/register")
     suspend fun register(
         @Body body: RegisterRequestDto,
+    ): TokenDto
+
+    @POST("auth/refresh")
+    suspend fun refresh(
+        @Body body: RefreshRequestDto,
     ): TokenDto
 
     @POST("auth/login")
