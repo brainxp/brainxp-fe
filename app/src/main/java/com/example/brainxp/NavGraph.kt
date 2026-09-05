@@ -29,16 +29,9 @@ import com.example.brainxp.core.ui.PlaceholderAction
 import com.example.brainxp.core.ui.PlaceholderScreen
 import com.example.brainxp.core.ui.levelLabel
 import com.example.brainxp.domain.model.AcademicLevel
-import com.example.brainxp.feature.SAMPLE_ASSESSED_LEVEL
-import com.example.brainxp.feature.SAMPLE_DECLARED_LEVEL
 import com.example.brainxp.feature.SAMPLE_ESTIMATE_SECONDS
 import com.example.brainxp.feature.SAMPLE_MATERIAL_ID
-import com.example.brainxp.feature.SAMPLE_MATERIAL_NAME
 import com.example.brainxp.feature.SAMPLE_QUESTION_COUNT
-import com.example.brainxp.feature.SAMPLE_QUIZ
-import com.example.brainxp.feature.SAMPLE_READY_QUESTIONS
-import com.example.brainxp.feature.SAMPLE_RECEIPT
-import com.example.brainxp.feature.SAMPLE_REJECT_REASON
 import com.example.brainxp.feature.apps.AppPickerRoute
 import com.example.brainxp.feature.capture.CameraCaptureScreen
 import com.example.brainxp.feature.capture.CaptureMethod
