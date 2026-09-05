@@ -3,18 +3,15 @@ package com.example.brainxp.feature.capture
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brainxp.core.capture.CaptureStore
+import com.example.brainxp.core.capture.CapturedPage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import java.io.File
 import javax.inject.Inject
-
-data class CapturedPage(
-    val id: String,
-    val path: String,
-)
 
 data class CaptureUiState(
     val pages: List<CapturedPage> = emptyList(),
@@ -40,52 +37,56 @@ fun CaptureUiState.movePage(
     }
 }
 
+private data class Shot(
+    val capturing: Boolean = false,
+    val failed: Boolean = false,
+)
+
 @HiltViewModel
 class CaptureViewModel
     @Inject
     constructor(
         private val store: CaptureStore,
     ) : ViewModel() {
-        private val mutableState = MutableStateFlow(CaptureUiState())
-        val state: StateFlow<CaptureUiState> = mutableState.asStateFlow()
+        private val shot = MutableStateFlow(Shot())
+
+        val state: StateFlow<CaptureUiState> =
+            combine(store.pages, shot) { pages, current ->
+                CaptureUiState(
+                    pages = pages,
+                    capturing = current.capturing,
+                    failed = current.failed,
+                )
+            }.stateIn(viewModelScope, SharingStarted.Eagerly, CaptureUiState())
 
         fun newPageFile(): File = store.newPageFile()
 
         fun beginCapture() {
-            mutableState.value = mutableState.value.copy(capturing = true, failed = false)
+            shot.value = Shot(capturing = true)
         }
 
         fun captured(file: File) {
-            mutableState.value =
-                mutableState.value.copy(
-                    pages = mutableState.value.pages + CapturedPage(file.name, file.absolutePath),
-                    capturing = false,
-                )
+            store.add(file)
+            shot.value = Shot()
         }
 
         fun captureFailed(file: File) {
-            store.delete(file.absolutePath)
-            mutableState.value = mutableState.value.copy(capturing = false, failed = true)
+            store.deleteFile(file.absolutePath)
+            shot.value = Shot(failed = true)
         }
 
         fun delete(id: String) {
-            val page = mutableState.value.pages.firstOrNull { it.id == id } ?: return
-            store.delete(page.path)
-            mutableState.value =
-                mutableState.value.copy(pages = mutableState.value.pages.filterNot { it.id == id })
+            store.remove(id)
         }
 
         fun move(
             id: String,
             by: Int,
         ) {
-            mutableState.value = mutableState.value.movePage(id, by)
+            store.reorder(state.value.movePage(id, by).pages)
         }
 
         fun discardAll() {
-            viewModelScope.launch {
-                mutableState.value.pages.forEach { store.delete(it.path) }
-                mutableState.value = CaptureUiState()
-            }
+            store.clear()
         }
     }

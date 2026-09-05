@@ -1,5 +1,6 @@
 package com.example.brainxp.feature.capture
 
+import com.example.brainxp.core.capture.CapturedPage
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

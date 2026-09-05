@@ -55,6 +55,7 @@ import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Trash2
 import com.example.brainxp.R
 import com.example.brainxp.core.capture.CameraSession
+import com.example.brainxp.core.capture.CapturedPage
 import com.example.brainxp.core.ui.BrainXPTheme
 import com.example.brainxp.core.ui.EmptyState
 import com.example.brainxp.core.ui.LightSystemBars
