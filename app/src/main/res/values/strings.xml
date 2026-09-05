@@ -438,4 +438,15 @@ kehilangan kontak.</string>
     <string name="level_sma">SMA</string>
     <string name="lang_id">Indonesia</string>
     <string name="lang_en">Inggris</string>
+    <string name="camera_title">Foto catatan</string>
+    <string name="camera_page_count">%1$d halaman</string>
+    <string name="camera_hint">Ambil satu foto per halaman. Bisa beberapa sekaligus, urutannya bisa diubah nanti.</string>
+    <string name="camera_shutter">Ambil foto</string>
+    <string name="camera_continue">Lanjut dengan %1$d halaman</string>
+    <string name="camera_failed">Fotonya gagal disimpan. Coba ambil lagi.</string>
+    <string name="camera_denied_title">Kamera belum diizinkan</string>
+    <string name="camera_denied_body">BrainXP butuh kamera untuk memfoto catatanmu. Izinkan dari pengaturan aplikasi.</string>
+    <string name="camera_move_left">Geser ke kiri</string>
+    <string name="camera_move_right">Geser ke kanan</string>
+    <string name="camera_delete_page">Hapus halaman</string>
 </resources>
