@@ -479,4 +479,8 @@ kehilangan kontak.</string>
     <string name="review_too_long">Teksnya terlalu panjang — di atas %1$d karakter. Hapus bagian yang tidak perlu.</string>
     <string name="review_upload">Kirim materi</string>
     <string name="review_jump_failed">Lihat %1$d halaman yang gagal</string>
+    <string name="source_gallery">Pilih dari galeri</string>
+    <string name="source_gallery_sub">Foto yang sudah ada. Tidak perlu izin akses penyimpanan.</string>
+    <string name="source_too_large">Berkasnya lebih dari 32 MB. Pilih yang lebih kecil.</string>
+    <string name="source_unreadable">Berkasnya tidak bisa dibaca. Coba pilih ulang.</string>
 </resources>

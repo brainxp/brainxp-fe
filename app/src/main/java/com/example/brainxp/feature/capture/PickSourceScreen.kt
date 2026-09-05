@@ -1,5 +1,9 @@
 package com.example.brainxp.feature.capture
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -16,8 +20,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.composables.icons.lucide.Camera
 import com.composables.icons.lucide.FileText
+import com.composables.icons.lucide.Image
 import com.composables.icons.lucide.Lucide
 import com.example.brainxp.R
+import com.example.brainxp.core.capture.DOCUMENT_MIME_TYPES
 import com.example.brainxp.core.ui.BrainXPTheme
 import com.example.brainxp.core.ui.ChoiceRow
 import com.example.brainxp.core.ui.HeroCard
@@ -30,10 +36,22 @@ fun PickSourceScreen(
     questionCount: Int,
     estimatedRewardSeconds: Int,
     onPick: (CaptureMethod) -> Unit,
+    onPicked: (Uri) -> Unit,
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
+    rejection: String? = null,
 ) {
     val spacing = BrainXPTheme.spacing
+
+    val pickImage =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.PickVisualMedia(),
+        ) { uri -> uri?.let(onPicked) }
+
+    val pickDocument =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.OpenDocument(),
+        ) { uri -> uri?.let(onPicked) }
 
     Column(
         modifier =
@@ -80,15 +98,25 @@ fun PickSourceScreen(
                 onClick = { onPick(CaptureMethod.PHOTO) },
             )
             ChoiceRow(
+                title = stringResource(R.string.source_gallery),
+                subtitle = stringResource(R.string.source_gallery_sub),
+                icon = Lucide.Image,
+                onClick = {
+                    pickImage.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                    )
+                },
+            )
+            ChoiceRow(
                 title = stringResource(R.string.source_document),
                 subtitle = stringResource(R.string.source_document_sub),
                 icon = Lucide.FileText,
-                highlight = true,
-                onClick = { onPick(CaptureMethod.DOCUMENT) },
+                onClick = { pickDocument.launch(DOCUMENT_MIME_TYPES) },
             )
         }
 
         Spacer(modifier = Modifier.weight(1f))
+        rejection?.let { Note(text = it, alert = true) }
         Note(text = stringResource(R.string.source_note))
         Spacer(modifier = Modifier.size(spacing.xs))
     }
@@ -102,6 +130,7 @@ private fun PickSourcePreview() {
             questionCount = 6,
             estimatedRewardSeconds = 1_140,
             onPick = {},
+            onPicked = {},
             onBack = {},
         )
     }
