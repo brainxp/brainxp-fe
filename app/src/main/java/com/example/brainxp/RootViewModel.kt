@@ -7,6 +7,7 @@ import com.example.brainxp.data.repo.RestrictionRepository
 import com.example.brainxp.domain.GuardedAction
 import com.example.brainxp.domain.ParentLock
 import com.example.brainxp.domain.UnlockSessionManager
+import com.example.brainxp.domain.model.DeviceRole
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -39,6 +40,11 @@ class RootViewModel
         val pinRequired: StateFlow<GuardedAction?> = mutablePinRequired.asStateFlow()
 
         private var pinVerified = false
+
+        val role: StateFlow<DeviceRole?> =
+            settings.settings
+                .map { it.role }
+                .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
         val state: StateFlow<RootUiState> =
             settings.settings

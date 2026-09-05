@@ -73,15 +73,22 @@ class PairingCodeViewModel
             loadedFor = childId
             mutableState.update { it.copy(loading = true, error = null) }
             viewModelScope.launch {
+                val named =
+                    (family.children() as? AppResult.Success)
+                        ?.value
+                        ?.firstOrNull { child -> child.childId == childId }
+                        ?.name
+                        .orEmpty()
+
                 mutableState.update {
                     when (val result = family.pairingCode(childId)) {
                         is AppResult.Success -> {
                             it.copy(
                                 code =
                                     PairingCodeUiState(
-                                        subjectName = "",
+                                        subjectName = named,
                                         code = result.value.code,
-                                        secondsLeft = 0,
+                                        secondsLeft = secondsUntil(result.value.expiresAt),
                                     ),
                                 loading = false,
                             )
@@ -113,6 +120,7 @@ class ChildReportViewModel
     @Inject
     constructor(
         private val rewards: RewardRepository,
+        private val family: FamilyRepository,
     ) : ViewModel() {
         private val mutableState = MutableStateFlow(ChildReportLoad())
         val state: StateFlow<ChildReportLoad> = mutableState.asStateFlow()
@@ -127,6 +135,15 @@ class ChildReportViewModel
             loadedFor = childId
             mutableState.update { it.copy(loading = true, error = null) }
             viewModelScope.launch {
+                val resolved =
+                    childName.ifBlank {
+                        (family.children() as? AppResult.Success)
+                            ?.value
+                            ?.firstOrNull { child -> child.childId == childId }
+                            ?.name
+                            .orEmpty()
+                    }
+
                 mutableState.update {
                     when (val result = rewards.report(REPORT_WINDOW_DAYS, childId)) {
                         is AppResult.Success -> {
@@ -134,7 +151,7 @@ class ChildReportViewModel
                             it.copy(
                                 report =
                                     ChildReportUiState(
-                                        subjectName = childName,
+                                        subjectName = resolved,
                                         alert = report.guardianAlerts.firstOrNull(),
                                         earnedPerDay = report.days.map { day -> day.earnedSeconds },
                                         balanceSeconds = report.standing.balanceSeconds,
@@ -173,3 +190,13 @@ private fun LedgerEntry.toRow(): LedgerRow =
         note = note,
         deltaSeconds = deltaSeconds,
     )
+
+private fun secondsUntil(isoTimestamp: String): Int =
+    runCatching {
+        val expiry = java.time.Instant.parse(isoTimestamp)
+        java.time.Duration
+            .between(java.time.Instant.now(), expiry)
+            .seconds
+            .coerceAtLeast(0L)
+            .toInt()
+    }.getOrDefault(0)

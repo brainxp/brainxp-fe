@@ -19,6 +19,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.example.brainxp.domain.model.DeviceRole
 
 @Composable
 fun BrainXPApp(
@@ -27,6 +28,7 @@ fun BrainXPApp(
 ) {
     val viewModel: RootViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val role by viewModel.role.collectAsStateWithLifecycle()
 
     Scaffold(modifier = modifier.fillMaxSize()) { padding ->
         val content = Modifier.padding(padding)
@@ -52,7 +54,7 @@ fun BrainXPApp(
                             setWarningLead = viewModel::setWarningLead,
                             endUnlock = viewModel::endUnlock,
                         ),
-                    deepLink = deepLink,
+                    deepLink = deepLink ?: parentRoot(role),
                 )
             }
         }
@@ -128,3 +130,5 @@ private fun defaultDecorators(): List<NavEntryDecorator<NavKey>> =
 internal fun NavBackStack<NavKey>.popOrIgnore() {
     if (size > 1) removeAt(lastIndex)
 }
+
+private fun parentRoot(role: DeviceRole?): NavKey? = MainRoute.FamilyHome.takeIf { role == DeviceRole.PARENT }

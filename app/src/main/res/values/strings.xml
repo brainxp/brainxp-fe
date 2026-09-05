@@ -302,6 +302,14 @@ kehilangan kontak.</string>
     <string name="preparing_step_validating">Diperiksa dan dikalibrasi</string>
     <string name="preparing_step_partial">Soal pertama siap</string>
     <string name="preparing_step_ready">Sisa soal disusun</string>
+    <string name="pin_body">Pengaturan ini dijaga orang tua. Masukkan PIN untuk melanjutkan.</string>
+    <string name="pin_label">PIN orang tua</string>
+    <string name="pin_wrong">PIN salah. Coba lagi.</string>
+    <string name="pin_confirm">Buka</string>
+    <string name="pin_title_restrictions">Ubah aplikasi yang dikunci</string>
+    <string name="pin_title_mode">Ganti mode</string>
+    <string name="pin_title_protection">Matikan perlindungan</string>
+    <string name="pair_failed">Kodenya tidak cocok atau sudah kedaluwarsa. Minta kode baru dari orang tua.</string>
     <string name="done_title">Semua siap</string>
     <string name="done_body">Akunmu sudah dibuat dan penjaga waktu bermain sudah berjalan.</string>
     <string name="done_step_account">Akun dibuat</string>

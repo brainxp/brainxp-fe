@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.result.AppResult
+import com.example.brainxp.data.prefs.SettingsDataStore
 import com.example.brainxp.data.repo.AuthRepository
+import com.example.brainxp.domain.model.DeviceRole
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,6 +26,7 @@ class SignInViewModel
     @Inject
     constructor(
         private val auth: AuthRepository,
+        private val settings: SettingsDataStore,
     ) : ViewModel() {
         private val _state = MutableStateFlow(SignInUiState())
         val state: StateFlow<SignInUiState> = _state.asStateFlow()
@@ -43,6 +46,9 @@ class SignInViewModel
                     } else {
                         auth.login(credentials.email, credentials.password)
                     }
+                if (result is AppResult.Success) {
+                    settings.setRole(if (result.value.role == ROLE_PARENT) DeviceRole.PARENT else DeviceRole.CHILD)
+                }
                 _state.update {
                     when (result) {
                         is AppResult.Success -> it.copy(busy = false, signedIn = true)
@@ -52,3 +58,5 @@ class SignInViewModel
             }
         }
     }
+
+private const val ROLE_PARENT = "parent"

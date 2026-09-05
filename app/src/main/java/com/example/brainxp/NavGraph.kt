@@ -73,6 +73,7 @@ import com.example.brainxp.feature.library.MaterialDetailScreen
 import com.example.brainxp.feature.library.MaterialDetailViewModel
 import com.example.brainxp.feature.onboarding.LevelScreen
 import com.example.brainxp.feature.onboarding.LevelViewModel
+import com.example.brainxp.feature.onboarding.PairDeviceViewModel
 import com.example.brainxp.feature.onboarding.PickModeScreen
 import com.example.brainxp.feature.onboarding.PickRoleScreen
 import com.example.brainxp.feature.onboarding.SetupDoneScreen
@@ -123,7 +124,12 @@ internal fun EntryProviderScope<NavKey>.onboardingEntries(backStack: NavBackStac
         val state by viewModel.state.collectAsStateWithLifecycle()
 
         LaunchedEffect(state.signedIn) {
-            if (state.signedIn) backStack.add(OnboardingRoute.Level)
+            if (!state.signedIn) return@LaunchedEffect
+            if (key.family) {
+                backStack.add(OnboardingRoute.PermissionSetup)
+            } else {
+                backStack.add(OnboardingRoute.Level)
+            }
         }
 
         SignInScreen(
@@ -134,23 +140,7 @@ internal fun EntryProviderScope<NavKey>.onboardingEntries(backStack: NavBackStac
             error = state.error,
         )
     }
-    entry<OnboardingRoute.PairDevice> {
-        var digits by remember { mutableStateOf("") }
-
-        PairDeviceScreen(
-            digits = digits,
-            onBack = { backStack.popOrIgnore() },
-            onKey = { key ->
-                if (digits.length < PAIRING_CODE_LENGTH) {
-                    digits += key
-                    if (digits.length == PAIRING_CODE_LENGTH) {
-                        backStack.add(OnboardingRoute.PermissionSetup)
-                    }
-                }
-            },
-            onDelete = { digits = digits.dropLast(1) },
-        )
-    }
+    entry<OnboardingRoute.PairDevice> { PairDeviceEntry(backStack) }
 }
 
 internal fun EntryProviderScope<NavKey>.onboardingTailEntries(
@@ -641,4 +631,23 @@ private fun SettingsEntry(backStack: NavBackStack<NavKey>) {
             )
         }
     }
+}
+
+@Composable
+private fun PairDeviceEntry(backStack: NavBackStack<NavKey>) {
+    val viewModel: PairDeviceViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(state.paired) {
+        if (state.paired) backStack.add(OnboardingRoute.PermissionSetup)
+    }
+
+    PairDeviceScreen(
+        digits = state.digits,
+        onBack = { backStack.popOrIgnore() },
+        onKey = viewModel::press,
+        onDelete = viewModel::backspace,
+        busy = state.busy,
+        error = state.error?.let { stringResource(R.string.pair_failed) },
+    )
 }

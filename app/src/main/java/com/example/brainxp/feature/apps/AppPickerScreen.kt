@@ -25,6 +25,7 @@ import com.example.brainxp.blocking.InstalledApp
 import com.example.brainxp.core.ui.BrainXPTheme
 import com.example.brainxp.core.ui.EmptyState
 import com.example.brainxp.core.ui.LoadingState
+import com.example.brainxp.core.ui.ParentPinDialog
 import com.example.brainxp.core.ui.PillTone
 import com.example.brainxp.core.ui.StatusPill
 
@@ -39,6 +40,15 @@ fun AppPickerRoute(modifier: Modifier = Modifier) {
         onToggle = viewModel::onToggle,
         modifier = modifier,
     )
+
+    if (state.pinRequired) {
+        ParentPinDialog(
+            title = stringResource(R.string.pin_title_restrictions),
+            onSubmit = viewModel::submitPin,
+            onDismiss = viewModel::dismissPin,
+            wrong = state.pinWrong,
+        )
+    }
 }
 
 @Composable

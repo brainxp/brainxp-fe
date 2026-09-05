@@ -11,6 +11,7 @@ import androidx.navigation3.runtime.NavKey
 import com.example.brainxp.core.ui.ErrorState
 import com.example.brainxp.core.ui.LoadingState
 import com.example.brainxp.feature.family.BalanceAdjustScreen
+import com.example.brainxp.feature.family.BalanceAdjustViewModel
 import com.example.brainxp.feature.family.ChildReportScreen
 import com.example.brainxp.feature.family.ChildReportViewModel
 import com.example.brainxp.feature.family.FamilyHomeScreen
@@ -171,15 +172,22 @@ private fun BalanceEntry(
     key: MainRoute.FamilyBalance,
     backStack: NavBackStack<NavKey>,
 ) {
-    val viewModel: ChildReportViewModel = hiltViewModel()
-    val load by viewModel.state.collectAsStateWithLifecycle()
+    val reports: ChildReportViewModel = hiltViewModel()
+    val adjuster: BalanceAdjustViewModel = hiltViewModel()
+    val load by reports.state.collectAsStateWithLifecycle()
+    val adjust by adjuster.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(key.childId) { viewModel.load(key.childId, "") }
+    LaunchedEffect(key.childId) { reports.load(key.childId, "") }
+    LaunchedEffect(adjust.applied) { if (adjust.applied) backStack.popOrIgnore() }
 
     val report = load.report
     when {
         report == null -> {
             LoadingState()
+        }
+
+        adjust.error != null -> {
+            ErrorState(error = adjust.error!!, onRetry = { backStack.popOrIgnore() })
         }
 
         else -> {
@@ -188,7 +196,9 @@ private fun BalanceEntry(
                 balanceSeconds = report.balanceSeconds,
                 idleDaysAllowed = 0,
                 onBack = { backStack.popOrIgnore() },
-                onApply = { _, _, _ -> backStack.popOrIgnore() },
+                onApply = { direction, seconds, note ->
+                    adjuster.apply(key.childId, direction, seconds, note)
+                },
             )
         }
     }
