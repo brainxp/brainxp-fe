@@ -48,6 +48,7 @@ class RowGroupScope internal constructor() {
         destructiveValue: Boolean = false,
         onClick: (() -> Unit)? = null,
         leading: @Composable (() -> Unit)? = null,
+        trailing: @Composable (() -> Unit)? = null,
     ) {
         if (rendered > 0) {
             HorizontalDivider(thickness = HAIRLINE, color = MaterialTheme.colorScheme.outline)
@@ -60,6 +61,7 @@ class RowGroupScope internal constructor() {
             emphasiseValue = emphasiseValue,
             destructiveValue = destructiveValue,
             leading = leading,
+            trailing = trailing,
             modifier = if (onClick == null) modifier else modifier.clickable(onClick = onClick),
         )
     }
@@ -73,6 +75,7 @@ private fun RowGroupItem(
     emphasiseValue: Boolean,
     destructiveValue: Boolean,
     leading: @Composable (() -> Unit)?,
+    trailing: @Composable (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     val spacing = BrainXPTheme.spacing
@@ -99,7 +102,7 @@ private fun RowGroupItem(
         }
 
         Column(
-            modifier = Modifier.fillMaxWidth(if (value == null) 1f else TITLE_WIDTH),
+            modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(spacing.xs),
         ) {
             Text(
@@ -128,12 +131,13 @@ private fun RowGroupItem(
                     },
             )
         }
+
+        trailing?.invoke()
     }
 }
 
 private val HAIRLINE = 1.dp
 private val AVATAR = 38.dp
-private const val TITLE_WIDTH = 0.72f
 
 @Composable
 private fun RowGroupSample(modifier: Modifier = Modifier) {
