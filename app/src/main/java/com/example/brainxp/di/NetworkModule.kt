@@ -8,6 +8,7 @@ import com.example.brainxp.core.network.NetworkTokenRefresher
 import com.example.brainxp.core.network.PersistentAuthTokenStore
 import com.example.brainxp.core.network.PolicyApi
 import com.example.brainxp.core.network.QuizApi
+import com.example.brainxp.core.network.RewardApi
 import com.example.brainxp.core.network.TokenAuthenticator
 import com.example.brainxp.core.network.TokenRefresher
 import dagger.Binds
@@ -48,6 +49,10 @@ object NetworkModule {
     @Provides
     @Singleton
     fun providePolicyApi(retrofit: Retrofit): PolicyApi = retrofit.create(PolicyApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideRewardApi(retrofit: Retrofit): RewardApi = retrofit.create(RewardApi::class.java)
 
     @Provides
     @Singleton

@@ -11,13 +11,11 @@ enum class BlockReason {
 data class Standing(
     val balanceSeconds: Int,
     val playableSeconds: Int,
-    val ceilingSeconds: Int,
     val dailyCapSeconds: Int,
     val spentTodaySeconds: Int,
     val secondsUntilReset: Int,
     val blockReason: BlockReason,
     val streakCurrent: Int,
-    val points: Int,
     val freezeTokens: Int,
     val idleDays: Int = 0,
     val idleDaysAllowed: Int = 0,
@@ -67,4 +65,20 @@ data class RestrictedApp(
     val packageName: String,
     val label: String,
     val enabled: Boolean,
+)
+
+data class DayPoint(
+    val day: String,
+    val earnedSeconds: Int,
+    val consumedSeconds: Int,
+)
+
+data class Report(
+    val standing: Standing,
+    val days: List<DayPoint>,
+    val materialsStudied: Int,
+    val correctTotal: Int,
+    val essayPassed: Int,
+    val recent: List<LedgerEntry>,
+    val guardianAlerts: List<String>,
 )

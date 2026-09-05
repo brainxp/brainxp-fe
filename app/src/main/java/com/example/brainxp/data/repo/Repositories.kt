@@ -12,6 +12,7 @@ import com.example.brainxp.domain.model.MaterialPage
 import com.example.brainxp.domain.model.MaterialType
 import com.example.brainxp.domain.model.PairingResult
 import com.example.brainxp.domain.model.Progress
+import com.example.brainxp.domain.model.Report
 import com.example.brainxp.domain.model.RestrictedApp
 import com.example.brainxp.domain.model.Standing
 import kotlinx.coroutines.flow.Flow
@@ -40,6 +41,8 @@ interface RewardRepository {
     suspend fun reportConsumption(entries: List<ConsumptionEntry>): AppResult<Standing>
 
     suspend fun history(): AppResult<List<LedgerEntry>>
+
+    suspend fun report(days: Int): AppResult<Report>
 
     suspend fun adjust(
         direction: LedgerDirection,
