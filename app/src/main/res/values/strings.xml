@@ -449,4 +449,20 @@ kehilangan kontak.</string>
     <string name="camera_move_left">Geser ke kiri</string>
     <string name="camera_move_right">Geser ke kanan</string>
     <string name="camera_delete_page">Hapus halaman</string>
+    <string name="ocr_prepare_title">Pengenalan teks</string>
+    <string name="ocr_prepare_headline">Menyiapkan pengenalan teks</string>
+    <string name="ocr_prepare_body">Sekali unduh, sekitar 4 MB. Setelah ini foto catatanmu bisa dibaca tanpa perlu internet.</string>
+    <string name="ocr_prepare_ready_headline">Pengenalan teks siap</string>
+    <string name="ocr_prepare_ready_body">Modelnya sudah ada di ponsel ini. Foto catatan langsung bisa dibaca.</string>
+    <string name="ocr_prepare_failed_headline">Modelnya belum bisa diunduh</string>
+    <string name="ocr_prepare_failed_body">Bisa jadi jaringannya sedang bermasalah atau Layanan Google Play perlu diperbarui.</string>
+    <string name="ocr_prepare_non_blocking">Kamu tetap bisa lanjut. Unduhannya dicoba lagi otomatis saat kamu memfoto catatan pertama kali.</string>
+    <string name="ocr_prepare_continue">Lanjut</string>
+    <string name="ocr_prepare_skip">Lanjut dulu</string>
+    <string name="ocr_step_download">Model diunduh</string>
+    <string name="ocr_step_ready">Siap dipakai tanpa internet</string>
+
+    <string name="ocr_reading">Membaca %1$d halaman…</string>
+    <string name="ocr_page_failed">Halaman %1$d gagal dibaca: %2$s</string>
+    <string name="ocr_all_failed">Tidak ada halaman yang bisa dibaca. Coba foto ulang dengan cahaya lebih terang.</string>
 </resources>
