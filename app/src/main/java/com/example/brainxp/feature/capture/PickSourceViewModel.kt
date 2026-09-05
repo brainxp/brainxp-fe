@@ -7,7 +7,9 @@ import com.example.brainxp.R
 import com.example.brainxp.core.capture.PickRejection
 import com.example.brainxp.core.capture.PickResult
 import com.example.brainxp.core.capture.PickedFileCache
+import com.example.brainxp.core.upload.UploadQueue
 import com.example.brainxp.di.IoDispatcher
+import com.example.brainxp.domain.model.MaterialType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +24,7 @@ class PickSourceViewModel
     @Inject
     constructor(
         private val cache: PickedFileCache,
+        private val uploads: UploadQueue,
         @IoDispatcher private val io: CoroutineDispatcher,
     ) : ViewModel() {
         private val mutableRejection = MutableStateFlow<Int?>(null)
@@ -39,6 +42,7 @@ class PickSourceViewModel
                 when (val result = withContext(io) { cache.copyIn(uri) }) {
                     is PickResult.Accepted -> {
                         mutablePicked.value = result.file.cachedPath
+                        uploads.enqueue(result.file.cachedPath, result.file.name, MaterialType.DOCUMENT)
                         onAccepted()
                     }
 
