@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -68,29 +70,35 @@ fun QuizScreen(
         ProgressStrip(state = state)
         QuestionDots(state = state, onEvent = onEvent)
 
-        Text(
-            text = question.stem,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(top = spacing.xs),
-        )
+        Column(
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(spacing.md),
+        ) {
+            Text(
+                text = question.stem,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(top = spacing.xs),
+            )
 
-        if (question.essay) {
-            EssayAnswer(state = state, question = question, onEvent = onEvent)
-        } else {
-            Column(verticalArrangement = Arrangement.spacedBy(spacing.sm)) {
-                question.options.forEachIndexed { index, text ->
-                    OptionRow(
-                        letter = LETTERS[index].toString(),
-                        text = text,
-                        selected = state.chosen == index,
-                        onClick = { onEvent(QuizEvent.Choose(index)) },
-                    )
+            if (question.essay) {
+                EssayAnswer(state = state, question = question, onEvent = onEvent)
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(spacing.sm)) {
+                    question.options.forEachIndexed { index, text ->
+                        OptionRow(
+                            letter = LETTERS[index].toString(),
+                            text = text,
+                            selected = state.chosen == index,
+                            onClick = { onEvent(QuizEvent.Choose(index)) },
+                        )
+                    }
                 }
             }
         }
-
-        Spacer(modifier = Modifier.weight(1f))
 
         Text(
             text =
