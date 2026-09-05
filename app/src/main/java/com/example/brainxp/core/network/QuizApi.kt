@@ -17,6 +17,11 @@ interface QuizApi {
         @Path("sessionId") sessionId: String,
     ): QuizDto
 
+    @POST("quizzes/{sessionId}/submit")
+    suspend fun submit(
+        @Path("sessionId") sessionId: String,
+    ): ReceiptDto
+
     @POST("quizzes/{sessionId}/answers")
     suspend fun answer(
         @Path("sessionId") sessionId: String,

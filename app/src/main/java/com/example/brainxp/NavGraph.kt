@@ -90,6 +90,7 @@ import com.example.brainxp.feature.questions.QuizScreen
 import com.example.brainxp.feature.questions.QuizViewModel
 import com.example.brainxp.feature.questions.recordAnswer
 import com.example.brainxp.feature.results.ReceiptScreen
+import com.example.brainxp.feature.results.ReceiptViewModel
 import kotlinx.coroutines.launch
 
 internal fun EntryProviderScope<NavKey>.onboardingEntries(backStack: NavBackStack<NavKey>) {
@@ -386,13 +387,7 @@ internal fun EntryProviderScope<NavKey>.learningEntries(backStack: NavBackStack<
     }
     entry<MainRoute.MaterialDetail> { key -> MaterialDetailEntry(key, backStack) }
     entry<MainRoute.Questions> { key -> QuestionsEntry(key, backStack) }
-    entry<MainRoute.Results> {
-        ReceiptScreen(
-            state = SAMPLE_RECEIPT,
-            onHome = { backStack.popOrIgnore() },
-            onLibrary = { backStack.add(MainRoute.MaterialList) },
-        )
-    }
+    entry<MainRoute.Results> { key -> ReceiptEntry(key, backStack) }
 }
 
 @Composable
@@ -496,7 +491,10 @@ private fun QuestionsEntry(
                         }
 
                         QuizEvent.Submit -> {
-                            load.sessionId?.let { backStack.add(MainRoute.Results(it)) }
+                            load.sessionId?.let { sessionId ->
+                                viewModel.finish()
+                                backStack.add(MainRoute.Results(sessionId))
+                            }
                         }
                     }
                 },
@@ -579,6 +577,36 @@ private fun MaterialDetailEntry(
                 onDelete = viewModel::delete,
                 onBack = { backStack.popOrIgnore() },
                 deleting = state.deleting,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ReceiptEntry(
+    key: MainRoute.Results,
+    backStack: NavBackStack<NavKey>,
+) {
+    val viewModel: ReceiptViewModel = hiltViewModel()
+    val load by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(key.sessionId) { viewModel.submit(key.sessionId) }
+
+    val receipt = load.receipt
+    when {
+        load.error != null && receipt == null -> {
+            ErrorState(error = load.error!!, onRetry = viewModel::retry)
+        }
+
+        receipt == null -> {
+            LoadingState()
+        }
+
+        else -> {
+            ReceiptScreen(
+                state = receipt,
+                onHome = { backStack.popOrIgnore() },
+                onLibrary = { backStack.add(MainRoute.MaterialList) },
             )
         }
     }

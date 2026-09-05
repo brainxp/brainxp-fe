@@ -49,6 +49,7 @@ data class QuestionSession(
     val mode: SessionMode,
     val questions: List<Question>,
     val createdAt: Long,
+    val answeredIds: Set<String> = emptySet(),
 )
 
 enum class GenerationStatus {
@@ -70,18 +71,31 @@ data class AnswerSaved(
     val totalCount: Int,
 )
 
-data class ConceptCoverage(
-    val conceptId: String,
+data class ReceiptLine(
+    val ordinal: Int,
     val label: String,
-    val correct: Int,
-    val total: Int,
+    val difficulty: String,
+    val multiplier: Double,
+    val rewardSeconds: Int,
+    val voided: Boolean,
+    val voidReason: String?,
+    val explanation: String?,
 )
 
-data class SessionResult(
+data class SessionReceipt(
     val sessionId: String,
-    val score: Double,
-    val rewardSeconds: Int,
-    val rewardGranted: Boolean,
-    val reason: String?,
-    val coverage: List<ConceptCoverage>,
+    val title: String?,
+    val baseRewardSeconds: Int,
+    val lines: List<ReceiptLine>,
+    val subtotalSeconds: Int,
+    val levelFactor: Double,
+    val levelNote: String,
+    val noveltyFactor: Double,
+    val noveltyNote: String,
+    val creditedSeconds: Int,
+    val balanceSeconds: Int,
+    val correctCount: Int,
+    val questionCount: Int,
+    val streakCurrent: Int,
+    val newBadges: List<String>,
 )

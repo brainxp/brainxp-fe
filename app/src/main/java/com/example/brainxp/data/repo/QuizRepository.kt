@@ -10,6 +10,7 @@ import com.example.brainxp.core.result.map
 import com.example.brainxp.data.prefs.AuthDataStore
 import com.example.brainxp.domain.model.AnswerSaved
 import com.example.brainxp.domain.model.QuestionSession
+import com.example.brainxp.domain.model.SessionReceipt
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -37,6 +38,8 @@ class QuizRepository
                     ),
                 )
             }.map { AnswerSaved(it.questionId, it.answeredCount, it.totalCount) }
+
+        suspend fun submit(sessionId: String): AppResult<SessionReceipt> = call { api.submit(sessionId) }.map { it.toReceipt() }
 
         suspend fun session(sessionId: String): AppResult<QuestionSession> = call { api.quiz(sessionId) }.map { it.toSession() }
 

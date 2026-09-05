@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.result.AppResult
 import com.example.brainxp.core.upload.AnswerFlushScheduler
+import com.example.brainxp.data.db.QuestionSessionDao
+import com.example.brainxp.data.db.QuestionSessionEntity
 import com.example.brainxp.data.repo.AnswerQueue
 import com.example.brainxp.data.repo.QueuedAnswer
 import com.example.brainxp.data.repo.QuizRepository
@@ -32,6 +34,7 @@ class QuizViewModel
         private val quizzes: QuizRepository,
         private val answers: AnswerQueue,
         private val flushes: AnswerFlushScheduler,
+        private val sessions: QuestionSessionDao,
     ) : ViewModel() {
         private val mutableState = MutableStateFlow(QuizLoad())
         val state: StateFlow<QuizLoad> = mutableState.asStateFlow()
@@ -43,8 +46,23 @@ class QuizViewModel
             startedFor = materialId
             mutableState.update { it.copy(loading = true, error = null) }
             viewModelScope.launch {
+                val open = sessions.findForMaterial(materialId).firstOrNull { it.status == STATUS_OPEN }
+                val result = open?.let { quizzes.session(it.id) } ?: quizzes.start(materialId)
+
+                if (result is AppResult.Success && open == null) {
+                    sessions.upsert(
+                        QuestionSessionEntity(
+                            id = result.value.sessionId,
+                            materialId = materialId,
+                            mode = result.value.mode.name,
+                            status = STATUS_OPEN,
+                            createdAt = System.currentTimeMillis(),
+                        ),
+                    )
+                }
+
                 mutableState.update {
-                    when (val result = quizzes.start(materialId)) {
+                    when (result) {
                         is AppResult.Success -> {
                             it.copy(
                                 quiz = result.value.toUiState(),
@@ -58,6 +76,14 @@ class QuizViewModel
                         }
                     }
                 }
+                answers.flush()
+            }
+        }
+
+        fun finish() {
+            val sessionId = mutableState.value.sessionId ?: return
+            viewModelScope.launch {
+                sessions.recordResult(id = sessionId, status = STATUS_DONE, score = null, rewardSeconds = null)
             }
         }
 
@@ -110,11 +136,16 @@ class QuizViewModel
         }
     }
 
-internal fun QuestionSession.toUiState(): QuizUiState =
-    QuizUiState(
+internal fun QuestionSession.toUiState(): QuizUiState {
+    val shown = questions.mapNotNull(Question::toUiQuestion)
+    val alreadyAnswered = shown.filter { it.id in answeredIds }.associate { it.id to it.id }
+    return QuizUiState(
         title = title ?: FALLBACK_TITLE,
-        questions = questions.mapNotNull(Question::toUiQuestion),
+        questions = shown,
+        answers = alreadyAnswered,
+        index = shown.indexOfFirst { it.id !in answeredIds }.coerceAtLeast(0),
     )
+}
 
 private fun Question.toUiQuestion(): QuizQuestion? =
     when (this) {
@@ -146,3 +177,5 @@ private fun Question.toUiQuestion(): QuizQuestion? =
     }
 
 private const val FALLBACK_TITLE = "Sesi belajar"
+private const val STATUS_OPEN = "OPEN"
+private const val STATUS_DONE = "DONE"
