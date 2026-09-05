@@ -29,6 +29,7 @@ import com.example.brainxp.core.ui.PlaceholderAction
 import com.example.brainxp.core.ui.PlaceholderScreen
 import com.example.brainxp.core.ui.levelLabel
 import com.example.brainxp.domain.model.AcademicLevel
+import com.example.brainxp.domain.model.DeviceRole
 import com.example.brainxp.feature.SAMPLE_ESTIMATE_SECONDS
 import com.example.brainxp.feature.SAMPLE_MATERIAL_ID
 import com.example.brainxp.feature.SAMPLE_QUESTION_COUNT
@@ -70,7 +71,6 @@ import com.example.brainxp.feature.library.LibraryScreen
 import com.example.brainxp.feature.library.LibraryViewModel
 import com.example.brainxp.feature.library.MaterialDetailScreen
 import com.example.brainxp.feature.library.MaterialDetailViewModel
-import com.example.brainxp.feature.onboarding.DeviceRole
 import com.example.brainxp.feature.onboarding.LevelScreen
 import com.example.brainxp.feature.onboarding.LevelViewModel
 import com.example.brainxp.feature.onboarding.PickModeScreen

@@ -1,0 +1,112 @@
+package com.example.brainxp.feature.family
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.brainxp.core.result.ApiError
+import com.example.brainxp.core.result.AppResult
+import com.example.brainxp.data.repo.PolicyRepository
+import com.example.brainxp.data.repo.SubjectPolicy
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+private const val SECONDS_PER_MINUTE = 60
+
+data class PolicyEditorLoad(
+    val policy: PolicyUiState? = null,
+    val loading: Boolean = true,
+    val saving: Boolean = false,
+    val saved: Boolean = false,
+    val notice: String? = null,
+    val error: ApiError? = null,
+)
+
+@HiltViewModel
+class PolicyEditorViewModel
+    @Inject
+    constructor(
+        private val policies: PolicyRepository,
+    ) : ViewModel() {
+        private val mutableState = MutableStateFlow(PolicyEditorLoad())
+        val state: StateFlow<PolicyEditorLoad> = mutableState.asStateFlow()
+
+        private var childId: String? = null
+
+        fun load(
+            subjectId: String,
+            childName: String,
+        ) {
+            if (childId == subjectId) return
+            childId = subjectId
+            mutableState.update { it.copy(loading = true, error = null) }
+            viewModelScope.launch { fetch(subjectId, childName) }
+        }
+
+        fun retry() {
+            val subject = childId ?: return
+            val name =
+                mutableState.value.policy
+                    ?.subjectName
+                    .orEmpty()
+            childId = null
+            load(subject, name)
+        }
+
+        fun onEvent(event: PolicyEvent) {
+            val current = mutableState.value.policy ?: return
+            if (event == PolicyEvent.Save) {
+                save(current)
+                return
+            }
+            mutableState.update { it.copy(policy = current.stepped(event), saved = false) }
+        }
+
+        private suspend fun fetch(
+            subjectId: String,
+            childName: String,
+        ) {
+            mutableState.update {
+                when (val result = policies.policy(subjectId)) {
+                    is AppResult.Success -> it.copy(policy = result.value.toUiState(childName), loading = false)
+                    is AppResult.Failure -> it.copy(loading = false, error = result.error)
+                }
+            }
+        }
+
+        private fun save(policy: PolicyUiState) {
+            val subject = childId ?: return
+            if (mutableState.value.saving) return
+            mutableState.update { it.copy(saving = true, error = null, notice = null) }
+            viewModelScope.launch {
+                val counts = policies.setQuestionsPerSession(policy.questionsPerSession, subject)
+                val caps =
+                    policies.setDailyCaps(policy.dailyCapMinutes.map { it * SECONDS_PER_MINUTE }, subject)
+
+                val failed = listOf(counts, caps).filterIsInstance<AppResult.Failure>().firstOrNull()
+                if (failed != null) {
+                    mutableState.update { it.copy(saving = false, error = failed.error) }
+                    return@launch
+                }
+
+                val deferred = (caps as? AppResult.Success)?.value?.takeIf { !it.applied }
+                mutableState.update { it.copy(saving = false, saved = true, notice = deferred?.message) }
+                fetch(subject, policy.subjectName)
+            }
+        }
+    }
+
+private fun SubjectPolicy.toUiState(childName: String): PolicyUiState =
+    PolicyUiState(
+        subjectName = childName,
+        questionsPerSession = questionsPerSession,
+        essayCount = essayCount,
+        dailyCapMinutes = dailyCapSeconds.map { it / SECONDS_PER_MINUTE },
+        dailyGrantMinutes = dailyGrantSeconds.map { it / SECONDS_PER_MINUTE },
+        idleDaysAllowed = idleDaysAllowed,
+        dayResetHour = dayResetHour,
+        apps = lockedApps.map { LockedAppEntry(packageName = it, label = it, locked = true) },
+    )

@@ -41,7 +41,12 @@ class NetworkRewardRepository
 
         override suspend fun history(): AppResult<List<LedgerEntry>> = withSubject { api.ledger(it).map(LedgerEntryDto::toEntry) }
 
-        override suspend fun report(days: Int): AppResult<Report> = withSubject { api.report(it, days).toReport() }
+        override suspend fun report(
+            days: Int,
+            subjectId: String?,
+        ): AppResult<Report> = withSubject(subjectId) { api.report(it, days).toReport() }
+
+        override suspend fun standingOf(subjectId: String): AppResult<Standing> = withSubject(subjectId) { api.standing(it).toStanding() }
 
         override suspend fun reportConsumption(entries: List<ConsumptionEntry>): AppResult<Standing> =
             withSubject { subject ->
@@ -52,15 +57,19 @@ class NetworkRewardRepository
             direction: LedgerDirection,
             seconds: Int,
             note: String,
+            subjectId: String?,
         ): AppResult<Standing> =
-            withSubject { subject ->
+            withSubject(subjectId) { subject ->
                 api
                     .adjust(subject, AdjustDto(direction = direction.name.lowercase(), seconds = seconds, note = note))
                     .toStanding()
             }
 
-        private suspend fun <T> withSubject(block: suspend (String) -> T): AppResult<T> {
-            val subject = auth.current().subjectId ?: return AppResult.Failure(ApiError.Unauthorized)
+        private suspend fun <T> withSubject(
+            explicit: String? = null,
+            block: suspend (String) -> T,
+        ): AppResult<T> {
+            val subject = explicit ?: auth.current().subjectId ?: return AppResult.Failure(ApiError.Unauthorized)
             return runCatching { block(subject) }
                 .fold(
                     onSuccess = { AppResult.Success(it) },

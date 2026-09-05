@@ -22,16 +22,7 @@ import com.example.brainxp.core.ui.BrainXPTheme
 import com.example.brainxp.core.ui.ChoiceRow
 import com.example.brainxp.core.ui.Note
 import com.example.brainxp.core.ui.ScreenNav
-
-enum class SetupMode {
-    FAMILY,
-    PERSONAL,
-}
-
-enum class DeviceRole {
-    PARENT,
-    CHILD,
-}
+import com.example.brainxp.domain.model.DeviceRole
 
 @Composable
 fun PickModeScreen(

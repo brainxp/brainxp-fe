@@ -44,13 +44,19 @@ interface RewardRepository {
 
     suspend fun history(): AppResult<List<LedgerEntry>>
 
-    suspend fun report(days: Int): AppResult<Report>
+    suspend fun report(
+        days: Int,
+        subjectId: String? = null,
+    ): AppResult<Report>
 
     suspend fun adjust(
         direction: LedgerDirection,
         seconds: Int,
         note: String,
+        subjectId: String? = null,
     ): AppResult<Standing>
+
+    suspend fun standingOf(subjectId: String): AppResult<Standing>
 }
 
 interface RestrictionRepository {

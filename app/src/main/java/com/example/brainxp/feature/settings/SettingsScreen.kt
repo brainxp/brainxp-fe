@@ -146,6 +146,10 @@ private fun SettingsPreview() {
                     dayResetHour = 4,
                     idleDaysAllowed = 2,
                     pendingWeakenAt = null,
+                    essayCount = PREVIEW_ESSAYS,
+                    dailyCapSeconds = List(DAYS_IN_WEEK) { PREVIEW_CAP_SECONDS },
+                    dailyGrantSeconds = List(DAYS_IN_WEEK) { 0 },
+                    lockedApps = emptyList(),
                 ),
             onLevel = {},
             onLanguage = {},
@@ -156,3 +160,7 @@ private fun SettingsPreview() {
         )
     }
 }
+
+private const val DAYS_IN_WEEK = 7
+private const val PREVIEW_ESSAYS = 2
+private const val PREVIEW_CAP_SECONDS = 3_600

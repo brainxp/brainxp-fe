@@ -60,7 +60,12 @@ private class StubRewardRepository : RewardRepository {
 
     override suspend fun history(): AppResult<List<LedgerEntry>> = AppResult.Success(emptyList())
 
-    override suspend fun report(days: Int): AppResult<Report> =
+    override suspend fun standingOf(subjectId: String): AppResult<Standing> = result
+
+    override suspend fun report(
+        days: Int,
+        subjectId: String?,
+    ): AppResult<Report> =
         AppResult.Success(
             Report(
                 standing = standing(0),
@@ -77,6 +82,7 @@ private class StubRewardRepository : RewardRepository {
         direction: LedgerDirection,
         seconds: Int,
         note: String,
+        subjectId: String?,
     ): AppResult<Standing> = result
 }
 

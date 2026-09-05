@@ -1,80 +1,195 @@
 package com.example.brainxp
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import com.example.brainxp.core.ui.ErrorState
+import com.example.brainxp.core.ui.LoadingState
 import com.example.brainxp.feature.family.BalanceAdjustScreen
 import com.example.brainxp.feature.family.ChildReportScreen
+import com.example.brainxp.feature.family.ChildReportViewModel
 import com.example.brainxp.feature.family.FamilyHomeScreen
+import com.example.brainxp.feature.family.FamilyHomeViewModel
 import com.example.brainxp.feature.family.NewChildScreen
+import com.example.brainxp.feature.family.NewChildViewModel
 import com.example.brainxp.feature.family.PairingCodeScreen
+import com.example.brainxp.feature.family.PairingCodeViewModel
 import com.example.brainxp.feature.family.PolicyEditorScreen
-import com.example.brainxp.feature.family.PolicyEvent
-import com.example.brainxp.feature.family.SAMPLE_FAMILY
-import com.example.brainxp.feature.family.SAMPLE_PAIRING_CODE
-import com.example.brainxp.feature.family.SAMPLE_POLICY
-import com.example.brainxp.feature.family.SAMPLE_REPORT
-import com.example.brainxp.feature.family.stepped
+import com.example.brainxp.feature.family.PolicyEditorViewModel
 
 internal fun EntryProviderScope<NavKey>.familyEntries(backStack: NavBackStack<NavKey>) {
-    entry<MainRoute.FamilyHome> {
-        FamilyHomeScreen(
-            state = SAMPLE_FAMILY,
-            onBack = { backStack.popOrIgnore() },
-            onOpenChild = { backStack.add(MainRoute.FamilyChild(it)) },
-            onNewChild = { backStack.add(MainRoute.FamilyNewChild) },
-            onSelfRules = { backStack.add(MainRoute.FamilyChildPolicy("self")) },
-            onJoinRules = { backStack.add(MainRoute.FamilyChildPolicy("self")) },
-        )
-    }
-    entry<MainRoute.FamilyNewChild> {
-        NewChildScreen(
-            onBack = { backStack.popOrIgnore() },
-            onCreated = { _, _, _ -> backStack.add(MainRoute.FamilyChildPolicy("child-new")) },
-        )
-    }
-    entry<MainRoute.FamilyChild> { key ->
-        ChildReportScreen(
-            state = SAMPLE_REPORT,
-            onBack = { backStack.popOrIgnore() },
-            onEditPolicy = { backStack.add(MainRoute.FamilyChildPolicy(key.childId)) },
-            onIssueCode = { backStack.add(MainRoute.FamilyPairing(key.childId)) },
-            onAdjustBalance = { backStack.add(MainRoute.FamilyBalance(key.childId)) },
-            onRemove = { backStack.popOrIgnore() },
-        )
-    }
-    entry<MainRoute.FamilyChildPolicy> { key ->
-        var policy by remember { mutableStateOf(SAMPLE_POLICY) }
+    entry<MainRoute.FamilyHome> { FamilyHomeEntry(backStack) }
+    entry<MainRoute.FamilyNewChild> { NewChildEntry(backStack) }
+    entry<MainRoute.FamilyChild> { key -> ChildReportEntry(key, backStack) }
+    entry<MainRoute.FamilyChildPolicy> { key -> ChildPolicyEntry(key, backStack) }
+    entry<MainRoute.FamilyPairing> { key -> PairingCodeEntry(key, backStack) }
+    entry<MainRoute.FamilyBalance> { key -> BalanceEntry(key, backStack) }
+}
 
-        PolicyEditorScreen(
-            state = policy,
-            onBack = { backStack.popOrIgnore() },
-            onEvent = { event ->
-                when (event) {
-                    PolicyEvent.Save -> backStack.add(MainRoute.FamilyPairing(key.childId))
-                    else -> policy = policy.stepped(event)
-                }
-            },
-        )
+@Composable
+private fun FamilyHomeEntry(backStack: NavBackStack<NavKey>) {
+    val viewModel: FamilyHomeViewModel = hiltViewModel()
+    val load by viewModel.state.collectAsStateWithLifecycle()
+
+    when {
+        load.error != null -> {
+            ErrorState(error = load.error!!, onRetry = viewModel::retry)
+        }
+
+        load.loading -> {
+            LoadingState()
+        }
+
+        else -> {
+            FamilyHomeScreen(
+                state = load.home,
+                onBack = { backStack.popOrIgnore() },
+                onOpenChild = { backStack.add(MainRoute.FamilyChild(it)) },
+                onNewChild = { backStack.add(MainRoute.FamilyNewChild) },
+                onSelfRules = { backStack.add(MainRoute.Settings) },
+                onJoinRules = { backStack.add(MainRoute.Settings) },
+            )
+        }
     }
-    entry<MainRoute.FamilyPairing> {
-        PairingCodeScreen(
-            state = SAMPLE_PAIRING_CODE,
-            onBack = { backStack.popOrIgnore() },
-            onDone = { backStack.popOrIgnore() },
-        )
+}
+
+@Composable
+private fun NewChildEntry(backStack: NavBackStack<NavKey>) {
+    val viewModel: NewChildViewModel = hiltViewModel()
+    val load by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(load.createdId) {
+        load.createdId?.let { backStack.add(MainRoute.FamilyPairing(it)) }
     }
-    entry<MainRoute.FamilyBalance> {
-        BalanceAdjustScreen(
-            subjectName = SAMPLE_REPORT.subjectName,
-            balanceSeconds = SAMPLE_REPORT.balanceSeconds,
-            idleDaysAllowed = SAMPLE_POLICY.idleDaysAllowed,
-            onBack = { backStack.popOrIgnore() },
-            onApply = { _, _, _ -> backStack.popOrIgnore() },
-        )
+
+    NewChildScreen(
+        onBack = { backStack.popOrIgnore() },
+        onCreated = { name, level, language -> viewModel.create(name, level, language.name.lowercase()) },
+    )
+}
+
+@Composable
+private fun ChildReportEntry(
+    key: MainRoute.FamilyChild,
+    backStack: NavBackStack<NavKey>,
+) {
+    val viewModel: ChildReportViewModel = hiltViewModel()
+    val load by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(key.childId) { viewModel.load(key.childId, "") }
+
+    val report = load.report
+    when {
+        load.error != null && report == null -> {
+            ErrorState(error = load.error!!, onRetry = viewModel::retry)
+        }
+
+        report == null -> {
+            LoadingState()
+        }
+
+        else -> {
+            ChildReportScreen(
+                state = report,
+                onBack = { backStack.popOrIgnore() },
+                onEditPolicy = { backStack.add(MainRoute.FamilyChildPolicy(key.childId)) },
+                onIssueCode = { backStack.add(MainRoute.FamilyPairing(key.childId)) },
+                onAdjustBalance = { backStack.add(MainRoute.FamilyBalance(key.childId)) },
+                onRemove = { backStack.popOrIgnore() },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ChildPolicyEntry(
+    key: MainRoute.FamilyChildPolicy,
+    backStack: NavBackStack<NavKey>,
+) {
+    val viewModel: PolicyEditorViewModel = hiltViewModel()
+    val load by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(key.childId) { viewModel.load(key.childId, "") }
+
+    val policy = load.policy
+    when {
+        load.error != null && policy == null -> {
+            ErrorState(error = load.error!!, onRetry = viewModel::retry)
+        }
+
+        policy == null -> {
+            LoadingState()
+        }
+
+        else -> {
+            PolicyEditorScreen(
+                state = policy,
+                onBack = { backStack.popOrIgnore() },
+                onEvent = viewModel::onEvent,
+            )
+        }
+    }
+}
+
+@Composable
+private fun PairingCodeEntry(
+    key: MainRoute.FamilyPairing,
+    backStack: NavBackStack<NavKey>,
+) {
+    val viewModel: PairingCodeViewModel = hiltViewModel()
+    val load by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(key.childId) { viewModel.load(key.childId) }
+
+    val code = load.code
+    when {
+        load.error != null && code == null -> {
+            ErrorState(error = load.error!!, onRetry = viewModel::refresh)
+        }
+
+        code == null -> {
+            LoadingState()
+        }
+
+        else -> {
+            PairingCodeScreen(
+                state = code,
+                onBack = { backStack.popOrIgnore() },
+                onDone = { backStack.popOrIgnore() },
+            )
+        }
+    }
+}
+
+@Composable
+private fun BalanceEntry(
+    key: MainRoute.FamilyBalance,
+    backStack: NavBackStack<NavKey>,
+) {
+    val viewModel: ChildReportViewModel = hiltViewModel()
+    val load by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(key.childId) { viewModel.load(key.childId, "") }
+
+    val report = load.report
+    when {
+        report == null -> {
+            LoadingState()
+        }
+
+        else -> {
+            BalanceAdjustScreen(
+                subjectName = report.subjectName,
+                balanceSeconds = report.balanceSeconds,
+                idleDaysAllowed = 0,
+                onBack = { backStack.popOrIgnore() },
+                onApply = { _, _, _ -> backStack.popOrIgnore() },
+            )
+        }
     }
 }

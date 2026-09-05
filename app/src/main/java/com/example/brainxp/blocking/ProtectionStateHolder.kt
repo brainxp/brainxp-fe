@@ -3,12 +3,9 @@ package com.example.brainxp.blocking
 import com.example.brainxp.core.permission.PermissionStateProvider
 import com.example.brainxp.core.permission.SpecialPermission
 import com.example.brainxp.data.prefs.SettingsDataStore
-import com.example.brainxp.data.repo.ActivityLogRepository
 import com.example.brainxp.data.repo.RestrictionRepository
 import com.example.brainxp.di.AppScope
 import com.example.brainxp.domain.UnlockSessionManager
-import com.example.brainxp.domain.model.ActivityEvent
-import com.example.brainxp.domain.model.ActivityKind
 import com.example.brainxp.domain.model.RestrictionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -41,7 +38,7 @@ class ProtectionStateHolder
     constructor(
         restrictions: RestrictionRepository,
         private val unlocks: UnlockSessionManager,
-        private val activityLog: ActivityLogRepository,
+        private val health: GuardianHealthReporter,
         permissions: PermissionStateProvider,
         settings: SettingsDataStore,
         @AppScope private val scope: CoroutineScope,
@@ -81,19 +78,7 @@ class ProtectionStateHolder
                 snapshot
                     .map { it.status }
                     .distinctUntilChanged()
-                    .collect { status ->
-                        val kind =
-                            when (status) {
-                                ProtectionStatus.DEGRADED -> ActivityKind.PROTECTION_DEGRADED
-                                ProtectionStatus.OFF -> ActivityKind.PROTECTION_DISABLED
-                                ProtectionStatus.ACTIVE -> null
-                            }
-                        kind?.let {
-                            activityLog.record(
-                                ActivityEvent(kind = it, timestamp = System.currentTimeMillis()),
-                            )
-                        }
-                    }
+                    .collect { status -> health.report(status) }
             }
         }
     }
