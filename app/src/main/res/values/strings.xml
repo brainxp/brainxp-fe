@@ -465,4 +465,18 @@ kehilangan kontak.</string>
     <string name="ocr_reading">Membaca %1$d halaman…</string>
     <string name="ocr_page_failed">Halaman %1$d gagal dibaca: %2$s</string>
     <string name="ocr_all_failed">Tidak ada halaman yang bisa dibaca. Coba foto ulang dengan cahaya lebih terang.</string>
+    <string name="review_title">Periksa teksnya</string>
+    <string name="review_body">Teks ini yang dipakai membuat soal. Perbaiki yang salah baca sebelum dikirim — sekali salah, soalnya ikut salah.</string>
+    <string name="review_chars">%1$d karakter</string>
+    <string name="review_page">Hal %1$d</string>
+    <string name="review_field">Teks halaman %1$d</string>
+    <string name="review_placeholder">Ketik ulang kalau kosong</string>
+    <string name="review_page_failed">Halaman %1$d gagal dibaca: %2$s. Ketik sendiri atau foto ulang.</string>
+    <string name="review_saving">Menyimpan…</string>
+    <string name="review_saved">Tersimpan otomatis</string>
+    <string name="review_not_saved">Belum tersimpan</string>
+    <string name="review_too_short">Teksnya terlalu sedikit — di bawah %1$d karakter belum cukup untuk membuat soal.</string>
+    <string name="review_too_long">Teksnya terlalu panjang — di atas %1$d karakter. Hapus bagian yang tidak perlu.</string>
+    <string name="review_upload">Kirim materi</string>
+    <string name="review_jump_failed">Lihat %1$d halaman yang gagal</string>
 </resources>
