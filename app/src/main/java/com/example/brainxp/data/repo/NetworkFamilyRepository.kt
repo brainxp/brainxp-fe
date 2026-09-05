@@ -9,6 +9,7 @@ import com.example.brainxp.core.network.FamilyApi
 import com.example.brainxp.core.network.HeartbeatRequestDto
 import com.example.brainxp.core.network.PairRequestDto
 import com.example.brainxp.core.network.PairingCodeDto
+import com.example.brainxp.core.network.SelfSubjectRequestDto
 import com.example.brainxp.core.network.SubjectDto
 import com.example.brainxp.core.result.AppResult
 import com.example.brainxp.core.result.map
@@ -47,6 +48,11 @@ class NetworkFamilyRepository
                         ),
                     ).toChild()
             }
+
+        override suspend fun createSelfSubject(level: AcademicLevel): AppResult<FamilyChild> =
+            call { api.createSelfSubject(SelfSubjectRequestDto(academicLevel = level.wire)).toChild() }
+
+        override suspend fun removeChild(childId: String): AppResult<Unit> = call { api.deleteSubject(childId) }
 
         override suspend fun pairingCode(childId: String): AppResult<PairingCode> =
             call { api.pairingCode(childId) }.map(PairingCodeDto::toCode)

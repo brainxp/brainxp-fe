@@ -87,6 +87,10 @@ interface FamilyRepository {
         language: String,
     ): AppResult<FamilyChild>
 
+    suspend fun createSelfSubject(level: AcademicLevel): AppResult<FamilyChild>
+
+    suspend fun removeChild(childId: String): AppResult<Unit>
+
     suspend fun pairingCode(childId: String): AppResult<PairingCode>
 
     suspend fun pair(code: String): AppResult<Unit>

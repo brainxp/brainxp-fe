@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
@@ -12,6 +13,7 @@ import androidx.navigation3.runtime.NavKey
 import com.example.brainxp.core.ui.ErrorState
 import com.example.brainxp.core.ui.LoadingState
 import com.example.brainxp.core.ui.Note
+import com.example.brainxp.domain.model.AcademicLevel
 import com.example.brainxp.feature.family.BalanceAdjustScreen
 import com.example.brainxp.feature.family.BalanceAdjustViewModel
 import com.example.brainxp.feature.family.ChildReportScreen
@@ -39,6 +41,11 @@ private fun FamilyHomeEntry(backStack: NavBackStack<NavKey>) {
     val viewModel: FamilyHomeViewModel = hiltViewModel()
     val load by viewModel.state.collectAsStateWithLifecycle()
 
+    LifecycleResumeEffect(Unit) {
+        viewModel.retry()
+        onPauseOrDispose {}
+    }
+
     when {
         load.error != null -> {
             ErrorState(error = load.error!!, onRetry = viewModel::retry)
@@ -54,8 +61,15 @@ private fun FamilyHomeEntry(backStack: NavBackStack<NavKey>) {
                 onBack = { backStack.popOrIgnore() },
                 onOpenChild = { backStack.add(MainRoute.FamilyChild(it)) },
                 onNewChild = { backStack.add(MainRoute.FamilyNewChild) },
-                onSelfRules = { backStack.add(MainRoute.Settings) },
-                onJoinRules = { backStack.add(MainRoute.Settings) },
+                onSelfRules = {
+                    val own = load.home.self
+                    if (own == null) {
+                        viewModel.claimOwnRules(AcademicLevel.UMUM)
+                    } else {
+                        backStack.add(MainRoute.FamilyChildPolicy(own.id))
+                    }
+                },
+                onJoinRules = { viewModel.claimOwnRules(AcademicLevel.UMUM) },
             )
         }
     }
@@ -85,6 +99,7 @@ private fun ChildReportEntry(
     val load by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(key.childId) { viewModel.load(key.childId, "") }
+    LaunchedEffect(load.removed) { if (load.removed) backStack.popOrIgnore() }
 
     val report = load.report
     when {
@@ -103,7 +118,7 @@ private fun ChildReportEntry(
                 onEditPolicy = { backStack.add(MainRoute.FamilyChildPolicy(key.childId)) },
                 onIssueCode = { backStack.add(MainRoute.FamilyPairing(key.childId)) },
                 onAdjustBalance = { backStack.add(MainRoute.FamilyBalance(key.childId)) },
-                onRemove = { backStack.popOrIgnore() },
+                onRemove = viewModel::remove,
             )
         }
     }

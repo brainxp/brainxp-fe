@@ -3,6 +3,7 @@ package com.example.brainxp.core.network
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -22,6 +23,11 @@ data class SubjectDto(
     @SerialName("display_name") val displayName: String,
     @SerialName("academic_level") val academicLevel: String,
     val kind: String,
+)
+
+@Serializable
+data class SelfSubjectRequestDto(
+    @SerialName("academic_level") val academicLevel: String,
 )
 
 @Serializable
@@ -65,6 +71,16 @@ interface FamilyApi {
     suspend fun createChild(
         @Body body: ChildRequestDto,
     ): SubjectDto
+
+    @POST("subjects/self")
+    suspend fun createSelfSubject(
+        @Body body: SelfSubjectRequestDto,
+    ): SubjectDto
+
+    @DELETE("subjects/{subjectId}")
+    suspend fun deleteSubject(
+        @Path("subjectId") subjectId: String,
+    )
 
     @POST("subjects/{subjectId}/pairing-code")
     suspend fun pairingCode(

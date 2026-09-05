@@ -112,6 +112,8 @@ class PairingCodeViewModel
 data class ChildReportLoad(
     val report: ChildReportUiState? = null,
     val loading: Boolean = true,
+    val removing: Boolean = false,
+    val removed: Boolean = false,
     val error: ApiError? = null,
 )
 
@@ -122,6 +124,20 @@ class ChildReportViewModel
         private val rewards: RewardRepository,
         private val family: FamilyRepository,
     ) : ViewModel() {
+        fun remove() {
+            val childId = loadedFor ?: return
+            if (mutableState.value.removing) return
+            mutableState.update { it.copy(removing = true, error = null) }
+            viewModelScope.launch {
+                mutableState.update {
+                    when (val result = family.removeChild(childId)) {
+                        is AppResult.Success -> it.copy(removing = false, removed = true)
+                        is AppResult.Failure -> it.copy(removing = false, error = result.error)
+                    }
+                }
+            }
+        }
+
         private val mutableState = MutableStateFlow(ChildReportLoad())
         val state: StateFlow<ChildReportLoad> = mutableState.asStateFlow()
 
