@@ -6,8 +6,8 @@ import com.example.brainxp.data.db.ActivityEventDao
 import com.example.brainxp.data.db.AnswerDao
 import com.example.brainxp.data.db.BrainXPDatabase
 import com.example.brainxp.data.db.MIGRATION_1_2
+import com.example.brainxp.data.db.MIGRATION_2_3
 import com.example.brainxp.data.db.MaterialDao
-import com.example.brainxp.data.db.OcrDraftDao
 import com.example.brainxp.data.db.PendingOperationDao
 import com.example.brainxp.data.db.QuestionDao
 import com.example.brainxp.data.db.QuestionSessionDao
@@ -30,7 +30,7 @@ object DatabaseModule {
     ): BrainXPDatabase =
         Room
             .databaseBuilder(context, BrainXPDatabase::class.java, BrainXPDatabase.NAME)
-            .addMigrations(MIGRATION_1_2)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .build()
 
     @Provides
@@ -53,9 +53,6 @@ object DatabaseModule {
 
     @Provides
     fun provideActivityEventDao(db: BrainXPDatabase): ActivityEventDao = db.activityEventDao()
-
-    @Provides
-    fun provideOcrDraftDao(db: BrainXPDatabase): OcrDraftDao = db.ocrDraftDao()
 
     @Provides
     fun providePendingOperationDao(db: BrainXPDatabase): PendingOperationDao = db.pendingOperationDao()

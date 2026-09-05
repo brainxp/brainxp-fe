@@ -13,10 +13,9 @@ import androidx.room.TypeConverters
         UnlockSessionEntity::class,
         RestrictedAppEntity::class,
         ActivityEventEntity::class,
-        OcrDraftEntity::class,
         PendingOperationEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = false,
 )
 @TypeConverters(Converters::class, JsonConverters::class)
@@ -34,8 +33,6 @@ abstract class BrainXPDatabase : RoomDatabase() {
     abstract fun restrictedAppDao(): RestrictedAppDao
 
     abstract fun activityEventDao(): ActivityEventDao
-
-    abstract fun ocrDraftDao(): OcrDraftDao
 
     abstract fun pendingOperationDao(): PendingOperationDao
 

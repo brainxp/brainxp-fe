@@ -106,14 +106,6 @@ data class ActivityEventEntity(
     val syncState: SyncState = SyncState.PENDING,
 )
 
-@Entity(tableName = "ocr_drafts", primaryKeys = ["draftId", "pageIndex"])
-data class OcrDraftEntity(
-    val draftId: String,
-    val pageIndex: Int,
-    val text: String,
-    val updatedAt: Long,
-)
-
 @Entity(tableName = "pending_operations", indices = [Index("nextAttemptAt")])
 data class PendingOperationEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,

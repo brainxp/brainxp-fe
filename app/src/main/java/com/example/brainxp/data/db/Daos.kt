@@ -204,27 +204,6 @@ interface ActivityEventDao {
 }
 
 @Dao
-interface OcrDraftDao {
-    @Upsert
-    suspend fun upsert(page: OcrDraftEntity)
-
-    @Query("SELECT * FROM ocr_drafts WHERE draftId = :draftId ORDER BY pageIndex ASC")
-    suspend fun findForDraft(draftId: String): List<OcrDraftEntity>
-
-    @Query("SELECT * FROM ocr_drafts WHERE draftId = :draftId ORDER BY pageIndex ASC")
-    fun observeForDraft(draftId: String): Flow<List<OcrDraftEntity>>
-
-    @Query("SELECT SUM(LENGTH(text)) FROM ocr_drafts WHERE draftId = :draftId")
-    suspend fun charCountForDraft(draftId: String): Int?
-
-    @Query("DELETE FROM ocr_drafts WHERE draftId = :draftId")
-    suspend fun deleteDraft(draftId: String)
-
-    @Query("SELECT DISTINCT draftId FROM ocr_drafts")
-    suspend fun findDraftIds(): List<String>
-}
-
-@Dao
 interface PendingOperationDao {
     @Insert
     suspend fun insert(operation: PendingOperationEntity): Long

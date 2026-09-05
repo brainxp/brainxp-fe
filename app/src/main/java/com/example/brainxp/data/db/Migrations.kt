@@ -19,3 +19,10 @@ val MIGRATION_1_2 =
             db.execSQL("CREATE INDEX IF NOT EXISTS `index_unlock_sessions_status` ON `unlock_sessions` (`status`)")
         }
     }
+
+val MIGRATION_2_3 =
+    object : Migration(2, 3) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("DROP TABLE IF EXISTS `ocr_drafts`")
+        }
+    }
