@@ -66,6 +66,8 @@ import com.example.brainxp.feature.library.LibraryEffect
 import com.example.brainxp.feature.library.LibraryScreen
 import com.example.brainxp.feature.library.LibraryViewModel
 import com.example.brainxp.feature.onboarding.DeviceRole
+import com.example.brainxp.feature.onboarding.LevelScreen
+import com.example.brainxp.feature.onboarding.LevelViewModel
 import com.example.brainxp.feature.onboarding.PickModeScreen
 import com.example.brainxp.feature.onboarding.PickRoleScreen
 import com.example.brainxp.feature.onboarding.SetupMode
@@ -111,7 +113,7 @@ internal fun EntryProviderScope<NavKey>.onboardingEntries(backStack: NavBackStac
         val state by viewModel.state.collectAsStateWithLifecycle()
 
         LaunchedEffect(state.signedIn) {
-            if (state.signedIn) backStack.add(OnboardingRoute.PermissionSetup)
+            if (state.signedIn) backStack.add(OnboardingRoute.Level)
         }
 
         SignInScreen(
@@ -145,6 +147,21 @@ internal fun EntryProviderScope<NavKey>.onboardingTailEntries(
     backStack: NavBackStack<NavKey>,
     onSetupComplete: () -> Unit,
 ) {
+    entry<OnboardingRoute.Level> {
+        val viewModel: LevelViewModel = hiltViewModel()
+        val state by viewModel.state.collectAsStateWithLifecycle()
+
+        LaunchedEffect(state.saved) {
+            if (state.saved) backStack.add(OnboardingRoute.PermissionSetup)
+        }
+
+        LevelScreen(
+            onSubmit = viewModel::submit,
+            onBack = { backStack.popOrIgnore() },
+            busy = state.busy,
+            error = state.error,
+        )
+    }
     entry<OnboardingRoute.PermissionSetup> {
         PermissionSetupRoute(
             onDone = { backStack.add(OnboardingRoute.SetupDone) },
