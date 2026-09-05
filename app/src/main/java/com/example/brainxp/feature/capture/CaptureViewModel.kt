@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brainxp.core.capture.CaptureStore
 import com.example.brainxp.core.capture.CapturedPage
+import com.example.brainxp.core.upload.UploadQueue
+import com.example.brainxp.domain.model.MaterialType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -47,6 +49,7 @@ class CaptureViewModel
     @Inject
     constructor(
         private val store: CaptureStore,
+        private val uploads: UploadQueue,
     ) : ViewModel() {
         private val shot = MutableStateFlow(Shot())
 
@@ -84,6 +87,13 @@ class CaptureViewModel
             by: Int,
         ) {
             store.reorder(state.value.movePage(id, by).pages)
+        }
+
+        fun uploadAll() {
+            state.value.pages.forEach { page ->
+                uploads.enqueue(page.path, page.id, MaterialType.PHOTO)
+            }
+            store.reorder(emptyList())
         }
 
         fun discardAll() {
