@@ -147,7 +147,7 @@ private fun ReadyLibrary(
 @Composable
 private fun subtitleFor(material: Material): String =
     listOf(
-        stringResource(R.string.library_question_count, "%,d".format(material.charCount)),
+        stringResource(R.string.library_question_count, material.questionCount),
         stringResource(R.string.library_times_studied, material.sessionCount),
     ).joinToString(SEPARATOR)
 
@@ -162,7 +162,6 @@ private val PREVIEW_MATERIALS =
             title = "Bab 4 — Gerak Lurus",
             type = MaterialType.PHOTO,
             status = MaterialStatus.READY,
-            charCount = 4_812,
             createdAt = 0L,
             sessionCount = 1,
         ),
@@ -171,7 +170,6 @@ private val PREVIEW_MATERIALS =
             title = "Hukum Newton",
             type = MaterialType.DOCUMENT,
             status = MaterialStatus.READY,
-            charCount = 2_400,
             createdAt = 0L,
             sessionCount = 4,
         ),

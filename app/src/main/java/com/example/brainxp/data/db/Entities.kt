@@ -10,10 +10,13 @@ data class MaterialEntity(
     @PrimaryKey val id: String,
     val title: String,
     val type: String,
-    val charCount: Int,
     val status: String,
     val createdAt: Long,
     val sessionCount: Int = 0,
+    val questionCount: Int = 0,
+    val assessedLevel: String? = null,
+    val declaredLevel: String? = null,
+    val gateReason: String? = null,
 )
 
 @Entity(

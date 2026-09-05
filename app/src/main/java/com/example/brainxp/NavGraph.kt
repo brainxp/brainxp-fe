@@ -27,6 +27,8 @@ import com.example.brainxp.core.ui.ErrorState
 import com.example.brainxp.core.ui.LoadingState
 import com.example.brainxp.core.ui.PlaceholderAction
 import com.example.brainxp.core.ui.PlaceholderScreen
+import com.example.brainxp.core.ui.levelLabel
+import com.example.brainxp.domain.model.AcademicLevel
 import com.example.brainxp.feature.SAMPLE_ASSESSED_LEVEL
 import com.example.brainxp.feature.SAMPLE_DECLARED_LEVEL
 import com.example.brainxp.feature.SAMPLE_ESTIMATE_SECONDS
@@ -47,6 +49,7 @@ import com.example.brainxp.feature.capture.PreparingScreen
 import com.example.brainxp.feature.capture.PreparingStage
 import com.example.brainxp.feature.capture.PreparingViewModel
 import com.example.brainxp.feature.capture.RejectedScreen
+import com.example.brainxp.feature.capture.RejectedViewModel
 import com.example.brainxp.feature.debug.DebugUnlockPanel
 import com.example.brainxp.feature.family.BalanceAdjustScreen
 import com.example.brainxp.feature.family.ChildReportScreen
@@ -348,15 +351,7 @@ internal fun EntryProviderScope<NavKey>.captureEntries(backStack: NavBackStack<N
             },
         )
     }
-    entry<MainRoute.Rejected> {
-        RejectedScreen(
-            assessedLevel = SAMPLE_ASSESSED_LEVEL,
-            declaredLevel = SAMPLE_DECLARED_LEVEL,
-            reason = SAMPLE_REJECT_REASON,
-            onBack = { backStack.popOrIgnore() },
-            onRetry = { backStack.popOrIgnore() },
-        )
-    }
+    entry<MainRoute.Rejected> { key -> RejectedEntry(key, backStack) }
 }
 
 internal fun EntryProviderScope<NavKey>.learningEntries(backStack: NavBackStack<NavKey>) {
@@ -511,3 +506,49 @@ private fun QuestionsEntry(
         }
     }
 }
+
+@Composable
+private fun RejectedEntry(
+    key: MainRoute.Rejected,
+    backStack: NavBackStack<NavKey>,
+) {
+    val viewModel: RejectedViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(key.materialId) { viewModel.load(key.materialId) }
+
+    when {
+        state.error != null -> {
+            ErrorState(error = state.error!!, onRetry = viewModel::retry)
+        }
+
+        state.loading -> {
+            LoadingState()
+        }
+
+        else -> {
+            RejectedScreen(
+                assessedLevel = levelText(state.assessedLevel),
+                declaredLevel = levelText(state.declaredLevel),
+                reason = reasonText(state.reasonCode),
+                onBack = { backStack.popOrIgnore() },
+                onRetry = { backStack.popOrIgnore() },
+            )
+        }
+    }
+}
+
+@Composable
+private fun levelText(wire: String?): String =
+    AcademicLevel.fromWire(wire)?.let { levelLabel(it) } ?: stringResource(R.string.reject_level_unknown)
+
+@Composable
+private fun reasonText(code: String?): String =
+    when {
+        code == null -> stringResource(R.string.reject_reason_unknown)
+        code == "level_too_low" -> stringResource(R.string.reject_reason_level_too_low)
+        code == "too_thin" || code == "too_short" -> stringResource(R.string.reject_reason_too_thin)
+        code == "unreadable" -> stringResource(R.string.reject_reason_unreadable)
+        code.contains(' ') -> code
+        else -> stringResource(R.string.reject_reason_unknown)
+    }

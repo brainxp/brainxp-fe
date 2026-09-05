@@ -15,7 +15,7 @@ import androidx.room.TypeConverters
         ActivityEventEntity::class,
         PendingOperationEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = false,
 )
 @TypeConverters(Converters::class, JsonConverters::class)

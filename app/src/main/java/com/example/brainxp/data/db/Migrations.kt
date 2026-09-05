@@ -26,3 +26,24 @@ val MIGRATION_2_3 =
             db.execSQL("DROP TABLE IF EXISTS `ocr_drafts`")
         }
     }
+
+val MIGRATION_3_4 =
+    object : Migration(3, 4) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "CREATE TABLE IF NOT EXISTS `materials_new` (" +
+                    "`id` TEXT NOT NULL, `title` TEXT NOT NULL, `type` TEXT NOT NULL, " +
+                    "`status` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, " +
+                    "`sessionCount` INTEGER NOT NULL, `questionCount` INTEGER NOT NULL, " +
+                    "`assessedLevel` TEXT, `declaredLevel` TEXT, `gateReason` TEXT, " +
+                    "PRIMARY KEY(`id`))",
+            )
+            db.execSQL(
+                "INSERT INTO `materials_new` " +
+                    "(`id`, `title`, `type`, `status`, `createdAt`, `sessionCount`, `questionCount`) " +
+                    "SELECT `id`, `title`, `type`, `status`, `createdAt`, `sessionCount`, 0 FROM `materials`",
+            )
+            db.execSQL("DROP TABLE `materials`")
+            db.execSQL("ALTER TABLE `materials_new` RENAME TO `materials`")
+        }
+    }

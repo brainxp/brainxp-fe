@@ -109,10 +109,12 @@ internal fun MaterialDto.toMaterial(): Material =
         title = originalName ?: topicSummary ?: FALLBACK_TITLE,
         type = if (sourceType?.startsWith("image/") == true) MaterialType.IMAGE else MaterialType.DOCUMENT,
         status = statusOf(status),
-        charCount = 0,
         createdAt = epochOf(createdAt),
         sessionCount = timesStudied,
         questionCount = questionCount,
+        assessedLevel = assessedLevel,
+        declaredLevel = declaredLevel,
+        gateReason = gateReason,
     )
 
 private fun statusOf(raw: String): MaterialStatus =
@@ -129,10 +131,13 @@ private fun Material.toEntity(): MaterialEntity =
         id = id,
         title = title,
         type = type.name,
-        charCount = charCount,
         status = status.name,
         createdAt = createdAt,
         sessionCount = sessionCount,
+        questionCount = questionCount,
+        assessedLevel = assessedLevel,
+        declaredLevel = declaredLevel,
+        gateReason = gateReason,
     )
 
 private fun MaterialEntity.toMaterial(): Material =
@@ -141,9 +146,12 @@ private fun MaterialEntity.toMaterial(): Material =
         title = title,
         type = runCatching { MaterialType.valueOf(type) }.getOrDefault(MaterialType.DOCUMENT),
         status = runCatching { MaterialStatus.valueOf(status) }.getOrDefault(MaterialStatus.PROCESSING),
-        charCount = charCount,
         createdAt = createdAt,
         sessionCount = sessionCount,
+        questionCount = questionCount,
+        assessedLevel = assessedLevel,
+        declaredLevel = declaredLevel,
+        gateReason = gateReason,
     )
 
 private const val FALLBACK_TITLE = "Materi"

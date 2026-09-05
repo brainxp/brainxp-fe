@@ -19,10 +19,12 @@ data class Material(
     val title: String,
     val type: MaterialType,
     val status: MaterialStatus,
-    val charCount: Int,
     val createdAt: Long,
     val sessionCount: Int,
     val questionCount: Int = 0,
+    val assessedLevel: String? = null,
+    val declaredLevel: String? = null,
+    val gateReason: String? = null,
 )
 
 data class MaterialPage(

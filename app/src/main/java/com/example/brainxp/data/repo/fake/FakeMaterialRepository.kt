@@ -38,7 +38,6 @@ class FakeMaterialRepository
                         title = title.ifBlank { "Materi tanpa judul" },
                         type = type,
                         status = MaterialStatus.PROCESSING,
-                        charCount = 0,
                         createdAt = FakeData.now,
                         sessionCount = 0,
                     )

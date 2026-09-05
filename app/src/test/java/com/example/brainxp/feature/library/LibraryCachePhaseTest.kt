@@ -14,7 +14,6 @@ private fun material(id: String) =
         title = "Materi $id",
         type = MaterialType.DOCUMENT,
         status = MaterialStatus.READY,
-        charCount = 1_000,
         createdAt = 0L,
         sessionCount = 0,
     )
