@@ -108,5 +108,15 @@ sealed interface MainRoute : NavKey {
     ) : MainRoute
 
     @Serializable
-    data object FamilyPairing : MainRoute
+    data class FamilyPairing(
+        val childId: String,
+    ) : MainRoute
+
+    @Serializable
+    data object FamilyNewChild : MainRoute
+
+    @Serializable
+    data class FamilyBalance(
+        val childId: String,
+    ) : MainRoute
 }
