@@ -80,13 +80,6 @@ class QuizViewModel
             }
         }
 
-        fun finish() {
-            val sessionId = mutableState.value.sessionId ?: return
-            viewModelScope.launch {
-                sessions.recordResult(id = sessionId, status = STATUS_DONE, score = null, rewardSeconds = null)
-            }
-        }
-
         fun retry() {
             val materialId = startedFor ?: return
             startedFor = null
@@ -178,4 +171,3 @@ private fun Question.toUiQuestion(): QuizQuestion? =
 
 private const val FALLBACK_TITLE = "Sesi belajar"
 private const val STATUS_OPEN = "OPEN"
-private const val STATUS_DONE = "DONE"

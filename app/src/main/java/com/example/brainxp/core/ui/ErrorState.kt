@@ -131,14 +131,14 @@ private fun ApiError.bodyText(): String =
         }
 
         is ApiError.Validation -> {
-            field
-                ?.let { stringResource(R.string.error_validation_body_field, it) }
-                ?: message ?: stringResource(R.string.error_validation_body)
+            message
+                ?: field?.let { stringResource(R.string.error_validation_body_field, it) }
+                ?: stringResource(R.string.error_validation_body)
         }
 
         is ApiError.Unknown -> {
-            code
-                ?.let { stringResource(R.string.error_unknown_body_code, it) }
+            message
+                ?: code?.let { stringResource(R.string.error_unknown_body_code, it) }
                 ?: stringResource(R.string.error_unknown_body)
         }
 

@@ -27,6 +27,9 @@ interface MaterialDao {
     @Query("DELETE FROM materials WHERE id NOT IN (:keep)")
     suspend fun keepOnly(keep: List<String>)
 
+    @Query("DELETE FROM materials")
+    suspend fun clearAll()
+
     @Query("SELECT COUNT(*) FROM materials")
     suspend fun count(): Int
 }

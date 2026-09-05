@@ -484,10 +484,7 @@ private fun QuestionsEntry(
                         }
 
                         QuizEvent.Submit -> {
-                            load.sessionId?.let { sessionId ->
-                                viewModel.finish()
-                                backStack.add(MainRoute.Results(sessionId))
-                            }
+                            load.sessionId?.let { backStack.add(MainRoute.Results(it)) }
                         }
                     }
                 },

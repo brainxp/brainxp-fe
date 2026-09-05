@@ -59,7 +59,7 @@ class NetworkMaterialRepository
             return call { api.library(subject) }.map { rows ->
                 val items = rows.map(MaterialDto::toMaterial)
                 dao.upsert(items.map(Material::toEntity))
-                dao.keepOnly(items.map(Material::id))
+                if (items.isEmpty()) dao.clearAll() else dao.keepOnly(items.map(Material::id))
                 MaterialPage(items = items, nextCursor = null)
             }
         }

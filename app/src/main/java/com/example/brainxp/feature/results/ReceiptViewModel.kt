@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.result.AppResult
+import com.example.brainxp.data.db.QuestionSessionDao
 import com.example.brainxp.data.repo.QuizRepository
 import com.example.brainxp.domain.model.ReceiptLine
 import com.example.brainxp.domain.model.SessionReceipt
@@ -26,6 +27,7 @@ class ReceiptViewModel
     @Inject
     constructor(
         private val quizzes: QuizRepository,
+        private val sessions: QuestionSessionDao,
     ) : ViewModel() {
         private val mutableState = MutableStateFlow(ReceiptLoad())
         val state: StateFlow<ReceiptLoad> = mutableState.asStateFlow()
@@ -37,8 +39,19 @@ class ReceiptViewModel
             submittedFor = sessionId
             mutableState.update { it.copy(loading = true, error = null) }
             viewModelScope.launch {
+                val result = quizzes.submit(sessionId)
+                if (result is AppResult.Success) {
+                    sessions.recordResult(
+                        id = sessionId,
+                        status = STATUS_DONE,
+                        score = result.value.correctCount.toDouble() / result.value.questionCount.coerceAtLeast(1),
+                        rewardSeconds = result.value.creditedSeconds,
+                    )
+                } else {
+                    submittedFor = null
+                }
                 mutableState.update {
-                    when (val result = quizzes.submit(sessionId)) {
+                    when (result) {
                         is AppResult.Success -> it.copy(receipt = result.value.toUiState(), loading = false)
                         is AppResult.Failure -> it.copy(loading = false, error = result.error)
                     }
@@ -84,3 +97,4 @@ private fun ReceiptLine.toRow(): ReceiptRow =
     )
 
 private const val FALLBACK_TITLE = "Sesi belajar"
+private const val STATUS_DONE = "DONE"

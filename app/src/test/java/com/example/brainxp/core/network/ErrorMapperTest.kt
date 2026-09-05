@@ -107,6 +107,27 @@ class ErrorMapperTest {
         }
 
     @Test
+    fun aConflictKeepsTheServerSentence() =
+        runTest {
+            server.enqueue(
+                MockResponse()
+                    .setResponseCode(409)
+                    .setBody(
+                        """{"detail":{"code":"incomplete_session","message":"Masih ada 8 soal yang belum dijawab."}}""",
+                    ),
+            )
+
+            val error = failure(call())
+
+            assertTrue("expected Unknown but got $error", error is ApiError.Unknown)
+            assertEquals(
+                "Masih ada 8 soal yang belum dijawab.",
+                (error as ApiError.Unknown).message,
+            )
+            assertEquals(409, error.code)
+        }
+
+    @Test
     fun unauthorizedMapsToUnauthorized() =
         runTest {
             server.enqueue(MockResponse().setResponseCode(401))
