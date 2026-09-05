@@ -70,6 +70,7 @@ import com.example.brainxp.feature.onboarding.PickModeScreen
 import com.example.brainxp.feature.onboarding.PickRoleScreen
 import com.example.brainxp.feature.onboarding.SetupMode
 import com.example.brainxp.feature.onboarding.SignInScreen
+import com.example.brainxp.feature.onboarding.SignInViewModel
 import com.example.brainxp.feature.onboarding.WelcomeScreen
 import com.example.brainxp.feature.onboarding.permission.PermissionSetupRoute
 import com.example.brainxp.feature.progress.ProgressScreen
@@ -106,10 +107,19 @@ internal fun EntryProviderScope<NavKey>.onboardingEntries(backStack: NavBackStac
         )
     }
     entry<OnboardingRoute.SignIn> { key ->
+        val viewModel: SignInViewModel = hiltViewModel()
+        val state by viewModel.state.collectAsStateWithLifecycle()
+
+        LaunchedEffect(state.signedIn) {
+            if (state.signedIn) backStack.add(OnboardingRoute.PermissionSetup)
+        }
+
         SignInScreen(
             mode = if (key.family) SetupMode.FAMILY else SetupMode.PERSONAL,
             onBack = { backStack.popOrIgnore() },
-            onDone = { backStack.add(OnboardingRoute.PermissionSetup) },
+            onSubmit = viewModel::submit,
+            busy = state.busy,
+            error = state.error,
         )
     }
     entry<OnboardingRoute.PairDevice> {

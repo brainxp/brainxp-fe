@@ -48,6 +48,8 @@
     <string name="signin_password">Kata sandi</string>
     <string name="signin_password_hint">Minimal 10 karakter</string>
     <string name="signin_submit_login">Masuk</string>
+    <string name="signin_error_credentials_title">Email atau sandi salah</string>
+    <string name="signin_error_credentials_body">Periksa lagi email dan kata sandinya, lalu coba sekali lagi.</string>
     <string name="signin_submit_register">Daftar</string>
     <string name="signin_to_register">Belum punya akun? Daftar</string>
     <string name="signin_to_login">Sudah punya akun? Masuk</string>

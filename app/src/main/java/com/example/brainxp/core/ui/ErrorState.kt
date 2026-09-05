@@ -61,7 +61,7 @@ fun ErrorState(
 }
 
 @Composable
-private fun AlertNote(
+fun AlertNote(
     title: String,
     body: String,
     modifier: Modifier = Modifier,

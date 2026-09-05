@@ -25,20 +25,32 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.brainxp.R
+import com.example.brainxp.core.result.ApiError
+import com.example.brainxp.core.ui.AlertNote
 import com.example.brainxp.core.ui.BrainXPTheme
+import com.example.brainxp.core.ui.ErrorState
 import com.example.brainxp.core.ui.Field
 import com.example.brainxp.core.ui.PrimaryButton
 import com.example.brainxp.core.ui.ScreenNav
 
 private const val MIN_NEW_PASSWORD = 10
 
+data class Credentials(
+    val register: Boolean,
+    val displayName: String,
+    val email: String,
+    val password: String,
+    val family: Boolean,
+)
+
 @Composable
 fun SignInScreen(
     mode: SetupMode,
-    onDone: () -> Unit,
+    onSubmit: (Credentials) -> Unit,
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
     busy: Boolean = false,
+    error: ApiError? = null,
 ) {
     val spacing = BrainXPTheme.spacing
     var creating by rememberSaveable { mutableStateOf(false) }
@@ -123,6 +135,18 @@ fun SignInScreen(
             )
         }
 
+        if (error != null) {
+            Spacer(modifier = Modifier.size(spacing.lg))
+            if (error == ApiError.Unauthorized) {
+                AlertNote(
+                    title = stringResource(R.string.signin_error_credentials_title),
+                    body = stringResource(R.string.signin_error_credentials_body),
+                )
+            } else {
+                ErrorState(error = error)
+            }
+        }
+
         Spacer(modifier = Modifier.weight(1f))
 
         Column(verticalArrangement = Arrangement.spacedBy(spacing.sm)) {
@@ -131,7 +155,17 @@ fun SignInScreen(
                     stringResource(
                         if (creating) R.string.signin_submit_register else R.string.signin_submit_login,
                     ),
-                onClick = onDone,
+                onClick = {
+                    onSubmit(
+                        Credentials(
+                            register = creating,
+                            displayName = name.trim(),
+                            email = email.trim(),
+                            password = password,
+                            family = mode == SetupMode.FAMILY,
+                        ),
+                    )
+                },
                 enabled = ready,
                 loading = busy,
             )
@@ -155,11 +189,11 @@ fun SignInScreen(
 @Preview(name = "SignIn family", showBackground = true, heightDp = 780)
 @Composable
 private fun SignInPreview() {
-    BrainXPTheme { SignInScreen(mode = SetupMode.FAMILY, onDone = {}, onBack = {}) }
+    BrainXPTheme { SignInScreen(mode = SetupMode.FAMILY, onSubmit = {}, onBack = {}) }
 }
 
 @Preview(name = "SignIn personal", showBackground = true, heightDp = 780)
 @Composable
 private fun SignInPersonalPreview() {
-    BrainXPTheme { SignInScreen(mode = SetupMode.PERSONAL, onDone = {}) }
+    BrainXPTheme { SignInScreen(mode = SetupMode.PERSONAL, onSubmit = {}) }
 }
