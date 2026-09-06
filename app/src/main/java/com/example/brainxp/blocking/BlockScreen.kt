@@ -2,103 +2,236 @@ package com.example.brainxp.blocking
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.example.brainxp.R
+import com.example.brainxp.core.ui.BrainXPTextStyles
 import com.example.brainxp.core.ui.BrainXPTheme
-import com.example.brainxp.core.ui.HeroCard
-import com.example.brainxp.core.ui.HeroTone
-import com.example.brainxp.core.ui.PillTone
 import com.example.brainxp.core.ui.PrimaryButton
-import com.example.brainxp.core.ui.StatusPill
 import com.example.brainxp.core.ui.Tokens
+import com.example.brainxp.core.ui.longDuration
 import com.example.brainxp.core.ui.shortDuration
+
+private data class LedgerRow(
+    val label: String,
+    val value: String,
+    val lead: Boolean = false,
+)
 
 @Composable
 fun BlockScreen(
     appLabel: String,
     info: BlockedInfo,
-    onEarnTime: () -> Unit,
+    onAction: (BlockAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     BrainXPTheme(darkTheme = false) {
         val spacing = BrainXPTheme.spacing
 
-        Column(
+        BoxWithConstraints(
             modifier =
                 modifier
                     .fillMaxSize()
                     .background(Tokens.Blue900)
-                    .padding(horizontal = spacing.xl, vertical = spacing.xxxl),
-            verticalArrangement = Arrangement.spacedBy(spacing.md),
+                    .safeDrawingPadding(),
         ) {
-            Spacer(modifier = Modifier.weight(1f))
+            val wide = maxWidth >= SIDE_BY_SIDE_WIDTH && maxHeight < STACKED_HEIGHT
+            val body =
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = spacing.xl, vertical = spacing.xl)
 
-            StatusPill(text = appLabel, tone = PillTone.ON_DARK)
-
-            Text(
-                text = stringResource(titleOf(info.state)),
-                style = MaterialTheme.typography.displaySmall,
-                color = Color.White,
-                modifier = Modifier.padding(top = spacing.md),
-            )
-
-            Text(
-                text = bodyOf(info),
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = SECONDARY_INK),
-            )
-
-            HeroCard(
-                label = stringResource(heroLabelOf(info.state)),
-                value = shortDuration(info.balanceSeconds),
-                tone = HeroTone.GHOST,
-                progress = 1f,
-                modifier = Modifier.padding(top = spacing.md),
-                footer = {
-                    Text(
-                        text = stringResource(heroSubOf(info.state)),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = Color.White.copy(alpha = SECONDARY_INK),
-                    )
-                },
-            )
-
-            Surface(
-                modifier = Modifier.fillMaxWidth().padding(top = spacing.sm),
-                shape = MaterialTheme.shapes.medium,
-                color = Color.White.copy(alpha = NOTE_FILL),
-            ) {
-                Text(
-                    text = stringResource(noteOf(info.state)),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = SECONDARY_INK),
-                    modifier = Modifier.padding(spacing.md),
-                )
+            if (wide) {
+                Row(
+                    modifier = body,
+                    horizontalArrangement = Arrangement.spacedBy(spacing.xxl),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Reason(appLabel = appLabel, info = info, modifier = Modifier.weight(REASON_SHARE))
+                    Facts(info = info, onAction = onAction, modifier = Modifier.weight(FACTS_SHARE))
+                }
+            } else {
+                Column(
+                    modifier = body.widthIn(max = READING_WIDTH),
+                    verticalArrangement =
+                        Arrangement.spacedBy(spacing.xl, alignment = Alignment.CenterVertically),
+                ) {
+                    Reason(appLabel = appLabel, info = info)
+                    Facts(info = info, onAction = onAction)
+                }
             }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            PrimaryButton(
-                text = stringResource(actionOf(info.state)),
-                onClick = onEarnTime,
-                modifier = Modifier.fillMaxWidth(),
-                onDark = info.state == BlockedState.NO_BALANCE || info.state == BlockedState.IDLE_HOLD,
-            )
         }
     }
 }
+
+@Composable
+private fun Reason(
+    appLabel: String,
+    info: BlockedInfo,
+    modifier: Modifier = Modifier,
+) {
+    val spacing = BrainXPTheme.spacing
+
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(spacing.sm)) {
+        Text(
+            text = stringResource(R.string.block_locked_label, appLabel),
+            style = MaterialTheme.typography.labelMedium,
+            color = accentOf(info.state),
+        )
+        Text(
+            text = stringResource(titleOf(info.state)),
+            style = MaterialTheme.typography.headlineMedium,
+            color = Color.White,
+        )
+        Text(
+            text = bodyOf(info),
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.White.copy(alpha = SECONDARY_INK),
+        )
+    }
+}
+
+@Composable
+private fun Facts(
+    info: BlockedInfo,
+    onAction: (BlockAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val spacing = BrainXPTheme.spacing
+
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(spacing.md)) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(HAIRLINE)
+                    .background(Color.White.copy(alpha = RULE_INK)),
+        )
+
+        ledgerOf(info).forEach { row -> LedgerLine(row = row, accent = accentOf(info.state)) }
+
+        PrimaryButton(
+            text = stringResource(actionOf(info.state)),
+            onClick = { onAction(actionKindOf(info.state)) },
+            modifier = Modifier.padding(top = spacing.sm),
+            onDark = true,
+        )
+
+        Text(
+            text = stringResource(noteOf(info.state)),
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.White.copy(alpha = QUIET_INK),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+@Composable
+private fun LedgerLine(
+    row: LedgerRow,
+    accent: Color,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(BrainXPTheme.spacing.md),
+        verticalAlignment = Alignment.Bottom,
+    ) {
+        Text(
+            text = row.label,
+            style = MaterialTheme.typography.labelMedium,
+            color = Color.White.copy(alpha = QUIET_INK),
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = row.value,
+            style = if (row.lead) BrainXPTextStyles.numericSmall else MaterialTheme.typography.titleSmall,
+            color = if (row.lead) accent else Color.White,
+        )
+    }
+}
+
+@Composable
+private fun ledgerOf(info: BlockedInfo): List<LedgerRow> {
+    val rows =
+        mutableListOf(
+            LedgerRow(
+                label = stringResource(R.string.block_ledger_balance),
+                value = shortDuration(info.balanceSeconds),
+                lead = true,
+            ),
+        )
+
+    if (info.dailyCapSeconds > 0) {
+        rows +=
+            LedgerRow(
+                label = stringResource(R.string.block_ledger_today),
+                value =
+                    stringResource(
+                        R.string.block_ledger_today_value,
+                        shortDuration(info.spentTodaySeconds),
+                        shortDuration(info.dailyCapSeconds),
+                    ),
+            )
+    }
+
+    when (info.state) {
+        BlockedState.DAILY_CAP -> {
+            rows +=
+                LedgerRow(
+                    label = stringResource(R.string.block_ledger_reset),
+                    value = longDuration(info.secondsUntilReset),
+                )
+        }
+
+        BlockedState.IDLE_HOLD -> {
+            rows +=
+                LedgerRow(
+                    label = stringResource(R.string.block_ledger_idle),
+                    value =
+                        stringResource(
+                            R.string.block_ledger_idle_value,
+                            info.idleDays,
+                            info.idleDaysAllowed,
+                        ),
+                )
+        }
+
+        else -> {
+            Unit
+        }
+    }
+
+    return rows
+}
+
+private fun accentOf(state: BlockedState): Color =
+    when (state) {
+        BlockedState.NOT_STARTED -> Tokens.Mint
+        BlockedState.GUARDIAN_STALE -> Tokens.Amber400
+        BlockedState.NO_BALANCE, BlockedState.DAILY_CAP, BlockedState.IDLE_HOLD -> Tokens.Blue300
+    }
 
 @Composable
 private fun bodyOf(info: BlockedInfo): String =
@@ -133,24 +266,6 @@ private fun titleOf(state: BlockedState): Int =
         BlockedState.GUARDIAN_STALE -> R.string.block_screen_stale_title
     }
 
-private fun heroLabelOf(state: BlockedState): Int =
-    when (state) {
-        BlockedState.NO_BALANCE -> R.string.block_screen_hero_label
-        BlockedState.NOT_STARTED -> R.string.block_screen_idle_hero
-        BlockedState.DAILY_CAP -> R.string.block_screen_cap_hero
-        BlockedState.IDLE_HOLD -> R.string.block_screen_hold_hero
-        BlockedState.GUARDIAN_STALE -> R.string.block_screen_stale_hero
-    }
-
-private fun heroSubOf(state: BlockedState): Int =
-    when (state) {
-        BlockedState.NO_BALANCE -> R.string.block_screen_hero_sub
-        BlockedState.NOT_STARTED -> R.string.block_screen_idle_hero_sub
-        BlockedState.DAILY_CAP -> R.string.block_screen_cap_hero_sub
-        BlockedState.IDLE_HOLD -> R.string.block_screen_hold_hero_sub
-        BlockedState.GUARDIAN_STALE -> R.string.block_screen_stale_hero_sub
-    }
-
 private fun noteOf(state: BlockedState): Int =
     when (state) {
         BlockedState.NO_BALANCE -> R.string.block_screen_note
@@ -169,30 +284,43 @@ private fun actionOf(state: BlockedState): Int =
         BlockedState.GUARDIAN_STALE -> R.string.block_screen_stale_action
     }
 
-private const val SECONDARY_INK = 0.68f
-private const val NOTE_FILL = 0.09f
+private const val SECONDARY_INK = 0.74f
+private const val QUIET_INK = 0.6f
+private const val RULE_INK = 0.16f
+private const val REASON_SHARE = 1.1f
+private const val FACTS_SHARE = 1f
+private val HAIRLINE = 1.dp
+private val READING_WIDTH = 480.dp
+private val SIDE_BY_SIDE_WIDTH = 560.dp
+private val STACKED_HEIGHT = 520.dp
 
-@Preview(name = "Blocked empty balance", showBackground = true, heightDp = 820)
+@Preview(name = "Blocked portrait", showBackground = true, widthDp = 411, heightDp = 880)
 @Composable
 private fun BlockScreenPreview() {
     BlockScreen(
-        appLabel = "Mobile Legends",
-        info = BlockedInfo(BlockedState.NO_BALANCE),
-        onEarnTime = {},
+        appLabel = "Brawlhalla",
+        info = BlockedInfo(BlockedState.NO_BALANCE, dailyCapSeconds = 3_600),
+        onAction = {},
     )
 }
 
-@Preview(name = "Blocked not started", showBackground = true, heightDp = 820)
+@Preview(name = "Blocked landscape", showBackground = true, widthDp = 880, heightDp = 411)
 @Composable
-private fun BlockScreenNotStartedPreview() {
+private fun BlockScreenLandscapePreview() {
     BlockScreen(
-        appLabel = "Instagram",
-        info = BlockedInfo(BlockedState.NOT_STARTED, balanceSeconds = 1_500),
-        onEarnTime = {},
+        appLabel = "Brawlhalla",
+        info =
+            BlockedInfo(
+                BlockedState.NOT_STARTED,
+                balanceSeconds = 801,
+                spentTodaySeconds = 0,
+                dailyCapSeconds = 3_600,
+            ),
+        onAction = {},
     )
 }
 
-@Preview(name = "Blocked daily cap", showBackground = true, heightDp = 820)
+@Preview(name = "Blocked daily cap", showBackground = true, widthDp = 411, heightDp = 880)
 @Composable
 private fun BlockScreenCapPreview() {
     BlockScreen(
@@ -202,12 +330,14 @@ private fun BlockScreenCapPreview() {
                 BlockedState.DAILY_CAP,
                 balanceSeconds = 1_500,
                 secondsUntilReset = 18_000,
+                spentTodaySeconds = 3_600,
+                dailyCapSeconds = 3_600,
             ),
-        onEarnTime = {},
+        onAction = {},
     )
 }
 
-@Preview(name = "Blocked balance held", showBackground = true, heightDp = 820)
+@Preview(name = "Blocked balance held", showBackground = true, widthDp = 880, heightDp = 411)
 @Composable
 private fun BlockScreenHoldPreview() {
     BlockScreen(
@@ -218,17 +348,18 @@ private fun BlockScreenHoldPreview() {
                 balanceSeconds = 1_500,
                 idleDays = 4,
                 idleDaysAllowed = 2,
+                dailyCapSeconds = 3_600,
             ),
-        onEarnTime = {},
+        onAction = {},
     )
 }
 
-@Preview(name = "Blocked guardian stale", showBackground = true, heightDp = 820)
+@Preview(name = "Blocked guardian stale", showBackground = true, widthDp = 411, heightDp = 880)
 @Composable
 private fun BlockScreenStalePreview() {
     BlockScreen(
         appLabel = "Roblox",
         info = BlockedInfo(BlockedState.GUARDIAN_STALE, balanceSeconds = 1_500),
-        onEarnTime = {},
+        onAction = {},
     )
 }

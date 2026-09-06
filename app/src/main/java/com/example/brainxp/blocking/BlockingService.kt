@@ -141,7 +141,12 @@ class BlockingService : Service() {
                 blockedPackage = blockedPackage,
                 appLabel = appLabels[blockedPackage] ?: blockedPackage,
                 info = blockedInfoOf(balance.standing, balance.balanceSeconds),
-            ) { launchEarnTime(it) }
+            ) { pkg, action ->
+                when (action) {
+                    BlockAction.STUDY -> launchEarnTime(pkg)
+                    BlockAction.START_SESSION -> startSessionFrom(pkg)
+                }
+            }
         } else {
             clearTicks++
             if (ours || clearTicks >= CLEAR_TICKS_BEFORE_HIDE) {
@@ -150,6 +155,22 @@ class BlockingService : Service() {
             }
         }
         getSystemService(NotificationManager::class.java).notify(ProtectionNotification.ID, render())
+    }
+
+    private fun startSessionFrom(blockedPackage: String) {
+        scope.launch {
+            val seconds = rewards.state.value.balanceSeconds
+            val allowed = protection.snapshot.value.restriction.restrictedPackages
+            val alreadyRunning = unlocks.state.value is UnlockState.Active
+            if (alreadyRunning || seconds <= 0 || allowed.isEmpty()) {
+                launchEarnTime(blockedPackage)
+                return@launch
+            }
+            unlocks.start(seconds, allowed)
+            clearTicks = 0
+            blocked.value = false
+            overlay.hide()
+        }
     }
 
     private fun launchEarnTime(blockedPackage: String) {

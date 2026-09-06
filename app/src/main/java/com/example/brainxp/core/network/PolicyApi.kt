@@ -13,6 +13,12 @@ data class PolicyPatchDto(
     @SerialName("question_language") val questionLanguage: String? = null,
     @SerialName("questions_per_session") val questionsPerSession: Int? = null,
     @SerialName("daily_caps") val dailyCaps: List<Int>? = null,
+    @SerialName("base_reward_seconds") val baseRewardSeconds: Int? = null,
+    @SerialName("essay_ratio") val essayRatio: Double? = null,
+    @SerialName("daily_grants") val dailyGrants: List<Int>? = null,
+    @SerialName("day_reset_hour") val dayResetHour: Int? = null,
+    @SerialName("idle_days_allowed") val idleDaysAllowed: Int? = null,
+    @SerialName("allowed_upload_methods") val allowedUploadMethods: List<String>? = null,
 )
 
 @Serializable
@@ -35,6 +41,8 @@ data class PolicyDto(
     @SerialName("daily_caps") val dailyCaps: List<Int> = emptyList(),
     @SerialName("daily_grants") val dailyGrants: List<Int> = emptyList(),
     @SerialName("locked_apps") val lockedApps: List<String> = emptyList(),
+    @SerialName("base_reward_seconds") val baseRewardSeconds: Int = 0,
+    @SerialName("allowed_upload_methods") val allowedUploadMethods: List<String> = emptyList(),
 )
 
 interface PolicyApi {

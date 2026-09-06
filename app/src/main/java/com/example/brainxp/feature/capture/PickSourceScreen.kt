@@ -28,6 +28,7 @@ import com.example.brainxp.core.ui.HeroCard
 import com.example.brainxp.core.ui.Note
 import com.example.brainxp.core.ui.ScreenNav
 import com.example.brainxp.core.ui.shortDuration
+import com.example.brainxp.domain.model.UploadMethod
 
 @Composable
 fun PickSourceScreen(
@@ -38,6 +39,7 @@ fun PickSourceScreen(
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
     rejection: String? = null,
+    methods: Set<UploadMethod> = UploadMethod.entries.toSet(),
 ) {
     val spacing = BrainXPTheme.spacing
 
@@ -83,19 +85,24 @@ fun PickSourceScreen(
         )
 
         Column(verticalArrangement = Arrangement.spacedBy(spacing.sm)) {
-            ChoiceRow(
-                title = stringResource(R.string.source_photo),
-                subtitle = stringResource(R.string.source_photo_sub),
-                icon = Lucide.Camera,
-                highlight = true,
-                onClick = { onPick(CaptureMethod.PHOTO) },
-            )
-            ChoiceRow(
-                title = stringResource(R.string.source_document),
-                subtitle = stringResource(R.string.source_document_sub),
-                icon = Lucide.FileText,
-                onClick = { pickDocument.launch(DOCUMENT_MIME_TYPES) },
-            )
+            if (UploadMethod.PHOTO in methods) {
+                ChoiceRow(
+                    title = stringResource(R.string.source_photo),
+                    subtitle = stringResource(R.string.source_photo_sub),
+                    icon = Lucide.Camera,
+                    highlight = true,
+                    onClick = { onPick(CaptureMethod.PHOTO) },
+                )
+            }
+            if (UploadMethod.DOCUMENT in methods) {
+                ChoiceRow(
+                    title = stringResource(R.string.source_document),
+                    subtitle = stringResource(R.string.source_document_sub),
+                    icon = Lucide.FileText,
+                    highlight = UploadMethod.PHOTO !in methods,
+                    onClick = { pickDocument.launch(DOCUMENT_MIME_TYPES) },
+                )
+            }
         }
 
         Spacer(modifier = Modifier.weight(1f))

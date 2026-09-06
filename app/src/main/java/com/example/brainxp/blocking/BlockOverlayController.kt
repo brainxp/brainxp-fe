@@ -29,7 +29,7 @@ class BlockOverlayController
         private var owner: OverlayViewOwner? = null
         private var configSignature: String? = null
         private var target: String? = null
-        private var earnTime: ((String) -> Unit)? = null
+        private var action: ((String, BlockAction) -> Unit)? = null
         private var content: BlockContent? = null
 
         val isShowing: Boolean get() = container != null
@@ -40,18 +40,18 @@ class BlockOverlayController
             blockedPackage: String,
             appLabel: String = blockedPackage,
             info: BlockedInfo = BlockedInfo(),
-            onEarnTime: (String) -> Unit,
+            onAction: (String, BlockAction) -> Unit,
         ) {
             onMain {
                 content = BlockContent(blockedPackage, appLabel, info)
                 when {
                     container == null -> {
-                        attach(blockedPackage, onEarnTime)
+                        attach(blockedPackage, onAction)
                     }
 
                     target != blockedPackage -> {
                         detach()
-                        attach(blockedPackage, onEarnTime)
+                        attach(blockedPackage, onAction)
                     }
 
                     else -> {
@@ -67,7 +67,7 @@ class BlockOverlayController
 
         private fun attach(
             blockedPackage: String,
-            onEarnTime: (String) -> Unit,
+            onAction: (String, BlockAction) -> Unit,
         ) {
             val viewOwner = OverlayViewOwner().apply { attach() }
             val host = OverlayContainer(context, ::onConfigurationChanged)
@@ -80,7 +80,7 @@ class BlockOverlayController
                         BlockScreen(
                             appLabel = shown.appLabel,
                             info = shown.info,
-                            onEarnTime = { onEarnTime(blockedPackage) },
+                            onAction = { kind -> onAction(blockedPackage, kind) },
                         )
                     }
                 }
@@ -95,7 +95,7 @@ class BlockOverlayController
             container = host
             owner = viewOwner
             target = blockedPackage
-            earnTime = onEarnTime
+            action = onAction
             configSignature = signatureOf(context.resources.configuration)
         }
 
@@ -104,7 +104,7 @@ class BlockOverlayController
             container = null
             configSignature = null
             target = null
-            earnTime = null
+            action = null
             windowManager.removeView(host)
             owner?.detach()
             owner = null
@@ -113,7 +113,7 @@ class BlockOverlayController
         private fun onConfigurationChanged(newConfig: Configuration) {
             val signature = signatureOf(newConfig)
             val blockedPackage = target
-            val callback = earnTime
+            val callback = action
             if (signature == configSignature || blockedPackage == null || callback == null) {
                 return
             }
@@ -128,9 +128,15 @@ class BlockOverlayController
                     WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
+                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                     PixelFormat.TRANSLUCENT,
-                ).apply { title = WINDOW_TITLE }
+                ).apply {
+                    title = WINDOW_TITLE
+                    layoutInDisplayCutoutMode =
+                        WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+                }
 
         private fun signatureOf(configuration: Configuration): String =
             listOf(

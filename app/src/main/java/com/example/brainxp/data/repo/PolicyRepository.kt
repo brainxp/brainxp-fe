@@ -2,12 +2,15 @@ package com.example.brainxp.data.repo
 
 import com.example.brainxp.core.network.ErrorMapper
 import com.example.brainxp.core.network.PolicyApi
+import com.example.brainxp.core.network.PolicyDto
 import com.example.brainxp.core.network.PolicyPatchDto
 import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.result.AppResult
 import com.example.brainxp.core.result.map
 import com.example.brainxp.data.prefs.AuthDataStore
 import com.example.brainxp.domain.model.AcademicLevel
+import com.example.brainxp.domain.model.PolicyDraft
+import com.example.brainxp.domain.model.UploadMethod
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,6 +25,8 @@ data class SubjectPolicy(
     val dailyCapSeconds: List<Int>,
     val dailyGrantSeconds: List<Int>,
     val lockedApps: List<String>,
+    val baseRewardSeconds: Int,
+    val uploadMethods: Set<UploadMethod>,
 )
 
 data class PolicyChange(
@@ -40,21 +45,13 @@ class PolicyRepository
     ) {
         suspend fun policy(subjectId: String? = null): AppResult<SubjectPolicy> {
             val subject = subjectId ?: auth.current().subjectId ?: return AppResult.Failure(ApiError.Unauthorized)
-            return call { api.policy(subject) }.map { dto ->
-                SubjectPolicy(
-                    level = AcademicLevel.fromWire(dto.academicLevel),
-                    language = dto.questionLanguage.orEmpty(),
-                    questionsPerSession = dto.questionsPerSession,
-                    dayResetHour = dto.dayResetHour,
-                    idleDaysAllowed = dto.idleDaysAllowed,
-                    pendingWeakenAt = dto.pendingWeakenAt,
-                    essayCount = (dto.essayRatio * dto.questionsPerSession).toInt(),
-                    dailyCapSeconds = dto.dailyCaps,
-                    dailyGrantSeconds = dto.dailyGrants,
-                    lockedApps = dto.lockedApps,
-                )
-            }
+            return call { api.policy(subject) }.map(PolicyDto::toSubjectPolicy)
         }
+
+        suspend fun save(
+            draft: PolicyDraft,
+            subjectId: String? = null,
+        ): AppResult<PolicyChange> = patch(draft.toPatch(), subjectId)
 
         suspend fun setLevel(
             level: AcademicLevel,
@@ -65,16 +62,6 @@ class PolicyRepository
             language: String,
             subjectId: String? = null,
         ): AppResult<PolicyChange> = patch(PolicyPatchDto(questionLanguage = language), subjectId)
-
-        suspend fun setQuestionsPerSession(
-            count: Int,
-            subjectId: String? = null,
-        ): AppResult<PolicyChange> = patch(PolicyPatchDto(questionsPerSession = count), subjectId)
-
-        suspend fun setDailyCaps(
-            capsPerWeekday: List<Int>,
-            subjectId: String? = null,
-        ): AppResult<PolicyChange> = patch(PolicyPatchDto(dailyCaps = capsPerWeekday), subjectId)
 
         private suspend fun patch(
             body: PolicyPatchDto,

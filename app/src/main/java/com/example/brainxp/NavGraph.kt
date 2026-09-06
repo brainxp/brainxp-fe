@@ -62,6 +62,7 @@ import com.example.brainxp.feature.family.SAMPLE_PAIRING_CODE
 import com.example.brainxp.feature.family.SAMPLE_POLICY
 import com.example.brainxp.feature.family.SAMPLE_REPORT
 import com.example.brainxp.feature.family.stepped
+import com.example.brainxp.feature.health.ProtectionRow
 import com.example.brainxp.feature.history.HistoryScreen
 import com.example.brainxp.feature.history.HistoryViewModel
 import com.example.brainxp.feature.home.HomeEffect
@@ -291,9 +292,11 @@ internal fun EntryProviderScope<NavKey>.captureEntries(backStack: NavBackStack<N
     entry<MainRoute.Capture> {
         val picker: PickSourceViewModel = hiltViewModel()
         val rejection by picker.rejection.collectAsStateWithLifecycle()
+        val methods by picker.uploadMethods.collectAsStateWithLifecycle()
 
         PickSourceScreen(
             rejection = rejection?.let { stringResource(it) },
+            methods = methods,
             onPicked = { uri -> picker.accept(uri) { backStack.add(MainRoute.Preparing(PENDING_MATERIAL)) } },
             questionCount = SAMPLE_QUESTION_COUNT,
             estimatedRewardSeconds = SAMPLE_ESTIMATE_SECONDS,
@@ -585,8 +588,7 @@ private fun SettingsEntry(backStack: NavBackStack<NavKey>) {
         else -> {
             SettingsScreen(
                 policy = policy,
-                onLevel = viewModel::chooseLevel,
-                onLanguage = viewModel::chooseLanguage,
+                onEdit = viewModel::edit,
                 onApps = { backStack.add(MainRoute.AppPicker) },
                 onPermissions = { backStack.add(MainRoute.PermissionSetup) },
                 onPrivacyPolicy = { backStack.add(MainRoute.PrivacyPolicy) },
@@ -595,6 +597,7 @@ private fun SettingsEntry(backStack: NavBackStack<NavKey>) {
                 onBack = { backStack.popOrIgnore() },
                 saving = state.saving,
                 notice = state.notice,
+                protection = { ProtectionRow() },
             )
         }
     }

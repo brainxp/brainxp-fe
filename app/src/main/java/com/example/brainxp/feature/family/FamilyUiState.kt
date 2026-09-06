@@ -1,6 +1,11 @@
 package com.example.brainxp.feature.family
 
 import com.example.brainxp.domain.model.AcademicLevel
+import com.example.brainxp.domain.model.PolicyDraft
+import com.example.brainxp.domain.model.PolicyLimits
+import com.example.brainxp.domain.model.PolicyStep
+import com.example.brainxp.domain.model.UploadMethod
+import com.example.brainxp.domain.model.stepped
 
 enum class QuestionLanguage {
     ID,
@@ -36,10 +41,12 @@ data class PolicyUiState(
     val subjectName: String,
     val questionsPerSession: Int,
     val essayCount: Int,
+    val baseRewardSeconds: Int,
     val dailyCapMinutes: List<Int>,
     val dailyGrantMinutes: List<Int>,
     val idleDaysAllowed: Int,
     val dayResetHour: Int,
+    val uploadMethods: Set<UploadMethod>,
     val apps: List<LockedAppEntry>,
 ) {
     val mcqCount: Int get() = (questionsPerSession - essayCount).coerceAtLeast(0)
@@ -91,6 +98,12 @@ sealed interface PolicyEvent {
         val day: Int,
     ) : PolicyEvent
 
+    data object StepBaseReward : PolicyEvent
+
+    data class ToggleUploadMethod(
+        val method: UploadMethod,
+    ) : PolicyEvent
+
     data object StepIdleDays : PolicyEvent
 
     data object StepResetHour : PolicyEvent
@@ -104,40 +117,11 @@ sealed interface PolicyEvent {
 
 fun PolicyUiState.stepped(event: PolicyEvent): PolicyUiState =
     when (event) {
-        PolicyEvent.StepQuestions -> {
-            val next = if (questionsPerSession >= MAX_QUESTIONS_PER_SESSION) 2 else questionsPerSession + 2
-            copy(questionsPerSession = next, essayCount = essayCount.coerceAtMost(next))
-        }
-
-        PolicyEvent.StepEssay -> {
-            copy(essayCount = if (essayCount >= questionsPerSession) 0 else essayCount + 1)
-        }
-
-        is PolicyEvent.StepCap -> {
-            copy(dailyCapMinutes = dailyCapMinutes.cycled(event.day, CAP_STEPS))
-        }
-
-        is PolicyEvent.StepGrant -> {
-            copy(dailyGrantMinutes = dailyGrantMinutes.cycled(event.day, GRANT_STEPS))
-        }
-
-        PolicyEvent.StepIdleDays -> {
-            copy(idleDaysAllowed = if (idleDaysAllowed >= MAX_IDLE_DAYS) 0 else idleDaysAllowed + 1)
-        }
-
-        PolicyEvent.StepResetHour -> {
-            copy(dayResetHour = if (dayResetHour >= MAX_RESET_HOUR) 0 else dayResetHour + 1)
-        }
-
         is PolicyEvent.ToggleApp -> {
             copy(
                 apps =
                     apps.map { app ->
-                        if (app.packageName == event.packageName) {
-                            app.copy(locked = !app.locked)
-                        } else {
-                            app
-                        }
+                        if (app.packageName == event.packageName) app.copy(locked = !app.locked) else app
                     },
             )
         }
@@ -145,21 +129,52 @@ fun PolicyUiState.stepped(event: PolicyEvent): PolicyUiState =
         PolicyEvent.Save -> {
             this
         }
+
+        else -> {
+            event.asStep()?.let { step -> withDraft(draft().stepped(step)) } ?: this
+        }
     }
 
-private fun List<Int>.cycled(
-    index: Int,
-    steps: List<Int>,
-): List<Int> {
-    val current = getOrNull(index) ?: return this
-    val next = steps[(steps.indexOf(current).takeIf { it >= 0 }?.plus(1) ?: 0) % steps.size]
-    return mapIndexed { i, value -> if (i == index) next else value }
-}
+private fun PolicyEvent.asStep(): PolicyStep? =
+    when (this) {
+        PolicyEvent.StepQuestions -> PolicyStep.Questions
+        PolicyEvent.StepEssay -> PolicyStep.Essays
+        PolicyEvent.StepBaseReward -> PolicyStep.BaseReward
+        PolicyEvent.StepIdleDays -> PolicyStep.IdleDays
+        PolicyEvent.StepResetHour -> PolicyStep.ResetHour
+        is PolicyEvent.StepCap -> PolicyStep.Cap(day)
+        is PolicyEvent.StepGrant -> PolicyStep.Grant(day)
+        is PolicyEvent.ToggleUploadMethod -> PolicyStep.Upload(method)
+        is PolicyEvent.ToggleApp, PolicyEvent.Save -> null
+    }
 
-private val CAP_STEPS = listOf(0, 30, 60, 90, 120, 180)
-private val GRANT_STEPS = listOf(0, 15, 30, 60)
+fun PolicyUiState.draft(): PolicyDraft =
+    PolicyDraft(
+        questionsPerSession = questionsPerSession,
+        essayCount = essayCount,
+        baseRewardSeconds = baseRewardSeconds,
+        dailyCapSeconds = dailyCapMinutes.map { it * SECONDS_PER_MINUTE },
+        dailyGrantSeconds = dailyGrantMinutes.map { it * SECONDS_PER_MINUTE },
+        idleDaysAllowed = idleDaysAllowed,
+        dayResetHour = dayResetHour,
+        uploadMethods = uploadMethods,
+    )
 
-const val MAX_QUESTIONS_PER_SESSION = 10
-const val MAX_IDLE_DAYS = 14
-const val MAX_RESET_HOUR = 23
+private fun PolicyUiState.withDraft(draft: PolicyDraft): PolicyUiState =
+    copy(
+        questionsPerSession = draft.questionsPerSession,
+        essayCount = draft.essayCount,
+        baseRewardSeconds = draft.baseRewardSeconds,
+        dailyCapMinutes = draft.dailyCapSeconds.map { it / SECONDS_PER_MINUTE },
+        dailyGrantMinutes = draft.dailyGrantSeconds.map { it / SECONDS_PER_MINUTE },
+        idleDaysAllowed = draft.idleDaysAllowed,
+        dayResetHour = draft.dayResetHour,
+        uploadMethods = draft.uploadMethods,
+    )
+
+private const val SECONDS_PER_MINUTE = 60
+
+val MAX_QUESTIONS_PER_SESSION = PolicyLimits.QUESTIONS_PER_SESSION.last
+val MAX_IDLE_DAYS = PolicyLimits.IDLE_DAYS_ALLOWED.last
+val MAX_RESET_HOUR = PolicyLimits.DAY_RESET_HOUR.last
 private const val PERCENT = 100

@@ -7,6 +7,7 @@ import com.example.brainxp.core.result.AppResult
 import com.example.brainxp.data.repo.FamilyRepository
 import com.example.brainxp.data.repo.PolicyRepository
 import com.example.brainxp.data.repo.SubjectPolicy
+import com.example.brainxp.domain.model.PolicyDraft
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -92,28 +93,42 @@ class PolicyEditorViewModel
             if (mutableState.value.saving) return
             mutableState.update { it.copy(saving = true, error = null, notice = null) }
             viewModelScope.launch {
-                val counts = policies.setQuestionsPerSession(policy.questionsPerSession, subject)
-                val caps =
-                    policies.setDailyCaps(policy.dailyCapMinutes.map { it * SECONDS_PER_MINUTE }, subject)
+                when (val result = policies.save(policy.toDraft(), subject)) {
+                    is AppResult.Failure -> {
+                        mutableState.update { it.copy(saving = false, error = result.error) }
+                    }
 
-                val failed = listOf(counts, caps).filterIsInstance<AppResult.Failure>().firstOrNull()
-                if (failed != null) {
-                    mutableState.update { it.copy(saving = false, error = failed.error) }
-                    return@launch
+                    is AppResult.Success -> {
+                        val deferred = result.value.takeIf { !it.applied }
+                        mutableState.update {
+                            it.copy(saving = false, saved = true, notice = deferred?.message)
+                        }
+                        fetch(subject, policy.subjectName)
+                    }
                 }
-
-                val deferred = (caps as? AppResult.Success)?.value?.takeIf { !it.applied }
-                mutableState.update { it.copy(saving = false, saved = true, notice = deferred?.message) }
-                fetch(subject, policy.subjectName)
             }
         }
     }
+
+private fun PolicyUiState.toDraft(): PolicyDraft =
+    PolicyDraft(
+        questionsPerSession = questionsPerSession,
+        essayCount = essayCount,
+        baseRewardSeconds = baseRewardSeconds,
+        dailyCapSeconds = dailyCapMinutes.map { it * SECONDS_PER_MINUTE },
+        dailyGrantSeconds = dailyGrantMinutes.map { it * SECONDS_PER_MINUTE },
+        idleDaysAllowed = idleDaysAllowed,
+        dayResetHour = dayResetHour,
+        uploadMethods = uploadMethods,
+    )
 
 private fun SubjectPolicy.toUiState(childName: String): PolicyUiState =
     PolicyUiState(
         subjectName = childName,
         questionsPerSession = questionsPerSession,
         essayCount = essayCount,
+        baseRewardSeconds = baseRewardSeconds,
+        uploadMethods = uploadMethods,
         dailyCapMinutes = dailyCapSeconds.map { it / SECONDS_PER_MINUTE },
         dailyGrantMinutes = dailyGrantSeconds.map { it / SECONDS_PER_MINUTE },
         idleDaysAllowed = idleDaysAllowed,

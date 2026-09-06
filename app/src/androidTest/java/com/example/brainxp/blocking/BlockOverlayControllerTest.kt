@@ -38,7 +38,7 @@ class BlockOverlayControllerTest {
 
     @Test
     fun showAttachesExactlyOneWindow() {
-        onMain { controller.show(PACKAGE) {} }
+        onMain { controller.show(PACKAGE) { _, _ -> } }
 
         awaitWindowCount(1)
         assertTrue(controller.isShowing)
@@ -47,7 +47,7 @@ class BlockOverlayControllerTest {
 
     @Test
     fun hideRemovesTheWindow() {
-        onMain { controller.show(PACKAGE) {} }
+        onMain { controller.show(PACKAGE) { _, _ -> } }
         awaitWindowCount(1)
 
         onMain { controller.hide() }
@@ -59,9 +59,9 @@ class BlockOverlayControllerTest {
     @Test
     fun showIsIdempotent() {
         onMain {
-            controller.show(PACKAGE) {}
-            controller.show(PACKAGE) {}
-            controller.show(PACKAGE) {}
+            controller.show(PACKAGE) { _, _ -> }
+            controller.show(PACKAGE) { _, _ -> }
+            controller.show(PACKAGE) { _, _ -> }
         }
 
         awaitWindowCount(1)
@@ -69,7 +69,7 @@ class BlockOverlayControllerTest {
 
     @Test
     fun hideIsIdempotent() {
-        onMain { controller.show(PACKAGE) {} }
+        onMain { controller.show(PACKAGE) { _, _ -> } }
         awaitWindowCount(1)
 
         onMain {
@@ -91,10 +91,10 @@ class BlockOverlayControllerTest {
 
     @Test
     fun switchingTargetKeepsASingleWindow() {
-        onMain { controller.show(PACKAGE) {} }
+        onMain { controller.show(PACKAGE) { _, _ -> } }
         awaitWindowCount(1)
 
-        onMain { controller.show(OTHER_PACKAGE) {} }
+        onMain { controller.show(OTHER_PACKAGE) { _, _ -> } }
 
         awaitWindowCount(1)
         assertEquals(OTHER_PACKAGE, controller.showingFor)
@@ -103,7 +103,7 @@ class BlockOverlayControllerTest {
     @Test
     fun oneHundredCyclesLeaveNoWindowBehind() {
         repeat(CYCLES) {
-            onMain { controller.show(PACKAGE) {} }
+            onMain { controller.show(PACKAGE) { _, _ -> } }
             onMain { controller.hide() }
         }
 
@@ -115,7 +115,7 @@ class BlockOverlayControllerTest {
     fun oneHundredCyclesNeverExceedOneWindowAtATime() {
         var peak = 0
         repeat(CYCLES) {
-            onMain { controller.show(PACKAGE) {} }
+            onMain { controller.show(PACKAGE) { _, _ -> } }
             instrumentation.waitForIdleSync()
             peak = maxOf(peak, overlayWindowCount())
             onMain { controller.hide() }
@@ -128,12 +128,12 @@ class BlockOverlayControllerTest {
     @Test
     fun aCycleAfterOneHundredStillWorks() {
         repeat(CYCLES) {
-            onMain { controller.show(PACKAGE) {} }
+            onMain { controller.show(PACKAGE) { _, _ -> } }
             onMain { controller.hide() }
         }
         awaitWindowCount(0)
 
-        onMain { controller.show(PACKAGE) {} }
+        onMain { controller.show(PACKAGE) { _, _ -> } }
 
         awaitWindowCount(1)
         onMain { controller.hide() }
@@ -142,7 +142,7 @@ class BlockOverlayControllerTest {
 
     @Test
     fun showFromABackgroundThreadStillAttaches() {
-        val thread = Thread { controller.show(PACKAGE) {} }
+        val thread = Thread { controller.show(PACKAGE) { _, _ -> } }
         thread.start()
         thread.join()
 
@@ -151,7 +151,7 @@ class BlockOverlayControllerTest {
 
     @Test
     fun hideFromABackgroundThreadStillDetaches() {
-        onMain { controller.show(PACKAGE) {} }
+        onMain { controller.show(PACKAGE) { _, _ -> } }
         awaitWindowCount(1)
 
         val thread = Thread { controller.hide() }

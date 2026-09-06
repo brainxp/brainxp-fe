@@ -6,13 +6,6 @@ import org.junit.Test
 import java.io.File
 
 class LocaleParityTest {
-    private val untranslated: Set<String>
-        get() =
-            UNTRANSLATABLE_PATTERN
-                .findAll(resource("values").readText())
-                .map { it.groupValues[1] }
-                .toSet()
-
     private fun resource(locale: String): File {
         val candidates =
             listOf(
@@ -24,14 +17,15 @@ class LocaleParityTest {
     }
 
     private fun keys(locale: String): Set<String> =
-        NAME_PATTERN
+        ENTRY_PATTERN
             .findAll(resource(locale).readText())
+            .filterNot { it.groupValues[0].contains(UNTRANSLATABLE) }
             .map { it.groupValues[1] }
             .toSet()
 
     @Test
     fun englishCoversEveryTranslatableString() {
-        val missing = keys("values") - keys("values-en") - untranslated
+        val missing = keys("values") - keys("values-en")
 
         assertEquals(emptySet<String>(), missing)
     }
@@ -44,8 +38,11 @@ class LocaleParityTest {
     }
 
     @Test
-    fun theBrandNameIsNotTranslated() {
-        assertTrue(untranslated.none { it in keys("values-en") })
+    fun stringsMarkedUntranslatableStayOutOfTheEnglishFile() {
+        val marked = untranslatable()
+
+        assertTrue("nothing is marked untranslatable", marked.isNotEmpty())
+        assertEquals(emptySet<String>(), marked.intersect(keys("values-en")))
     }
 
     @Test
@@ -61,6 +58,13 @@ class LocaleParityTest {
         assertEquals(emptyList<String>(), diverged)
     }
 
+    private fun untranslatable(): Set<String> =
+        ENTRY_PATTERN
+            .findAll(resource("values").readText())
+            .filter { it.groupValues[0].contains(UNTRANSLATABLE) }
+            .map { it.groupValues[1] }
+            .toSet()
+
     private fun arguments(locale: String): Map<String, Set<String>> =
         ENTRY_PATTERN
             .findAll(resource(locale).readText())
@@ -73,8 +77,7 @@ class LocaleParityTest {
             }
 
     private companion object {
-        val UNTRANSLATABLE_PATTERN = Regex("""<string name="([^"]+)"[^>]*translatable="false"""")
-        val NAME_PATTERN = Regex("""<(?:string|plurals) name="([^"]+)"""")
+        const val UNTRANSLATABLE = "translatable=\"false\""
         val ENTRY_PATTERN = Regex("""<string name="([^"]+)"[^>]*>(.*?)</string>""", RegexOption.DOT_MATCHES_ALL)
         val ARGUMENT_PATTERN = Regex("""%\d+\$[a-z]""")
     }

@@ -124,7 +124,6 @@ private fun TopBar(
                     },
                 )
             }
-            ProtectionPill(state = state, onEvent = onEvent)
             IconButton(
                 onClick = { onEvent(HomeEvent.OpenProgress) },
                 modifier = Modifier.size(NAV_TAP),
@@ -137,31 +136,6 @@ private fun TopBar(
             }
         }
     }
-}
-
-@Composable
-private fun ProtectionPill(
-    state: HomeUiState,
-    onEvent: (HomeEvent) -> Unit,
-) {
-    val label =
-        when (state.protection) {
-            ProtectionStatus.ACTIVE -> R.string.home_protection_active
-            ProtectionStatus.DEGRADED -> R.string.home_protection_degraded
-            ProtectionStatus.OFF -> R.string.home_protection_off
-        }
-    val tone =
-        when (state.protection) {
-            ProtectionStatus.ACTIVE -> PillTone.OK
-            ProtectionStatus.DEGRADED -> PillTone.ALERT
-            ProtectionStatus.OFF -> PillTone.NEUTRAL
-        }
-
-    StatusPill(
-        text = stringResource(label),
-        tone = tone,
-        onClick = { onEvent(HomeEvent.ToggleProtection) },
-    )
 }
 
 @Composable
@@ -358,6 +332,10 @@ private fun Hero(state: HomeUiState) {
                     when {
                         state.idleLocked -> {
                             stringResource(R.string.home_idle_locked, state.idleDays)
+                        }
+
+                        running -> {
+                            stringResource(R.string.home_balance_left, shortDuration(state.balanceSeconds))
                         }
 
                         state.dailyCapSeconds > 0 -> {

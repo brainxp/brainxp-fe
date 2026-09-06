@@ -22,6 +22,8 @@ import com.example.brainxp.core.ui.RowGroup
 import com.example.brainxp.core.ui.ScreenNav
 import com.example.brainxp.core.ui.StatusPill
 import com.example.brainxp.core.ui.WeekBars
+import com.example.brainxp.core.ui.shortDuration
+import com.example.brainxp.domain.model.UploadMethod
 
 @Composable
 fun PolicyEditorScreen(
@@ -51,6 +53,13 @@ fun PolicyEditorScreen(
         SectionLabel(stringResource(R.string.policy_session))
         RowGroup {
             item(
+                title = stringResource(R.string.policy_reward),
+                subtitle = stringResource(R.string.policy_reward_sub),
+                value = shortDuration(state.baseRewardSeconds),
+                emphasiseValue = true,
+                onClick = { onEvent(PolicyEvent.StepBaseReward) },
+            )
+            item(
                 title = stringResource(R.string.policy_questions),
                 subtitle =
                     stringResource(R.string.policy_questions_sub, MAX_QUESTIONS_PER_SESSION),
@@ -71,6 +80,23 @@ fun PolicyEditorScreen(
                 emphasiseValue = true,
                 onClick = { onEvent(PolicyEvent.StepEssay) },
             )
+        }
+
+        SectionLabel(stringResource(R.string.policy_upload))
+        RowGroup {
+            UploadMethod.entries.forEach { method ->
+                val enabled = method in state.uploadMethods
+                item(
+                    title = stringResource(uploadLabelOf(method)),
+                    subtitle = stringResource(R.string.policy_upload_sub),
+                    value =
+                        stringResource(
+                            if (enabled) R.string.settings_upload_on else R.string.settings_upload_off,
+                        ),
+                    emphasiseValue = enabled,
+                    onClick = { onEvent(PolicyEvent.ToggleUploadMethod(method)) },
+                )
+            }
         }
 
         SectionLabel(stringResource(R.string.policy_caps))
@@ -165,3 +191,9 @@ private const val MAX_DAILY_MINUTES = 180
 private fun PolicyEditorPreview() {
     BrainXPTheme { PolicyEditorScreen(state = SAMPLE_POLICY, onEvent = {}, onBack = {}) }
 }
+
+private fun uploadLabelOf(method: UploadMethod): Int =
+    when (method) {
+        UploadMethod.PHOTO -> R.string.settings_upload_photo
+        UploadMethod.DOCUMENT -> R.string.settings_upload_document
+    }

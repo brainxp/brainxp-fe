@@ -3,6 +3,11 @@ package com.example.brainxp.blocking
 import com.example.brainxp.domain.model.BlockReason
 import com.example.brainxp.domain.model.Standing
 
+enum class BlockAction {
+    STUDY,
+    START_SESSION,
+}
+
 enum class BlockedState {
     NO_BALANCE,
     NOT_STARTED,
@@ -17,6 +22,8 @@ data class BlockedInfo(
     val secondsUntilReset: Int = 0,
     val idleDays: Int = 0,
     val idleDaysAllowed: Int = 0,
+    val spentTodaySeconds: Int = 0,
+    val dailyCapSeconds: Int = 0,
 )
 
 fun blockedInfoOf(
@@ -29,6 +36,8 @@ fun blockedInfoOf(
         secondsUntilReset = standing?.secondsUntilReset ?: 0,
         idleDays = standing?.idleDays ?: 0,
         idleDaysAllowed = standing?.idleDaysAllowed ?: 0,
+        spentTodaySeconds = standing?.spentTodaySeconds ?: 0,
+        dailyCapSeconds = standing?.dailyCapSeconds ?: 0,
     )
 
 fun blockedStateOf(
@@ -41,4 +50,15 @@ fun blockedStateOf(
         reason == BlockReason.DAILY_CAP -> BlockedState.DAILY_CAP
         balanceSeconds > 0 -> BlockedState.NOT_STARTED
         else -> BlockedState.NO_BALANCE
+    }
+
+fun actionKindOf(state: BlockedState): BlockAction =
+    when (state) {
+        BlockedState.NOT_STARTED -> BlockAction.START_SESSION
+
+        BlockedState.NO_BALANCE,
+        BlockedState.DAILY_CAP,
+        BlockedState.IDLE_HOLD,
+        BlockedState.GUARDIAN_STALE,
+        -> BlockAction.STUDY
     }

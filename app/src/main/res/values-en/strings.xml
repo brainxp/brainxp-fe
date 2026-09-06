@@ -172,6 +172,13 @@
     <string name="block_screen_hero_label">Playtime balance</string>
     <string name="block_screen_hero_sub">Do one session to add more</string>
     <string name="block_screen_note">Answering questions does not eat into your playtime.</string>
+    <string name="block_ledger_balance">In the bank</string>
+    <string name="block_ledger_today">Spent today</string>
+    <string name="block_ledger_today_value">%1$s of %2$s</string>
+    <string name="block_ledger_reset">Day turns in</string>
+    <string name="block_ledger_idle">Last studied</string>
+    <string name="block_ledger_idle_value">%1$d days ago, %2$d allowed</string>
+    <string name="block_locked_label">%1$s · locked</string>
     <string name="block_screen_action">Hand in material</string>
 
     <string name="block_screen_idle_title">You have not started your time yet.</string>
@@ -243,6 +250,7 @@
     <string name="home_protection_off">Protection off</string>
 
     <string name="home_balance_label">Playtime left</string>
+    <string name="home_balance_left">%1$s still in the bank</string>
     <string name="home_countdown_label">Playtime running</string>
     <string name="home_spent_of_cap">%1$s of %2$s used today</string>
     <string name="home_no_cap">No daily limit yet</string>
@@ -324,6 +332,12 @@
     <string name="settings_reset_hour">Day turns over at</string>
     <string name="settings_reset_hour_value">%1$02d:00</string>
     <string name="settings_idle_allowed">Days off allowed</string>
+    <string name="settings_protection">Protection</string>
+    <string name="settings_protection_on">Locked apps stay guarded</string>
+    <string name="settings_protection_degraded">Running in part — permissions need fixing</string>
+    <string name="settings_protection_off">Locked apps open freely</string>
+    <string name="settings_protection_turn_off">Turn off</string>
+    <string name="settings_protection_turn_on">Turn on</string>
     <string name="settings_apps">Locked apps</string>
     <string name="settings_permissions">System permissions</string>
     <string name="settings_pending">The loosened rule takes effect on %1$s. Until then the old rule applies.</string>
@@ -648,4 +662,19 @@
     <string name="accessibility_disclosure_continue">Understood, open settings</string>
 
     <string name="signin_privacy">Privacy policy</string>
+
+    <string name="settings_rules">Session rules</string>
+    <string name="settings_reward">Reward per question</string>
+    <string name="settings_essay">Essay share</string>
+    <string name="settings_essay_value">%1$d of %2$d</string>
+    <string name="settings_upload">How material is handed in</string>
+    <string name="settings_upload_photo">Photograph notes</string>
+    <string name="settings_upload_document">Send a file</string>
+    <string name="settings_upload_on">In use</string>
+    <string name="settings_upload_off">Turned off</string>
+    <string name="settings_rules_hint">Tap a row to change its value. Loosening a rule takes effect 24 hours later; tightening applies at once.</string>
+    <string name="policy_reward">Reward per question</string>
+    <string name="policy_reward_sub">The base before level and novelty calibration</string>
+    <string name="policy_upload">How material is handed in</string>
+    <string name="policy_upload_sub">At least one way must stay on</string>
 </resources>

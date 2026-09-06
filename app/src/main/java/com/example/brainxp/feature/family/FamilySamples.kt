@@ -1,6 +1,7 @@
 package com.example.brainxp.feature.family
 
 import com.example.brainxp.domain.model.AcademicLevel
+import com.example.brainxp.domain.model.UploadMethod
 
 internal val SAMPLE_FAMILY =
     FamilyHomeUiState(
@@ -43,6 +44,8 @@ internal val SAMPLE_POLICY =
         dailyGrantMinutes = listOf(0, 0, 0, 0, 0, 30, 30),
         idleDaysAllowed = 2,
         dayResetHour = 4,
+        baseRewardSeconds = 60,
+        uploadMethods = UploadMethod.entries.toSet(),
         apps =
             listOf(
                 LockedAppEntry("com.mobile.legends", "Mobile Legends", locked = true),

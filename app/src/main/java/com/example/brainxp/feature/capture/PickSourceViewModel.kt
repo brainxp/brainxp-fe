@@ -7,9 +7,12 @@ import com.example.brainxp.R
 import com.example.brainxp.core.capture.PickRejection
 import com.example.brainxp.core.capture.PickResult
 import com.example.brainxp.core.capture.PickedFileCache
+import com.example.brainxp.core.result.AppResult
 import com.example.brainxp.core.upload.UploadQueue
+import com.example.brainxp.data.repo.PolicyRepository
 import com.example.brainxp.di.IoDispatcher
 import com.example.brainxp.domain.model.MaterialType
+import com.example.brainxp.domain.model.UploadMethod
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,10 +28,22 @@ class PickSourceViewModel
     constructor(
         private val cache: PickedFileCache,
         private val uploads: UploadQueue,
+        private val policies: PolicyRepository,
         @IoDispatcher private val io: CoroutineDispatcher,
     ) : ViewModel() {
         private val mutableRejection = MutableStateFlow<Int?>(null)
         val rejection: StateFlow<Int?> = mutableRejection.asStateFlow()
+
+        private val mutableMethods = MutableStateFlow(UploadMethod.entries.toSet())
+        val uploadMethods: StateFlow<Set<UploadMethod>> = mutableMethods.asStateFlow()
+
+        init {
+            viewModelScope.launch {
+                val allowed = (policies.policy() as? AppResult.Success)?.value?.uploadMethods
+                mutableMethods.value = allowed?.ifEmpty { UploadMethod.entries.toSet() }
+                    ?: UploadMethod.entries.toSet()
+            }
+        }
 
         private val mutablePicked = MutableStateFlow<String?>(null)
         val pickedPath: StateFlow<String?> = mutablePicked.asStateFlow()

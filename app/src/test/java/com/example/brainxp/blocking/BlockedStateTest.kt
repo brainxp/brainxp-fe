@@ -53,4 +53,26 @@ class BlockedStateTest {
     fun `the cap is reported even when the balance reads zero`() {
         assertEquals(BlockedState.DAILY_CAP, state(BlockReason.DAILY_CAP, balance = 0))
     }
+
+    @Test
+    fun `a standing balance offers to start playing, not a trip back to BrainXP`() {
+        assertEquals(BlockAction.START_SESSION, actionKindOf(BlockedState.NOT_STARTED))
+    }
+
+    @Test
+    fun `every other state sends the user off to study`() {
+        listOf(
+            BlockedState.NO_BALANCE,
+            BlockedState.DAILY_CAP,
+            BlockedState.IDLE_HOLD,
+            BlockedState.GUARDIAN_STALE,
+        ).forEach { state ->
+            assertEquals(BlockAction.STUDY, actionKindOf(state))
+        }
+    }
+
+    @Test
+    fun `every state maps to exactly one action`() {
+        BlockedState.entries.forEach { state -> actionKindOf(state) }
+    }
 }

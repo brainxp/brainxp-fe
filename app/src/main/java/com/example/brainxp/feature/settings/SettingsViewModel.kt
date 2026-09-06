@@ -5,11 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.result.AppResult
 import com.example.brainxp.data.repo.AuthRepository
+import com.example.brainxp.data.repo.PolicyChange
 import com.example.brainxp.data.repo.PolicyRepository
 import com.example.brainxp.data.repo.SubjectPolicy
 import com.example.brainxp.domain.GuardedAction
 import com.example.brainxp.domain.ParentLock
-import com.example.brainxp.domain.model.AcademicLevel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,6 +38,7 @@ class SettingsViewModel
     @Inject
     constructor(
         private val policies: PolicyRepository,
+        private val editor: PolicySettingsEditor,
         private val auth: AuthRepository,
         private val parentLock: ParentLock,
     ) : ViewModel() {
@@ -55,11 +56,10 @@ class SettingsViewModel
 
         fun dismissNotice() = mutableState.update { it.copy(notice = null) }
 
-        fun chooseLevel(level: AcademicLevel) = apply { policies.setLevel(level) }
-
-        fun chooseLanguage(language: String) = apply { policies.setLanguage(language) }
-
-        fun chooseQuestionCount(count: Int) = apply { policies.setQuestionsPerSession(count) }
+        fun edit(edit: SettingsPolicyEdit) {
+            val current = mutableState.value.policy ?: return
+            apply { editor.apply(edit, current) }
+        }
 
         fun signOut() {
             viewModelScope.launch {
@@ -82,7 +82,7 @@ class SettingsViewModel
 
         fun dismissPin() = mutableState.update { it.copy(pinRequired = false, pinWrong = false) }
 
-        private fun apply(change: suspend () -> AppResult<com.example.brainxp.data.repo.PolicyChange>) {
+        private fun apply(change: suspend () -> AppResult<PolicyChange>) {
             if (mutableState.value.saving) return
             mutableState.update { it.copy(saving = true, error = null, notice = null) }
             viewModelScope.launch {
