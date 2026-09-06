@@ -83,6 +83,8 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.serialization)
+    implementation(libs.reveal.core)
+    implementation(libs.reveal.shapes)
     debugImplementation(libs.okhttp.logging)
     ksp(libs.androidx.hilt.compiler)
     ksp(libs.androidx.room.compiler)

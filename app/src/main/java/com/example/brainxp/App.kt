@@ -6,6 +6,7 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.Configuration
 import com.example.brainxp.blocking.ProtectionController
 import com.example.brainxp.core.permission.PermissionResumeObserver
+import com.example.brainxp.core.upload.PreparationNotifier
 import com.example.brainxp.data.repo.SessionRestorer
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
@@ -26,6 +27,9 @@ class App :
     @Inject
     lateinit var sessionRestorer: SessionRestorer
 
+    @Inject
+    lateinit var preparationNotifier: PreparationNotifier
+
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder().setWorkerFactory(workerFactory).build()
 
@@ -34,5 +38,6 @@ class App :
         sessionRestorer.restore()
         ProcessLifecycleOwner.get().lifecycle.addObserver(permissionResumeObserver)
         protectionController.start()
+        preparationNotifier.start()
     }
 }

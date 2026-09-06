@@ -49,6 +49,7 @@ fun SignInScreen(
     onSubmit: (Credentials) -> Unit,
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
+    onPrivacyPolicy: (() -> Unit)? = null,
     busy: Boolean = false,
     error: ApiError? = null,
 ) {
@@ -182,6 +183,15 @@ fun SignInScreen(
                     style = MaterialTheme.typography.labelLarge,
                 )
             }
+            onPrivacyPolicy?.let { open ->
+                TextButton(onClick = open, enabled = !busy, modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = stringResource(R.string.signin_privacy),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         }
     }
 }
@@ -189,7 +199,7 @@ fun SignInScreen(
 @Preview(name = "SignIn family", showBackground = true, heightDp = 780)
 @Composable
 private fun SignInPreview() {
-    BrainXPTheme { SignInScreen(mode = SetupMode.FAMILY, onSubmit = {}, onBack = {}) }
+    BrainXPTheme { SignInScreen(mode = SetupMode.FAMILY, onSubmit = {}, onBack = {}, onPrivacyPolicy = {}) }
 }
 
 @Preview(name = "SignIn personal", showBackground = true, heightDp = 780)

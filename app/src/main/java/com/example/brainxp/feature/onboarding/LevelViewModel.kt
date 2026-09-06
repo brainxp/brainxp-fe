@@ -29,6 +29,8 @@ class LevelViewModel
         private val _state = MutableStateFlow(LevelUiState())
         val state: StateFlow<LevelUiState> = _state.asStateFlow()
 
+        fun consumeSaved() = _state.update { it.copy(saved = false) }
+
         fun submit(level: AcademicLevel) {
             if (_state.value.busy) return
             _state.update { it.copy(busy = true, error = null) }

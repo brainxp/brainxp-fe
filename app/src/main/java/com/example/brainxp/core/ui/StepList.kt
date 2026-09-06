@@ -104,7 +104,7 @@ private fun StepRow(
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = ordinal.toString(),
+                text = if (step.state == LoadingStepState.Done) DONE_MARK else ordinal.toString(),
                 style = MaterialTheme.typography.labelSmall,
                 color = dotContent,
             )
@@ -134,6 +134,7 @@ private fun activePulse(): Float {
 }
 
 private const val DONE_FILL = 0.55f
+private const val DONE_MARK = "✓"
 private val DOT_SIZE = 20.dp
 private const val PULSE_MIN_ALPHA = 0.45f
 private const val PULSE_DURATION_MS = 600

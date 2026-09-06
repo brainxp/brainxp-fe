@@ -4,13 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brainxp.blocking.ProtectionStateHolder
 import com.example.brainxp.data.repo.BalanceSource
-import com.example.brainxp.data.repo.MaterialRepository
 import com.example.brainxp.data.repo.ReconciledBalance
 import com.example.brainxp.data.repo.RewardReconciler
 import com.example.brainxp.domain.ProtectionSwitch
 import com.example.brainxp.domain.UnlockSessionManager
 import com.example.brainxp.domain.model.BlockReason
-import com.example.brainxp.domain.model.Material
 import com.example.brainxp.domain.model.UnlockState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -31,7 +29,7 @@ class HomeViewModel
         private val reconciler: RewardReconciler,
         private val unlocks: UnlockSessionManager,
         private val lockedApps: LockedAppsSource,
-        private val materials: MaterialRepository,
+        private val progress: StudyProgressSource,
         private val protectionSwitch: ProtectionSwitch,
         protection: ProtectionStateHolder,
     ) : ViewModel() {
@@ -48,10 +46,10 @@ class HomeViewModel
 
         init {
             viewModelScope.launch { reconciler.reconcile() }
-            viewModelScope.launch { materials.page(cursor = null) }
+            viewModelScope.launch { progress.refresh() }
             viewModelScope.launch {
-                materials.observeCached().collect { cached ->
-                    mutableState.update { it.copy(pending = cached.pendingSession()) }
+                progress.observe().collect { study ->
+                    mutableState.update { it.copy(pending = study.pending, preparing = study.preparing) }
                 }
             }
             viewModelScope.launch {
@@ -97,6 +95,8 @@ class HomeViewModel
                 HomeEvent.FixPermissions -> emit(HomeEffect.OpenPermissionSetup)
                 HomeEvent.OpenLibrary -> emit(HomeEffect.OpenLibrary)
                 HomeEvent.OpenProgress -> emit(HomeEffect.OpenProgress)
+                HomeEvent.OpenPreparing -> emit(HomeEffect.OpenPreparing)
+                HomeEvent.OpenApps -> emit(HomeEffect.OpenApps)
                 HomeEvent.EndUnlockEarly -> viewModelScope.launch { unlocks.endEarly() }
                 HomeEvent.ToggleProtection -> toggleProtection()
                 is HomeEvent.OpenApp -> emit(HomeEffect.LaunchApp(event.packageName))
@@ -181,19 +181,8 @@ private fun HomeUiState.mergedWith(fresh: HomeUiState): HomeUiState =
         selectedOption = selectedOption?.takeIf { it in fresh.sessionOptions } ?: fresh.sessionOptions.firstOrNull(),
         starting = starting,
         pending = pending,
+        preparing = preparing,
         pinRequired = pinRequired,
         pinVerified = pinVerified,
         pinWrong = pinWrong,
     )
-
-private fun List<Material>.pendingSession(): PendingSession? =
-    firstNotNullOfOrNull { material ->
-        material.unfinished?.let { open ->
-            PendingSession(
-                materialId = material.id,
-                title = material.title,
-                answered = open.answered,
-                total = open.total,
-            )
-        }
-    }

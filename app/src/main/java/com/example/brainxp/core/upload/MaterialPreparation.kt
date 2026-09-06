@@ -6,6 +6,7 @@ import com.example.brainxp.data.repo.MaterialRepository
 import com.example.brainxp.di.AppScope
 import com.example.brainxp.domain.model.Material
 import com.example.brainxp.domain.model.MaterialStatus
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -27,7 +28,10 @@ sealed interface PreparationState {
 
     data class Working(
         val materialId: String,
-        val waitedMillis: Long,
+        val name: String = "",
+        val stage: PreparingStage = PreparingStage.READING,
+        val ready: Int = 0,
+        val total: Int = 0,
     ) : PreparationState
 
     data class Settled(
@@ -49,6 +53,7 @@ class MaterialPreparation
     @Inject
     constructor(
         private val materials: MaterialRepository,
+        private val stages: MaterialStageStream,
         @AppScope private val scope: CoroutineScope,
     ) {
         private val mutableState = MutableStateFlow<PreparationState>(PreparationState.Idle)
@@ -56,10 +61,13 @@ class MaterialPreparation
 
         private var watcher: Job? = null
 
-        fun watch(materialId: String) {
+        fun watch(
+            materialId: String,
+            name: String = "",
+        ) {
             if (watcher?.isActive == true && watchedId() == materialId) return
             watcher?.cancel()
-            mutableState.value = PreparationState.Working(materialId, waitedMillis = 0L)
+            mutableState.value = PreparationState.Working(materialId = materialId, name = name)
             watcher = scope.launch { follow(materialId) }
         }
 
@@ -78,6 +86,48 @@ class MaterialPreparation
             }
 
         private suspend fun follow(materialId: String) {
+            if (streamed(materialId)) return
+            poll(materialId)
+        }
+
+        private suspend fun streamed(materialId: String): Boolean {
+            var reached = false
+            val followed =
+                runCatching {
+                    stages.follow(materialId).collect { update ->
+                        reached = reached || update.settled
+                        advance(materialId, update)
+                    }
+                }
+            followed.exceptionOrNull()?.let { failure ->
+                if (failure is CancellationException) throw failure
+                return false
+            }
+            return reached && settle(materialId)
+        }
+
+        private fun advance(
+            materialId: String,
+            update: StageUpdate,
+        ) {
+            if (update.settled) return
+            mutableState.value =
+                working(materialId).copy(stage = update.stage, ready = update.ready, total = update.total)
+        }
+
+        private fun working(materialId: String): PreparationState.Working =
+            mutableState.value as? PreparationState.Working ?: PreparationState.Working(materialId)
+
+        private suspend fun settle(materialId: String): Boolean {
+            val result = materials.detail(materialId)
+            if (result is AppResult.Success && settled(result.value.status)) {
+                mutableState.value = PreparationState.Settled(result.value)
+                return true
+            }
+            return false
+        }
+
+        private suspend fun poll(materialId: String) {
             var waited = 0L
             var wait = FIRST_DELAY_MILLIS
 
@@ -93,7 +143,11 @@ class MaterialPreparation
                             mutableState.value = PreparationState.Settled(material)
                             return
                         }
-                        mutableState.value = PreparationState.Working(materialId, waited)
+                        mutableState.value =
+                            working(materialId).copy(
+                                stage = PreparingStage.VALIDATING,
+                                ready = material.questionCount,
+                            )
                     }
 
                     is AppResult.Failure -> {
@@ -101,7 +155,6 @@ class MaterialPreparation
                             mutableState.value = PreparationState.Stalled(materialId, result.error)
                             return
                         }
-                        mutableState.value = PreparationState.Working(materialId, waited)
                     }
                 }
             }

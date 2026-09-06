@@ -44,6 +44,7 @@ data class HomeUiState(
     val idleDays: Int = 0,
     val idleDaysAllowed: Int = 0,
     val pending: PendingSession? = null,
+    val preparing: PreparingRow? = null,
     val pinRequired: Boolean = false,
     val pinVerified: Boolean = false,
     val pinWrong: Boolean = false,

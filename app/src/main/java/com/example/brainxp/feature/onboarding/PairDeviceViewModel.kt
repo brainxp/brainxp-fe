@@ -34,6 +34,8 @@ class PairDeviceViewModel
         private val mutableState = MutableStateFlow(PairDeviceUiState())
         val state: StateFlow<PairDeviceUiState> = mutableState.asStateFlow()
 
+        fun consumePaired() = mutableState.update { it.copy(paired = false) }
+
         fun press(digit: Char) {
             val current = mutableState.value
             if (current.busy || current.digits.length >= PAIRING_CODE_DIGITS) return

@@ -40,6 +40,8 @@ fun SettingsScreen(
     onApps: () -> Unit,
     onPermissions: () -> Unit,
     onSignOut: () -> Unit,
+    onPrivacyPolicy: () -> Unit,
+    onDeleteAccount: () -> Unit,
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
     saving: Boolean = false,
@@ -111,6 +113,11 @@ fun SettingsScreen(
             item(title = stringResource(R.string.settings_permissions), onClick = onPermissions)
         }
 
+        RowGroup {
+            item(title = stringResource(R.string.settings_privacy), onClick = onPrivacyPolicy)
+            item(title = stringResource(R.string.settings_delete_account), onClick = onDeleteAccount)
+        }
+
         if (leaving) {
             Note(text = stringResource(R.string.settings_sign_out_warning), alert = true)
             PrimaryButton(
@@ -156,6 +163,8 @@ private fun SettingsPreview() {
             onApps = {},
             onPermissions = {},
             onSignOut = {},
+            onPrivacyPolicy = {},
+            onDeleteAccount = {},
             onBack = {},
         )
     }

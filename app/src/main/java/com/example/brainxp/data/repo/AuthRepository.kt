@@ -10,11 +10,13 @@ import com.example.brainxp.core.network.RegisterRequestDto
 import com.example.brainxp.core.network.TokenDto
 import com.example.brainxp.core.result.AppResult
 import com.example.brainxp.data.prefs.AuthDataStore
+import com.example.brainxp.domain.model.DeviceRole
+import com.example.brainxp.domain.model.deviceRoleOf
 import javax.inject.Inject
 import javax.inject.Singleton
 
 data class Identity(
-    val role: String,
+    val role: DeviceRole,
     val subjectId: String?,
 )
 
@@ -64,7 +66,7 @@ class AuthRepository
                         store.saveTokens(token.accessToken, token.refreshToken)
                         store.saveIdentity(token.subjectId, token.familyId, token.role)
                         tokens.update(AuthTokens(token.accessToken, token.refreshToken))
-                        AppResult.Success(Identity(token.role, token.subjectId))
+                        AppResult.Success(Identity(deviceRoleOf(token.role), token.subjectId))
                     },
                     onFailure = { AppResult.Failure(errors.map(it)) },
                 )

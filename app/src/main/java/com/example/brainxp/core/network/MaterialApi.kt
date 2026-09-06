@@ -4,12 +4,14 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Path
+import retrofit2.http.Streaming
 
 @Serializable
 data class MaterialAcceptedDto(
@@ -43,6 +45,15 @@ data class UnfinishedDto(
     val total: Int,
 )
 
+@Serializable
+data class StageEventDto(
+    val stage: String,
+    val ready: Int? = null,
+    val total: Int? = null,
+    val status: String? = null,
+    val reason: String? = null,
+)
+
 interface MaterialApi {
     @Multipart
     @POST("subjects/{subjectId}/materials")
@@ -66,4 +77,10 @@ interface MaterialApi {
     suspend fun material(
         @Path("materialId") materialId: String,
     ): MaterialDto
+
+    @Streaming
+    @GET("materials/{materialId}/stream")
+    suspend fun stream(
+        @Path("materialId") materialId: String,
+    ): ResponseBody
 }

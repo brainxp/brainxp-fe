@@ -179,4 +179,68 @@ class PermissionSetupScreenTest {
         compose.onNodeWithText(str(R.string.permission_setup_optional)).assertExists()
         compose.onAllNodesWithText(str(R.string.permission_setup_recommended)).assertCountEquals(2)
     }
+
+    @Test
+    fun theAccessibilityStepAsksForConsentBeforeOpeningSettings() {
+        val opened = mutableListOf<SpecialPermission>()
+        show(
+            granted = SpecialPermission.entries.toSet() - SpecialPermission.ACCESSIBILITY,
+            onOpenSettings = { opened += it },
+        )
+
+        compose.onNodeWithText(str(R.string.permission_setup_open)).performScrollTo().performClick()
+
+        assertEquals(emptyList<SpecialPermission>(), opened)
+        compose.onNodeWithText(str(R.string.accessibility_disclosure_title)).assertExists()
+    }
+
+    @Test
+    fun theDisclosureNamesWhatIsReadAndWhatIsNot() {
+        show(granted = SpecialPermission.entries.toSet() - SpecialPermission.ACCESSIBILITY)
+
+        compose.onNodeWithText(str(R.string.permission_setup_open)).performScrollTo().performClick()
+
+        compose.onNodeWithText(str(R.string.accessibility_disclosure_reads)).assertExists()
+        compose.onNodeWithText(str(R.string.accessibility_disclosure_not)).assertExists()
+        compose.onNodeWithText(str(R.string.accessibility_disclosure_optional)).assertExists()
+    }
+
+    @Test
+    fun acceptingTheDisclosureOpensAccessibilitySettings() {
+        val opened = mutableListOf<SpecialPermission>()
+        show(
+            granted = SpecialPermission.entries.toSet() - SpecialPermission.ACCESSIBILITY,
+            onOpenSettings = { opened += it },
+        )
+
+        compose.onNodeWithText(str(R.string.permission_setup_open)).performScrollTo().performClick()
+        compose.onNodeWithText(str(R.string.accessibility_disclosure_continue)).performClick()
+
+        assertEquals(listOf(SpecialPermission.ACCESSIBILITY), opened)
+        compose.onNodeWithText(str(R.string.accessibility_disclosure_title)).assertDoesNotExist()
+    }
+
+    @Test
+    fun decliningTheDisclosureOpensNothing() {
+        val opened = mutableListOf<SpecialPermission>()
+        show(
+            granted = SpecialPermission.entries.toSet() - SpecialPermission.ACCESSIBILITY,
+            onOpenSettings = { opened += it },
+        )
+
+        compose.onNodeWithText(str(R.string.permission_setup_open)).performScrollTo().performClick()
+        compose.onNodeWithText(str(R.string.detail_delete_cancel)).performClick()
+
+        assertEquals(emptyList<SpecialPermission>(), opened)
+        compose.onNodeWithText(str(R.string.accessibility_disclosure_title)).assertDoesNotExist()
+    }
+
+    @Test
+    fun aNonAccessibilityStepOpensSettingsWithNoDisclosure() {
+        show(granted = SpecialPermission.entries.toSet() - SpecialPermission.OVERLAY)
+
+        compose.onNodeWithText(str(R.string.permission_setup_open)).performScrollTo().performClick()
+
+        compose.onNodeWithText(str(R.string.accessibility_disclosure_title)).assertDoesNotExist()
+    }
 }

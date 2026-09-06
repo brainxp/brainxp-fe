@@ -19,6 +19,10 @@ class SetParentPinViewModel
         private val mutableSaved = MutableStateFlow(false)
         val saved: StateFlow<Boolean> = mutableSaved.asStateFlow()
 
+        fun consumeSaved() {
+            mutableSaved.value = false
+        }
+
         fun set(pin: String) {
             viewModelScope.launch {
                 pins.set(pin)

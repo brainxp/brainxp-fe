@@ -4,12 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brainxp.data.prefs.AuthDataStore
 import com.example.brainxp.data.prefs.SettingsDataStore
-import com.example.brainxp.domain.model.DeviceRole
+import com.example.brainxp.domain.model.familyParent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -29,10 +28,10 @@ class RootViewModel
         private val settings: SettingsDataStore,
         private val auth: AuthDataStore,
     ) : ViewModel() {
-        val role: StateFlow<DeviceRole?> =
-            settings.settings
-                .map { it.role }
-                .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+        val familyRoot: StateFlow<Boolean> =
+            combine(settings.settings, auth.auth) { snapshot, session ->
+                familyParent(snapshot.role, session.familyId, session.role)
+            }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
         val state: StateFlow<RootUiState> =
             combine(settings.settings, auth.auth) { snapshot, session ->

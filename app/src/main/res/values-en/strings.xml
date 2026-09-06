@@ -1,0 +1,651 @@
+<resources>
+    <string name="action_retry">Try again</string>
+    <string name="action_back">Back</string>
+
+    <string name="welcome_title">Hand in your notes,\nearn playtime.</string>
+    <string name="welcome_body">Photograph your notes or send in a lesson file. The questions come from that, and every correct answer adds playtime.</string>
+    <string name="welcome_start">Start</string>
+    <string name="welcome_meter_label">Playtime card</string>
+    <string name="welcome_take_motion">Linear motion</string>
+    <string name="welcome_take_newton">Newton\'s laws</string>
+    <string name="welcome_take_friction">Friction essay</string>
+    <string name="welcome_level_easy">easy</string>
+    <string name="welcome_level_medium">medium</string>
+    <string name="welcome_level_hard">hard</string>
+    <string name="welcome_gain">+%1$s</string>
+
+    <string name="mode_nav">Initial setup</string>
+    <string name="mode_title">Who sets the rules?</string>
+    <string name="mode_body">Whatever you pick here is what holds the rules from now on.</string>
+    <string name="mode_family_title">Family Mode</string>
+    <string name="mode_family_sub">A parent sets it up from their own phone. The child just follows along and cannot change it.</string>
+    <string name="mode_personal_title">Personal Mode</string>
+    <string name="mode_personal_sub">You set your own rules for yourself. Loosen one and it takes effect tomorrow.</string>
+    <string name="mode_note">This phone is not registered to any family yet.</string>
+
+    <string name="role_nav">Family Mode</string>
+    <string name="role_title">Whose phone is this?</string>
+    <string name="role_body">The rules live on the child\'s phone. The parent\'s phone is for setting them up and keeping an eye on things.</string>
+    <string name="role_parent_title">Parent</string>
+    <string name="role_parent_sub">Create a child profile, set rules, issue a code</string>
+    <string name="role_child_title">Child</string>
+    <string name="role_child_sub">Enter the code from the parent\'s phone</string>
+    <string name="role_note">A child has no password. All that is stored is a nickname and a school level.</string>
+
+    <string name="signin_nav_login">Sign in</string>
+    <string name="signin_nav_register">Create account</string>
+    <string name="signin_title_login">Welcome back</string>
+    <string name="signin_title_register">Create a new account</string>
+    <string name="signin_body_family">This account holds the rules for everyone in the family.</string>
+    <string name="signin_body_personal">This account keeps the rules you set for yourself.</string>
+    <string name="signin_name">Name</string>
+    <string name="signin_name_hint">Nickname</string>
+    <string name="signin_email">Email</string>
+    <string name="signin_email_hint">you@example.com</string>
+    <string name="signin_password">Password</string>
+    <string name="signin_password_hint">At least 10 characters</string>
+    <string name="signin_submit_login">Sign in</string>
+    <string name="level_title">School level</string>
+    <string name="level_heading">What level are you at?</string>
+    <string name="level_body">This decides how deep the questions built from your material go.</string>
+    <string name="level_sd">Primary</string>
+    <string name="level_smp">Junior high</string>
+    <string name="level_sma">Senior high</string>
+    <string name="level_kuliah">University</string>
+    <string name="level_umum">General</string>
+    <string name="level_note">Your level is used to turn away material far below what you can handle, not to limit what you are allowed to study.</string>
+    <string name="level_submit">Continue</string>
+    <string name="level_error_session_title">Session ended</string>
+    <string name="level_error_session_body">Sign in again to carry on.</string>
+    <string name="signin_error_credentials_title">Wrong email or password</string>
+    <string name="signin_error_credentials_body">Check the email and password again, then give it one more try.</string>
+    <string name="signin_submit_register">Sign up</string>
+    <string name="signin_to_register">No account yet? Sign up</string>
+    <string name="signin_to_login">Already have an account? Sign in</string>
+
+    <string name="pair_nav">Join a family</string>
+    <string name="pair_title">Enter the code</string>
+    <string name="pair_body">Ask your parent for the six digits.</string>
+    <string name="pair_note">Once the code goes through, the rules, level, and starting balance land on this phone right away.</string>
+    <string name="pair_delete">Delete one digit</string>
+
+    <string name="library_title">Material library</string>
+    <string name="library_intro">Your questions stay until you delete them. Redoing a set still builds understanding, but the reward shrinks each time round.</string>
+    <string name="library_empty">No material yet. Hand one in, and its questions are yours to study again.</string>
+    <string name="library_question_count">%1$d questions</string>
+    <string name="library_times_studied">done %1$d×</string>
+    <string name="library_never_studied">not done yet</string>
+    <string name="library_reward">reward %1$s</string>
+    <string name="library_swipe_hint">Swipe a material to the left to delete it.</string>
+    <string name="library_pending">Unfinished · %1$d of %2$d filled in</string>
+    <string name="library_resume">Continue</string>
+    <string name="library_remove">Delete</string>
+    <string name="library_remove_title">Delete this material?</string>
+    <string name="library_remove_body">%1$s and its %2$d questions are gone for good. The minutes you already earned from it stay untouched.</string>
+    <string name="library_remove_failed">The material could not be deleted. Try again.</string>
+
+    <string name="progress_title">Your progress</string>
+    <string name="progress_streak_label">Current streak</string>
+    <string name="progress_days">days</string>
+    <string name="progress_freeze">Skip days left</string>
+    <string name="progress_freeze_sub">One per 7 days in a row, two at most</string>
+    <string name="progress_longest">Longest streak</string>
+    <string name="progress_sessions">Sessions finished</string>
+    <string name="progress_correct">Questions answered correctly</string>
+    <string name="progress_essays">Essays over the threshold</string>
+    <string name="progress_badges">Badges · %1$d of %2$d</string>
+    <string name="progress_badge_note">Badges do not earn playtime. Some can only be reached through hard questions and essays.</string>
+
+    <string name="home_progress_open">Open progress</string>
+    <string name="home_rest_days">Days off allowed</string>
+    <string name="home_rest_days_sub">Before your balance is held back</string>
+    <string name="home_rest_days_value">%1$d days</string>
+    <string name="home_idle_locked">Held · last studied %1$d days ago</string>
+
+    <string name="error_network_title">No connection</string>
+    <string name="error_network_body">Check your internet connection, then try again.</string>
+
+    <string name="error_unauthorized_title">Session ended</string>
+    <string name="error_unauthorized_body">Sign in again to carry on.</string>
+
+    <string name="error_rate_limited_title">Too many requests</string>
+    <string name="error_rate_limited_body">Wait a moment before trying again.</string>
+    <string name="error_rate_limited_body_seconds">Try again in %1$d seconds.</string>
+
+    <string name="error_timeout_title">This is taking too long</string>
+    <string name="error_timeout_body">Your material is still being processed on the server. Check again shortly.</string>
+    <string name="error_server_busy_title">The server is busy</string>
+    <string name="error_server_busy_body">This one is on us, not you. Try again shortly.</string>
+
+    <string name="error_validation_title">Data not accepted</string>
+    <string name="error_validation_body">The server turned this data down. Change it and send it again.</string>
+    <string name="error_validation_body_field">The \"%1$s\" part needs fixing.</string>
+
+    <string name="error_unknown_title">Could not be processed</string>
+    <string name="error_unknown_body">Try again now. If it keeps failing, close the app and open it again.</string>
+
+    <string name="permission_setup_title">Set up permissions</string>
+    <string name="permission_setup_subtitle">BrainXP needs a few system permissions before it can guard your playtime. Work through each step in order.</string>
+    <string name="permission_setup_step_label">Step %1$d of %2$d</string>
+    <string name="permission_setup_open">Open settings</string>
+    <string name="permission_setup_granted">Already on</string>
+    <string name="permission_setup_optional">Optional</string>
+    <string name="permission_setup_recommended">Recommended</string>
+    <string name="permission_setup_continue">Continue</string>
+    <string name="permission_setup_finish">Done</string>
+    <string name="permission_setup_blocked">The two required permissions above must be on before you can continue.</string>
+    <string name="permission_setup_degraded">Protection is on, but not fully. The steps you skipped make it easier for BrainXP to fail without telling you.</string>
+    <string name="permission_setup_unavailable">This device has no settings page for that permission.</string>
+
+    <string name="permission_notifications_title">Notifications</string>
+    <string name="permission_notifications_breaks">Without this you will not be told when playtime is nearly up, and the guard service notification stays hidden.</string>
+
+    <string name="permission_usage_access_title">Usage access</string>
+    <string name="permission_usage_access_breaks">Without this BrainXP cannot tell which app you have open, so nothing can be restricted at all.</string>
+
+    <string name="permission_overlay_title">Display over other apps</string>
+    <string name="permission_overlay_breaks">Without this the block screen cannot appear, so restricted apps stay wide open.</string>
+
+    <string name="permission_battery_title">Exempt from battery saver</string>
+    <string name="permission_battery_breaks">Without this the system can kill the guard service while the phone is idle, and restrictions stop with no warning.</string>
+
+    <string name="permission_accessibility_title">Accessibility service</string>
+    <string name="permission_accessibility_breaks">This is a slightly faster alternative app detector. Skipping it costs you nothing — the main detector is enough.</string>
+
+    <string name="accessibility_service_label">BrainXP app detector</string>
+    <string name="accessibility_service_description">Tells BrainXP which app you have just opened, so the apps you restrict can be locked sooner. BrainXP only reads the app name, never what is on your screen.</string>
+
+    <string name="blocking_channel_name">Protection</string>
+    <string name="blocking_channel_description">Shows that BrainXP is guarding the apps you restricted.</string>
+    <string name="blocking_notification_active">Protection on</string>
+    <string name="blocking_notification_blocked">This app is restricted right now</string>
+    <string name="blocking_notification_unlocked">Playtime running</string>
+    <string name="blocking_notification_remaining">%1$s left</string>
+
+    <plurals name="blocking_notification_restricted_count">
+        <item quantity="one">%1$d app guarded</item>
+        <item quantity="other">%1$d apps guarded</item>
+    </plurals>
+
+    <string name="block_screen_title">Your balance is empty.</string>
+    <string name="block_screen_body">You locked this app yourself. Work through one session from your material, and the time opens up again.</string>
+    <string name="block_screen_hero_label">Playtime balance</string>
+    <string name="block_screen_hero_sub">Do one session to add more</string>
+    <string name="block_screen_note">Answering questions does not eat into your playtime.</string>
+    <string name="block_screen_action">Hand in material</string>
+
+    <string name="block_screen_idle_title">You have not started your time yet.</string>
+    <string name="block_screen_idle_body">Your balance is still there. Open BrainXP and start playtime to use it.</string>
+    <string name="block_screen_idle_hero">Balance ready to use</string>
+    <string name="block_screen_idle_hero_sub">Just start it</string>
+    <string name="block_screen_idle_note">Your balance only goes down while you are actually playing.</string>
+    <string name="block_screen_idle_action">Start playtime</string>
+
+    <string name="block_screen_cap_title">Today\'s limit is used up.</string>
+    <string name="block_screen_cap_body">It is not your balance that ran out — just today\'s allowance. The day turns over in about %1$s.</string>
+    <string name="block_screen_cap_hero">Your balance is safe, nothing lost</string>
+    <string name="block_screen_cap_hero_sub">Today\'s quota is full</string>
+    <string name="block_screen_cap_note">Answering questions now still adds to your balance and keeps your streak, but it will not open apps today.</string>
+    <string name="block_screen_cap_action">Hand in material for tomorrow</string>
+
+    <string name="block_screen_hold_title">Your balance is on hold.</string>
+    <string name="block_screen_hold_body">You last studied %1$d days ago, and the allowance is %2$d days off. Do one session and your balance opens up again.</string>
+    <string name="block_screen_hold_hero">Balance intact, nothing lost</string>
+    <string name="block_screen_hold_hero_sub">Waiting for you to study again</string>
+    <string name="block_screen_hold_note">Nothing expires. One session done and it is all usable again.</string>
+    <string name="block_screen_hold_action">Do one session</string>
+
+    <string name="block_screen_stale_title">The guard lost contact.</string>
+    <string name="block_screen_stale_body">BrainXP stopped reporting in, so apps stay locked until contact is back. Your balance is untouched.</string>
+    <string name="block_screen_stale_hero">Balance saved</string>
+    <string name="block_screen_stale_hero_sub">Waiting for the guard to reconnect</string>
+    <string name="block_screen_stale_note">Open BrainXP and let it connect for a moment. The lock lifts on its own.</string>
+    <string name="block_screen_stale_action">Hand in material while you wait</string>
+
+    <string name="home_session_spent">%1$s used this session</string>
+    <string name="home_session_note">Your balance only goes down while a locked app is open. Stop whenever you like, the rest stays saved.</string>
+
+    <string name="app_picker_title">Pick apps</string>
+    <string name="app_picker_search">Search apps</string>
+    <string name="app_picker_loading">Reading the app list</string>
+    <string name="app_picker_game">Game</string>
+    <string name="app_picker_empty_title">Nothing matches</string>
+    <string name="app_picker_empty_body">Try another word, or clear the search to see everything.</string>
+
+    <string name="warning_channel_name">Playtime almost up</string>
+    <string name="warning_channel_description">A heads-up before your playtime ends, so it does not cut off suddenly.</string>
+
+    <string name="degraded_channel_name">Protection trouble</string>
+    <string name="degraded_channel_description">Warnings for when a permission BrainXP needs gets revoked.</string>
+    <string name="degraded_notification_title">Protection is not running fully</string>
+    <string name="degraded_notification_body">A permission was revoked. The apps you restricted can be opened freely until it is restored.</string>
+    <string name="degraded_banner_title">Protection is not running fully</string>
+    <string name="degraded_banner_body">A permission it needs was revoked, so restrictions are not working.</string>
+    <string name="degraded_banner_action">Fix permissions</string>
+
+    <string name="expiry_warning_title">%1$s left</string>
+    <string name="expiry_warning_body">Your playtime is nearly up. Finish what you are watching first.</string>
+
+    <string name="duration_hours">%1$dh %2$02dm</string>
+    <string name="duration_minutes">%1$d min</string>
+    <string name="duration_seconds">%1$d sec</string>
+    <string name="duration_zero">0 min</string>
+    <string name="duration_short_hours">%1$dh %2$02dm</string>
+    <string name="duration_short_minutes">%1$dm</string>
+    <string name="duration_short_seconds">%1$ds</string>
+    <string name="duration_multiplier">×%1$s</string>
+
+    <string name="home_title">Home</string>
+    <string name="home_streak">%1$d days</string>
+
+    <string name="home_protection_active">Protection on</string>
+    <string name="home_protection_degraded">Not full</string>
+    <string name="home_protection_off">Protection off</string>
+
+    <string name="home_balance_label">Playtime left</string>
+    <string name="home_countdown_label">Playtime running</string>
+    <string name="home_spent_of_cap">%1$s of %2$s used today</string>
+    <string name="home_no_cap">No daily limit yet</string>
+    <string name="home_stale_balance">Not connected to the server. This figure is from the last record.</string>
+    <string name="home_cap_reached">Daily limit reached. Your balance is untouched and waiting — the day turns over in about %1$s.</string>
+
+    <string name="home_start_earning">Hand in material</string>
+    <string name="home_resume_title">Continue an unfinished session</string>
+    <string name="home_resume_sub">%1$s · %2$d of %3$d filled in</string>
+    <string name="home_session_label">Use your time now</string>
+    <string name="home_session_start">Start playtime</string>
+    <string name="home_session_starting">Getting ready…</string>
+    <string name="home_end_early">Finish now</string>
+
+    <string name="home_apps_open">Open while there is balance</string>
+    <string name="home_apps_locked">Currently locked</string>
+    <string name="home_app_open">Open</string>
+    <string name="home_app_locked">Locked</string>
+    <string name="home_no_apps_title">No apps locked yet</string>
+    <string name="home_apps_pick_title">Pick the apps you want locked</string>
+    <string name="home_apps_pick_sub">The ones you pick can only be opened when there is playtime</string>
+    <string name="home_apps_manage">Manage locked apps</string>
+    <string name="home_no_apps_managed">A parent decides this list</string>
+
+    <string name="home_library_title">Material library</string>
+    <string name="home_library_sub">Old questions can be studied again</string>
+    <string name="home_daily_cap">Today\'s playtime allowance</string>
+
+    <string name="source_title">Hand in material</string>
+    <string name="source_hero_label">This session</string>
+    <string name="source_unit">questions</string>
+    <string name="source_hero_sub">Up to about +%1$s</string>
+    <string name="source_pick">Pick how to hand it in</string>
+    <string name="source_photo">Photograph notes</string>
+    <string name="source_photo_sub">The camera opens straight away. Books, whiteboards, handwriting.</string>
+    <string name="source_document">Send a file</string>
+    <string name="source_document_sub">PDF, DOCX, PPTX, TXT, or a photo you already have — up to 32 MB.</string>
+    <string name="source_note">Material is processed by an AI service and is not used to train models. Uploading the same material again is still allowed, but the reward drops.</string>
+
+    <string name="preparing_title">Preparing questions</string>
+    <string name="preparing_status_working">Being written</string>
+    <string name="preparing_status_ready">All questions ready</string>
+    <string name="preparing_count_label">questions ready to answer</string>
+    <string name="preparing_count_none">No questions ready yet</string>
+    <string name="preparing_count_waiting">The questions are being written from your material</string>
+    <string name="preparing_step_reading">Material read</string>
+    <string name="preparing_step_validating">Checked and calibrated</string>
+    <string name="preparing_step_partial">First question ready</string>
+    <string name="preparing_step_ready">Remaining questions being written</string>
+    <string name="setpin_title">Parent PIN</string>
+    <string name="setpin_heading">Set a PIN on this phone</string>
+    <string name="setpin_body">This PIN is what guards the settings on the child\'s phone. Set it now, while you are the one holding it.</string>
+    <string name="setpin_field">4-digit PIN</string>
+    <string name="setpin_confirm">Repeat the PIN</string>
+    <string name="setpin_note">Without a PIN, the child can change which apps are locked, switch modes, and turn protection off themselves.</string>
+    <string name="setpin_save">Set the PIN</string>
+    <string name="setpin_skip">Later</string>
+    <string name="pin_body">A parent guards this setting. Enter the PIN to continue.</string>
+    <string name="pin_label">Parent PIN</string>
+    <string name="pin_wrong">Wrong PIN. Try again.</string>
+    <string name="pin_confirm">Unlock</string>
+    <string name="pin_title_restrictions">Change which apps are locked</string>
+    <string name="pin_title_mode">Leave this mode</string>
+    <string name="pin_title_protection">Turn protection off</string>
+    <string name="pair_failed">That code does not match or has expired. Ask your parent for a new one.</string>
+    <string name="done_title">All set</string>
+    <string name="done_body">Your account is created and the playtime guard is running.</string>
+    <string name="done_step_account">Account created</string>
+    <string name="done_step_level">Level chosen</string>
+    <string name="done_step_protection">Guard on</string>
+    <string name="done_step_material">Hand in your first material</string>
+    <string name="done_protection_partial">You skipped a permission, so the guard is not at full strength. You can complete it later from Settings.</string>
+    <string name="done_next">Next up: hand in one material, answer its questions, and your playtime starts adding up.</string>
+    <string name="done_start">Start</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_level">School level</string>
+    <string name="settings_language">Question language</string>
+    <string name="settings_questions">Questions per session</string>
+    <string name="settings_reset_hour">Day turns over at</string>
+    <string name="settings_reset_hour_value">%1$02d:00</string>
+    <string name="settings_idle_allowed">Days off allowed</string>
+    <string name="settings_apps">Locked apps</string>
+    <string name="settings_permissions">System permissions</string>
+    <string name="settings_pending">The loosened rule takes effect on %1$s. Until then the old rule applies.</string>
+    <string name="settings_sign_out">Sign out</string>
+    <string name="settings_sign_out_confirm">Yes, sign out</string>
+    <string name="settings_sign_out_warning">Your material and playtime stay saved on the server. You will need to sign in again to use them.</string>
+    <string name="activity_title">Activity log</string>
+    <string name="activity_scope">Only meaningful events are recorded. Which apps you open and close never end up here.</string>
+    <string name="activity_empty_title">No entries yet</string>
+    <string name="activity_empty_body">Meaningful events like new material, a finished session, and playtime starting will show up here.</string>
+    <string name="activity_material_added">New material handed in</string>
+    <string name="activity_session_completed">Study session finished</string>
+    <string name="activity_reward_earned">Playtime earned</string>
+    <string name="activity_unlock_started">Playtime started</string>
+    <string name="activity_unlock_ended">Playtime ended</string>
+    <string name="activity_protection_disabled">Protection turned off</string>
+    <string name="activity_protection_degraded">Protection weakened</string>
+    <string name="activity_protection_anomaly">Something looks off</string>
+    <string name="progress_chart_title">Minutes from studying</string>
+    <string name="progress_chart_caption">%1$d active days in the past week</string>
+    <string name="progress_chart_too_early">The chart appears once you have studied on %1$d different days. Before that, the line would only mislead.</string>
+    <string name="history_title">Time history</string>
+    <string name="history_intro">Every change to your playtime balance, newest first.</string>
+    <string name="history_empty_title">No history yet</string>
+    <string name="history_empty_body">Once you finish your first session, the time record shows up here.</string>
+    <string name="history_type_earn">From studying</string>
+    <string name="history_type_spend">Spent playing</string>
+    <string name="history_type_grant">Added by a parent</string>
+    <string name="history_type_redeem">Traded for a reward</string>
+    <string name="history_type_expire">Expired</string>
+    <string name="history_type_other">Adjustment</string>
+    <string name="detail_questions">Questions saved</string>
+    <string name="detail_questions_value">%1$d questions</string>
+    <string name="detail_studied">Times done</string>
+    <string name="detail_studied_value">%1$d times</string>
+    <string name="detail_assessed">Material level</string>
+    <string name="detail_status_ready">Ready</string>
+    <string name="detail_status_processing">Processing</string>
+    <string name="detail_status_failed">Turned down</string>
+    <string name="detail_start">Start session</string>
+    <string name="detail_delete">Delete material</string>
+    <string name="detail_delete_confirm">Yes, delete</string>
+    <string name="detail_delete_cancel">Cancel</string>
+    <string name="detail_delete_warning">This material and its %1$d questions are gone for good. The minutes you already earned stay safe.</string>
+    <string name="reject_reason_level_too_low">The content was judged far below your level, so its questions would not challenge you.</string>
+    <string name="reject_reason_too_thin">There is too little here to build questions from — not enough yet that can be tested.</string>
+    <string name="reject_reason_unreadable">The text could not be read. Try photographing it again or sending the original file.</string>
+    <string name="reject_reason_unknown">This material cannot be used to build questions.</string>
+    <string name="reject_level_unknown">not yet known</string>
+    <string name="preparing_stalled">The server has not answered. Your material may already be done — check again.</string>
+    <string name="preparing_retry">Check again</string>
+    <string name="preparing_note">Feel free to leave. The writing carries on even if you move to another screen, and you will be told when it is ready.</string>
+    <string name="preparing_start">Start answering</string>
+    <string name="preparing_start_count">Start answering · %1$d questions</string>
+    <string name="preparing_leave">Leave it running</string>
+    <string name="ready_channel_name">Questions ready</string>
+    <string name="ready_channel_description">Word as soon as the questions from your material are written.</string>
+    <string name="ready_notification_title">Your questions are ready</string>
+    <string name="ready_notification_body">%1$s · %2$d questions waiting</string>
+    <string name="ready_notification_action">Start answering</string>
+    <string name="ready_notification_rejected_title">Material cannot be used yet</string>
+    <string name="ready_notification_rejected_body">%1$s did not pass the check. Open to see why.</string>
+    <string name="home_preparing_title">Questions being written</string>
+    <string name="home_preparing_ready">First question is ready</string>
+    <string name="home_preparing_sub">%1$d of %2$d questions</string>
+    <string name="home_preparing_sub_waiting">Material is being read</string>
+
+    <string name="rejected_title">Material cannot be used yet</string>
+    <string name="rejected_alert">This material was judged to be at %1$s level, while yours is %2$s.</string>
+    <string name="rejected_headline">Questions from this material could not test anything</string>
+    <string name="rejected_rules">The rules</string>
+    <string name="rejected_rule_at_level">At or above your level</string>
+    <string name="rejected_rule_one_below">One level below</string>
+    <string name="rejected_rule_two_below">Two levels or more</string>
+    <string name="rejected_rule_refused">Turned down</string>
+    <string name="rejected_deleted">This file is deleted within an hour and is not kept in your library.</string>
+    <string name="rejected_action">Hand in other material</string>
+
+    <string name="quiz_position">Question %1$d of %2$d</string>
+    <string name="quiz_filled">%1$d filled in</string>
+    <string name="quiz_pending">%1$d waiting to send</string>
+    <string name="quiz_jump">Question %1$d</string>
+    <string name="quiz_jump_doubted">Question %1$d, unsure</string>
+    <string name="quiz_guide">How this works</string>
+    <string name="quiz_excerpt">From your material: %1$s</string>
+    <string name="quiz_answer_label">Your answer</string>
+    <string name="quiz_answer_hint">Write it in your own words, at least eight words.</string>
+    <string name="quiz_rubric">Marked against %1$d criteria, passing above 60.</string>
+    <string name="quiz_doubt">Unsure</string>
+    <string name="quiz_doubt_marked">Marked unsure</string>
+    <string name="quiz_submit">Hand in the session</string>
+    <string name="quiz_submit_now">Hand it in now</string>
+    <string name="quiz_review_again">Check again</string>
+    <string name="quiz_confirm_doubts">There are still %1$d questions marked unsure. Once handed in, the answers cannot be changed.</string>
+    <string name="quiz_hint_partial">Saved automatically. %1$d questions left, you can carry on later.</string>
+    <string name="quiz_hint_complete">Everything is filled in. Right and wrong show up after you hand it in.</string>
+    <string name="tour_title">A quick practice</string>
+    <string name="tour_step">%1$d of %2$d</string>
+    <string name="tour_next">Continue</string>
+    <string name="tour_start">Start the real one</string>
+    <string name="tour_skip">Skip the guide</string>
+    <string name="tour_wait">Give it a try, then continue</string>
+    <string name="tour_q1">If 3x + 5 = 20, what is x?</string>
+    <string name="tour_q1_a">x = 3</string>
+    <string name="tour_q1_b">x = 5</string>
+    <string name="tour_q1_c">x = 8</string>
+    <string name="tour_q1_d">x = 15</string>
+    <string name="tour_q2">What does 4a + 7a simplify to?</string>
+    <string name="tour_q2_a">11a</string>
+    <string name="tour_q2_b">28a</string>
+    <string name="tour_q2_c">4a + 7</string>
+    <string name="tour_q2_d">11</string>
+    <string name="tour_answer_title">Try answering this one</string>
+    <string name="tour_answer_body">The real questions are built from the material you hand in. This is a sample — tap the question card to watch an answer land.</string>
+    <string name="tour_autosave_title">Saved automatically</string>
+    <string name="tour_autosave_body">There is no save button. As soon as you pick something or pause your typing, the answer goes in.</string>
+    <string name="tour_doubt_title">Mark it if you are unsure</string>
+    <string name="tour_doubt_body">Tap the Unsure button below. Marked questions are easy to find again before handing in.</string>
+    <string name="tour_dots_title">The dots turn amber</string>
+    <string name="tour_dots_body">The row of dots above shows which are filled in and which you marked unsure.</string>
+    <string name="tour_move_title">Move between questions</string>
+    <string name="tour_move_body">Swipe the question page left or right to move back and forth. To jump further, tap a dot — try it now.</string>
+    <string name="tour_leave_title">Stop whenever you like</string>
+    <string name="tour_leave_body">The questions keep coming together in the background. Press Back whenever you like — we will tell you the moment they are ready.</string>
+    <string name="tour_prep_working">Still writing questions · %1$d ready</string>
+    <string name="tour_prep_reading">Reading your material</string>
+    <string name="tour_prep_ready">All questions ready</string>
+    <string name="tour_receipt_title">The marks come at the end</string>
+    <string name="tour_receipt_body">Right and wrong, and the playtime you gained, only appear once every question is handed in.</string>
+
+    <string name="receipt_title">Session finished</string>
+    <string name="receipt_correct">%1$d of %2$d correct</string>
+    <string name="receipt_header">Reward breakdown</string>
+    <string name="receipt_base">BASE PER QUESTION</string>
+    <string name="receipt_subtotal">SUBTOTAL</string>
+    <string name="receipt_level">Level calibration · %1$s</string>
+    <string name="receipt_novelty">Novelty · %1$s</string>
+    <string name="receipt_credited">Added to balance</string>
+    <string name="receipt_new_balance">New balance</string>
+    <string name="receipt_missed">What was not quite right</string>
+    <string name="receipt_missed_row">Question %1$d · %2$s</string>
+    <string name="receipt_streak">%1$d day streak. %2$s</string>
+    <string name="receipt_streak_keep">Keep it up.</string>
+    <string name="receipt_new_badges">New badges: %1$s.</string>
+    <string name="receipt_home">Back to home</string>
+    <string name="receipt_library">See the library</string>
+
+    <string name="void_wrong">wrong</string>
+
+    <string name="family_title">Family</string>
+    <string name="family_role">Parent</string>
+    <string name="family_children">Registered children</string>
+    <string name="family_child_sub">%1$d day streak · %2$s quota left</string>
+    <string name="family_add_child">Add a child</string>
+    <string name="family_add_child_sub">Create a profile, set rules, issue a code</string>
+    <string name="family_self">You</string>
+    <string name="family_self_sub">Hand in material and use your time</string>
+    <string name="family_self_rules">Rules for yourself</string>
+    <string name="family_self_rules_sub">Pick which apps are locked on this phone</string>
+    <string name="family_self_invite">The same rules can apply to you. Apps on this phone stay locked until you answer the questions yourself.</string>
+    <string name="family_self_join">Follow the rules too</string>
+    <string name="family_empty">No children registered yet. Add one to start setting rules.</string>
+
+    <string name="new_child_title">New child profile</string>
+    <string name="new_child_step">%1$d of 3</string>
+    <string name="new_child_headline">Introduce your child</string>
+    <string name="new_child_body">A nickname and a school level is all it takes. No email, phone number, or date of birth needed.</string>
+    <string name="new_child_name">Nickname</string>
+    <string name="new_child_name_hint">Raka</string>
+    <string name="new_child_level">School level</string>
+    <string name="new_child_language">Question language</string>
+    <string name="new_child_note">The level is used to turn away material far below what they can handle, not to limit what they are allowed to study.</string>
+    <string name="new_child_next">Set the rules</string>
+
+    <string name="policy_title">Rules for %1$s</string>
+    <string name="policy_session">Study session</string>
+    <string name="policy_questions">Questions per session</string>
+    <string name="policy_questions_sub">At most %1$d questions in one go</string>
+    <string name="policy_essay">Essay share</string>
+    <string name="policy_essay_sub">%1$d of %2$d questions · %3$d multiple choice</string>
+    <string name="policy_caps">Playtime allowance per day</string>
+    <string name="policy_grants">Daily balance</string>
+    <string name="policy_grants_sub">Free minutes that arrive each day without answering anything. Set 0 if every minute has to be earned.</string>
+    <string name="policy_other">Other rules</string>
+    <string name="policy_idle_days">Days off allowed</string>
+    <string name="policy_idle_days_sub">The balance is held if they go longer than this without studying</string>
+    <string name="policy_reset_hour">Day turns over at</string>
+    <string name="policy_reset_hour_sub">The daily quota resets at %1$02d:00</string>
+    <string name="policy_apps">Locked apps</string>
+    <string name="policy_app_locked">Needs balance to open</string>
+    <string name="policy_app_free">Open any time</string>
+    <string name="policy_locked">Locked</string>
+    <string name="policy_free">Free</string>
+    <string name="policy_hint">Tap a rule row to change its value. The lock list saves instantly.</string>
+    <string name="policy_save">Save the rules</string>
+    <string name="policy_days">%1$d days</string>
+    <string name="policy_hour">%1$02d</string>
+    <string name="policy_minutes_short">%1$d</string>
+
+    <string name="code_title">Code for %1$s</string>
+    <string name="code_hero">Enter this on the phone belonging to %1$s</string>
+    <string name="code_valid">Valid for another %1$s</string>
+    <string name="code_expired">The code has expired</string>
+    <string name="code_device_section">Current device</string>
+    <string name="code_device_sub">Registered %1$s</string>
+    <string name="code_device_active">Active</string>
+    <string name="code_replace_warning">As soon as this code is used on another device, the one above is signed out and has to be paired again.</string>
+    <string name="code_no_device">No device registered yet. The first device to enter this code is the one that will be used.</string>
+    <string name="code_done">Done</string>
+
+    <string name="report_title">%1$s</string>
+    <string name="report_earned">Minutes they earned</string>
+    <string name="report_earned_self">Minutes you earned</string>
+    <string name="report_days">%1$d days</string>
+    <string name="report_balance">Balance now</string>
+    <string name="report_materials">Material worked through</string>
+    <string name="report_correct">Questions answered correctly</string>
+    <string name="report_essays">Essays over the threshold</string>
+    <string name="report_recent">Recent history</string>
+    <string name="report_recent_empty">No activity yet</string>
+    <string name="report_privacy">You see the titles and the results, not what the notes say.</string>
+    <string name="report_privacy_self">A rule you loosen only takes effect 24 hours later.</string>
+    <string name="report_edit_policy">Change the rules</string>
+    <string name="report_issue_code">Issue a pairing code</string>
+    <string name="report_adjust">Adjust the balance</string>
+    <string name="report_remove">Remove %1$s</string>
+    <string name="report_remove_self">Stop following the rules</string>
+    <string name="report_remove_warning">The device belonging to %1$s is signed out immediately and the profile disappears from the list. Their material and history stay saved.</string>
+    <string name="report_remove_warning_self">The rules stop applying on this phone and every app opens freely.</string>
+    <string name="report_remove_confirm">Yes, remove %1$s</string>
+    <string name="report_remove_confirm_self">Yes, stop following the rules</string>
+    <string name="report_cancel">Cancel</string>
+
+    <string name="adjust_title">Balance for %1$s</string>
+    <string name="adjust_hero">Balance right now</string>
+    <string name="adjust_hero_sub">%1$d days off allowed</string>
+    <string name="adjust_kind">Kind of adjustment</string>
+    <string name="adjust_grant">Add time</string>
+    <string name="adjust_redeem">Take time away</string>
+    <string name="adjust_amount">Amount</string>
+    <string name="adjust_note">Note for %1$s</string>
+    <string name="adjust_note_hint">Traded for a reward: bicycle</string>
+    <string name="adjust_warning">A note is required and appears in the history for %1$s. An adjustment with no reason given feels like a punishment.</string>
+    <string name="adjust_apply_grant">Add %1$s</string>
+    <string name="adjust_apply_redeem">Take away %1$s</string>
+
+    <string name="lang_id">Indonesian</string>
+    <string name="lang_en">English</string>
+    <string name="camera_title">Photograph notes</string>
+    <string name="camera_page_count">%1$d pages</string>
+    <string name="camera_hint">Take one photo per page. Several in a row is fine, and you can reorder them afterwards.</string>
+    <string name="camera_shutter">Take a photo</string>
+    <string name="camera_continue">Continue with %1$d pages</string>
+    <string name="camera_failed">The photo could not be saved. Try taking it again.</string>
+    <string name="camera_denied_title">Camera not allowed yet</string>
+    <string name="camera_denied_body">BrainXP needs the camera to photograph your notes. Allow it from the app settings.</string>
+    <string name="camera_move_left">Move left</string>
+    <string name="camera_move_right">Move right</string>
+    <string name="camera_delete_page">Delete page</string>
+
+    <string name="source_too_large">The file is over 32 MB. Pick a smaller one.</string>
+    <string name="source_unreadable">The file could not be read. Try picking it again.</string>
+
+    <string name="privacy_title">Privacy policy</string>
+    <string name="privacy_open">Read the privacy policy</string>
+    <string name="privacy_updated">In effect since 6 September 2026</string>
+    <string name="privacy_summary">In short: BrainXP keeps the material you hand in, your answers, and a record of your playtime. No ads, no trackers, and no data sold.</string>
+
+    <string name="privacy_collect_heading">What we collect</string>
+    <string name="privacy_collect_body">When you sign up: your email address, password, and the name you use inside the app. The password is stored scrambled, not as you typed it. If this phone was paired by a parent using a code, it sends no email or password at all — only the pairing code, the phone model, and an install marker.</string>
+
+    <string name="privacy_apps_heading">Apps and time used</string>
+    <string name="privacy_apps_body">The list of apps you lock is kept on the server so the rules are the same everywhere. While you are spending playtime, BrainXP sends the name of the app you opened and how many seconds went by, because that is how your balance is worked out. BrainXP reads which app is in front only while the screen is on, and apps you have not locked are never recorded anywhere.</string>
+
+    <string name="privacy_material_heading">Material and answers</string>
+    <string name="privacy_material_body">Photos of notes or files you hand in are sent to the server, because that is where the text is read and the questions are built. Your chosen answers and essay text are sent to be marked. BrainXP does not read file contents on your phone and never touches other photos in your gallery — only the ones you pick yourself.</string>
+
+    <string name="privacy_accessibility_heading">Accessibility service</string>
+    <string name="privacy_accessibility_body">This is a choice, not a requirement, and skipping it costs you nothing. If you turn it on, BrainXP receives only the package name of the app that just came to the front, so blocking happens sooner. BrainXP does not read your screen, does not read what you type, and records nothing from other apps.</string>
+
+    <string name="privacy_family_heading">Family Mode</string>
+    <string name="privacy_family_body">In Family Mode, a parent sees the school level, the material handed in, session results, and playtime used. The parent is also told when protection on the child\' phone stops working or a permission is revoked. The parent does not see the contents of the notes the child photographed, and does not see other apps used beyond the locked ones.</string>
+
+    <string name="privacy_share_heading">We do not share it</string>
+    <string name="privacy_share_body">No data is sold or traded. BrainXP carries no ads, no analytics tooling, and no third-party crash reporting. Data moves only between your phone and the BrainXP server, always over an encrypted connection.</string>
+
+    <string name="privacy_keep_heading">How long we keep it</string>
+    <string name="privacy_keep_body">Material and history stay as long as your account exists, so you can reuse them. You can delete material one item at a time from your library whenever you like. What is on the phone is only a copy so the app keeps working without a signal, and it goes when the app is uninstalled.</string>
+
+    <string name="privacy_delete_heading">Deleting your account</string>
+    <string name="privacy_delete_body">You can ask for your account and all its data to be deleted from Settings, under Delete account. Requests are handled within 30 days, after which your material, history, balance, and profile are gone and cannot be brought back.</string>
+
+    <string name="privacy_children_heading">Children</string>
+    <string name="privacy_children_body">BrainXP is intended for ages 13 and over. Children under 13 should use BrainXP through Family Mode, paired by a parent with a code, because that route asks a child for no email, password, or name at all.</string>
+
+    <string name="privacy_contact_heading">Contacting us</string>
+    <string name="privacy_contact_body">For questions about your data, or to ask for your account to be deleted, write to dukungan@satu-miliar-pertama-di-2027.biz.id.</string>
+    <string name="privacy_contact_email">dukungan@satu-miliar-pertama-di-2027.biz.id</string>
+
+    <string name="delete_account_title">Delete account</string>
+    <string name="delete_account_body">This deletes your account and everything attached to it. If you only want to stop using the app on this phone, signing out is enough.</string>
+    <string name="delete_account_removed_label">What goes with it</string>
+    <string name="delete_account_removed_materials">Every material you have handed in</string>
+    <string name="delete_account_removed_sessions">All session history and answers</string>
+    <string name="delete_account_removed_balance">Any playtime balance left</string>
+    <string name="delete_account_removed_profile">Your profile, level, and rules</string>
+    <string name="delete_account_timeline">Your request is handled within 30 days. Until it is done, you can still sign in as usual.</string>
+    <string name="delete_account_warning">Once deleted, there is no way to bring it back. The same material would have to be handed in from scratch.</string>
+    <string name="delete_account_start">Request account deletion</string>
+    <string name="delete_account_confirm">Yes, send the request</string>
+    <string name="delete_account_no_mail">There is no email app on this phone. Write to %1$s instead.</string>
+    <string name="delete_account_mail_subject">BrainXP account deletion request</string>
+    <string name="delete_account_mail_body">I am asking for my BrainXP account and all of its data to be deleted.\n\nAccount marker: %1$s\n\nI understand that my material, history, and playtime balance will be gone and cannot be brought back.</string>
+
+    <string name="settings_privacy">Privacy policy</string>
+    <string name="settings_delete_account">Delete account</string>
+
+    <string name="accessibility_disclosure_title">Before you turn it on</string>
+    <string name="accessibility_disclosure_reads">BrainXP will receive the name of the app you just opened, so the apps you lock can be headed off sooner.</string>
+    <string name="accessibility_disclosure_not">BrainXP does not read your screen, does not read what you type, and records nothing from other apps.</string>
+    <string name="accessibility_disclosure_optional">This is optional. If you skip it, the main detector still works and nothing is lost.</string>
+    <string name="accessibility_disclosure_continue">Understood, open settings</string>
+
+    <string name="signin_privacy">Privacy policy</string>
+</resources>

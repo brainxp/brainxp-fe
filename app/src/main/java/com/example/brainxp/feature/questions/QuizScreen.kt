@@ -22,8 +22,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -41,8 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.composables.icons.lucide.CircleHelp
-import com.composables.icons.lucide.Lucide
 import com.example.brainxp.R
 import com.example.brainxp.core.ui.BrainXPTheme
 import com.example.brainxp.core.ui.Field
@@ -102,14 +98,7 @@ fun QuizScreen(
                     )
                 }
                 if (onGuide != null) {
-                    IconButton(onClick = onGuide, modifier = Modifier.size(TAP)) {
-                        Icon(
-                            imageVector = Lucide.CircleHelp,
-                            contentDescription = stringResource(R.string.quiz_guide),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(GLYPH),
-                        )
-                    }
+                    GuideButton(onClick = onGuide)
                 }
             }
         }
@@ -172,6 +161,29 @@ fun QuizScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun GuideButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val scheme = MaterialTheme.colorScheme
+
+    Surface(
+        modifier = modifier.size(TAP).clickable(onClick = onClick),
+        shape = MaterialTheme.shapes.medium,
+        color = scheme.surface,
+        border = BorderStroke(SELECTED_RING, scheme.outline),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = stringResource(R.string.quiz_guide_mark),
+                style = MaterialTheme.typography.labelLarge,
+                color = scheme.onSurfaceVariant,
+            )
         }
     }
 }
@@ -425,7 +437,7 @@ private fun DotState.colour() =
         DotState.ANSWERED -> Tokens.Blue300
         DotState.DOUBTED -> Tokens.Amber400
         DotState.DOUBTED_ANSWERED -> Tokens.Amber500
-        DotState.EMPTY -> MaterialTheme.colorScheme.surfaceContainerHigh
+        DotState.EMPTY -> Tokens.Blue100
     }
 
 internal const val LETTERS = "ABCD"
@@ -443,8 +455,7 @@ private val OPTION_HORIZONTAL = 14.dp
 private val OPTION_VERTICAL = 13.dp
 private val QUOTE_EDGE = 3.dp
 private val QUOTE_HEIGHT = 34.dp
-private val TAP = 40.dp
-private val GLYPH = 18.dp
+private val TAP = 38.dp
 
 @Preview(heightDp = 860)
 @Composable

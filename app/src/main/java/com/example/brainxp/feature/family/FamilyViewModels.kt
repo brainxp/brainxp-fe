@@ -33,6 +33,8 @@ class NewChildViewModel
         private val mutableState = MutableStateFlow(NewChildLoad())
         val state: StateFlow<NewChildLoad> = mutableState.asStateFlow()
 
+        fun consumeCreated() = mutableState.update { it.copy(createdId = null) }
+
         fun create(
             name: String,
             level: AcademicLevel,

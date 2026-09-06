@@ -6,7 +6,6 @@ import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.result.AppResult
 import com.example.brainxp.data.prefs.SettingsDataStore
 import com.example.brainxp.data.repo.AuthRepository
-import com.example.brainxp.domain.model.DeviceRole
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,6 +30,8 @@ class SignInViewModel
         private val _state = MutableStateFlow(SignInUiState())
         val state: StateFlow<SignInUiState> = _state.asStateFlow()
 
+        fun consumeSignIn() = _state.update { it.copy(signedIn = false) }
+
         fun submit(credentials: Credentials) {
             if (_state.value.busy) return
             _state.update { it.copy(busy = true, error = null) }
@@ -47,7 +48,7 @@ class SignInViewModel
                         auth.login(credentials.email, credentials.password)
                     }
                 if (result is AppResult.Success) {
-                    settings.setRole(if (result.value.role == ROLE_PARENT) DeviceRole.PARENT else DeviceRole.CHILD)
+                    settings.setRole(result.value.role)
                 }
                 _state.update {
                     when (result) {
@@ -58,5 +59,3 @@ class SignInViewModel
             }
         }
     }
-
-private const val ROLE_PARENT = "parent"

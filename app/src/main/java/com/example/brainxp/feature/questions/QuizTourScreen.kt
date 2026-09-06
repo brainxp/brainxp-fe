@@ -1,16 +1,14 @@
 package com.example.brainxp.feature.questions
 
 import androidx.annotation.StringRes
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
@@ -24,50 +22,64 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.brainxp.R
 import com.example.brainxp.core.ui.BrainXPTheme
+import com.example.brainxp.core.ui.LocalRevealCanvas
 import com.example.brainxp.core.ui.PillTone
 import com.example.brainxp.core.ui.PrimaryButton
 import com.example.brainxp.core.ui.ScreenNav
 import com.example.brainxp.core.ui.StatusPill
+import com.example.brainxp.core.ui.Tokens
+import com.svenjacobs.reveal.Reveal
+import com.svenjacobs.reveal.RevealCanvasState
+import com.svenjacobs.reveal.RevealOverlayArrangement
+import com.svenjacobs.reveal.RevealOverlayScope
+import com.svenjacobs.reveal.RevealShape
+import com.svenjacobs.reveal.RevealState
+import com.svenjacobs.reveal.effect.dim.DimRevealOverlayEffect
+import com.svenjacobs.reveal.rememberRevealState
+import com.svenjacobs.reveal.revealable
 
 internal enum class TourSpot {
-    NONE,
+    QUESTION,
     DOTS,
-    OPTIONS,
     DOUBT,
+    FOOTER,
     ACTS,
-}
-
-internal enum class TourWait {
-    ANSWER,
-    MARK,
-    NEXT,
 }
 
 internal data class TourStep(
     @StringRes val title: Int,
     @StringRes val body: Int,
-    val spot: TourSpot = TourSpot.NONE,
-    val waits: TourWait? = null,
+    val key: TourSpot,
+    val below: Boolean = true,
+    val waits: Boolean = false,
+    val swipe: Boolean = false,
 )
+
+private const val ANSWER_OPTION = 1
 
 internal val TOUR_STEPS =
     listOf(
-        TourStep(R.string.tour_answer_title, R.string.tour_answer_body, TourSpot.OPTIONS, TourWait.ANSWER),
-        TourStep(R.string.tour_autosave_title, R.string.tour_autosave_body, TourSpot.OPTIONS),
-        TourStep(R.string.tour_doubt_title, R.string.tour_doubt_body, TourSpot.DOUBT, TourWait.MARK),
+        TourStep(R.string.tour_answer_title, R.string.tour_answer_body, TourSpot.QUESTION, waits = true),
+        TourStep(R.string.tour_autosave_title, R.string.tour_autosave_body, TourSpot.QUESTION),
+        TourStep(R.string.tour_doubt_title, R.string.tour_doubt_body, TourSpot.DOUBT, below = false, waits = true),
         TourStep(R.string.tour_dots_title, R.string.tour_dots_body, TourSpot.DOTS),
-        TourStep(R.string.tour_move_title, R.string.tour_move_body, TourSpot.OPTIONS, TourWait.NEXT),
-        TourStep(R.string.tour_leave_title, R.string.tour_leave_body),
-        TourStep(R.string.tour_receipt_title, R.string.tour_receipt_body, TourSpot.ACTS),
+        TourStep(
+            title = R.string.tour_move_title,
+            body = R.string.tour_move_body,
+            key = TourSpot.DOTS,
+            waits = true,
+            swipe = true,
+        ),
+        TourStep(R.string.tour_leave_title, R.string.tour_leave_body, TourSpot.FOOTER, below = false),
+        TourStep(R.string.tour_receipt_title, R.string.tour_receipt_body, TourSpot.ACTS, below = false),
     )
 
 @Composable
@@ -75,9 +87,34 @@ fun QuizTourScreen(
     onDone: () -> Unit,
     onSkip: () -> Unit,
     modifier: Modifier = Modifier,
+    ready: Boolean = false,
+    onStart: (() -> Unit)? = null,
+    footer: @Composable () -> Unit = {},
+) {
+    TourBody(
+        canvas = LocalRevealCanvas.current,
+        onDone = onDone,
+        onSkip = onSkip,
+        ready = ready,
+        onStart = onStart,
+        footer = footer,
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun TourBody(
+    canvas: RevealCanvasState,
+    onDone: () -> Unit,
+    onSkip: () -> Unit,
+    ready: Boolean,
+    onStart: (() -> Unit)?,
+    footer: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val spacing = BrainXPTheme.spacing
     val practice = practiceQuestions()
+    val reveal = rememberRevealState()
 
     var at by remember { mutableIntStateOf(0) }
     var index by remember { mutableIntStateOf(0) }
@@ -87,85 +124,116 @@ fun QuizTourScreen(
     val step = TOUR_STEPS[at]
     val last = at == TOUR_STEPS.lastIndex
     val advance: () -> Unit = { if (at == TOUR_STEPS.lastIndex) onDone() else at += 1 }
+    val state = practiceState(questions = practice, index = index, picked = picked, marked = marked)
+    val pager = rememberPagerState(initialPage = 0, pageCount = { practice.size })
 
-    val state =
-        practiceState(
-            questions = practice,
-            index = index,
-            picked = picked,
-            marked = marked,
-        )
+    LaunchedEffect(at, index) {
+        val key = TOUR_STEPS[at].key
+        var tries = 0
+        while (!reveal.containsRevealable(key) && tries < REVEAL_TRIES) {
+            tries += 1
+            withFrameNanos { }
+        }
+        reveal.tryReveal(key)
+    }
+    LaunchedEffect(index) { pager.animateScrollToPage(index) }
 
-    val pager = rememberPagerState(initialPage = index, pageCount = { practice.size })
+    val tapped: (Any) -> Unit = { key ->
+        when (key) {
+            TourSpot.QUESTION -> {
+                picked = picked + (practice[index].id to ANSWER_OPTION)
+                advance()
+            }
 
-    LaunchedEffect(pager) {
-        snapshotFlow { pager.currentPage }.collect { page ->
-            if (page == index) return@collect
-            index = page
-            if (TOUR_STEPS[at].waits == TourWait.NEXT) advance()
+            TourSpot.DOUBT -> {
+                marked = !marked
+                advance()
+            }
+
+            TourSpot.DOTS -> {
+                index = (index + 1).coerceAtMost(practice.lastIndex)
+                advance()
+            }
+
+            else -> {
+                Unit
+            }
         }
     }
 
-    Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .navigationBarsPadding()
-                .padding(horizontal = spacing.screenHorizontal)
-                .padding(bottom = spacing.screenBottom),
+    Reveal(
+        revealCanvasState = canvas,
+        revealState = reveal,
+        modifier = modifier.fillMaxSize(),
+        overlayEffect = DimRevealOverlayEffect(color = Tokens.Blue900.copy(alpha = SCRIM)),
+        onRevealableClick = { key -> if (TOUR_STEPS[at].waits) tapped(key) },
+        overlayContent = { key ->
+            if (key == TOUR_STEPS[at].key) {
+                CoachCard(
+                    step = TOUR_STEPS[at],
+                    last = last,
+                    ready = ready,
+                    onStart = onStart,
+                    onAdvance = advance,
+                    onSkip = onSkip,
+                )
+            }
+        },
     ) {
-        ScreenNav(title = stringResource(R.string.tour_title)) {
-            StatusPill(
-                text = stringResource(R.string.tour_step, at + 1, TOUR_STEPS.size),
-                tone = PillTone.OUTLINE,
-            )
-        }
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = spacing.screenHorizontal)
+                    .padding(bottom = spacing.screenBottom),
+        ) {
+            ScreenNav(title = stringResource(R.string.tour_title)) {
+                StatusPill(
+                    text = stringResource(R.string.tour_step, at + 1, TOUR_STEPS.size),
+                    tone = PillTone.OUTLINE,
+                )
+            }
 
-        Spotlight(lit = step.spot == TourSpot.DOTS) {
-            Column {
+            Column(modifier = Modifier.spot(TourSpot.DOTS, reveal)) {
                 ProgressStrip(state = state)
                 QuestionDots(state = state, onJump = {})
             }
-        }
 
-        HorizontalPager(
-            state = pager,
-            modifier = Modifier.weight(1f),
-            pageSpacing = spacing.lg,
-            verticalAlignment = Alignment.Top,
-        ) { page ->
-            val question = practice[page]
+            HorizontalPager(
+                state = pager,
+                modifier = Modifier.weight(1f),
+                pageSpacing = spacing.lg,
+                userScrollEnabled = false,
+                verticalAlignment = Alignment.Top,
+            ) { page ->
+                val question = practice[page]
 
-            Column(verticalArrangement = Arrangement.spacedBy(spacing.md)) {
-                Text(
-                    text = question.stem,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Spotlight(lit = step.spot == TourSpot.OPTIONS) {
+                Column(
+                    modifier = Modifier.spot(TourSpot.QUESTION, reveal),
+                    verticalArrangement = Arrangement.spacedBy(spacing.md),
+                ) {
+                    Text(
+                        text = question.stem,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
                     Column(verticalArrangement = Arrangement.spacedBy(spacing.sm)) {
                         question.options.forEachIndexed { option, text ->
                             OptionRow(
                                 letter = LETTERS[option].toString(),
                                 text = text,
                                 selected = picked[question.id] == option,
-                                onClick = {
-                                    picked = picked + (question.id to option)
-                                    if (TOUR_STEPS[at].waits == TourWait.ANSWER) advance()
-                                },
+                                onClick = {},
                             )
                         }
                     }
                 }
             }
-        }
 
-        Column(
-            modifier = Modifier.padding(top = spacing.md),
-            verticalArrangement = Arrangement.spacedBy(spacing.sm),
-        ) {
-            Spotlight(lit = step.spot == TourSpot.ACTS) {
+            Column(
+                modifier = Modifier.padding(top = spacing.md),
+                verticalArrangement = Arrangement.spacedBy(spacing.sm),
+            ) {
                 Text(
                     text =
                         if (state.complete) {
@@ -175,45 +243,52 @@ fun QuizTourScreen(
                         },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.spot(TourSpot.ACTS, reveal),
                 )
-            }
-            Spotlight(lit = step.spot == TourSpot.DOUBT) {
                 DoubtButton(
                     marked = marked,
-                    onClick = {
-                        marked = !marked
-                        if (TOUR_STEPS[at].waits == TourWait.MARK) advance()
-                    },
+                    onClick = {},
+                    modifier = Modifier.spot(TourSpot.DOUBT, reveal),
                 )
+                Column(modifier = Modifier.spot(TourSpot.FOOTER, reveal)) { footer() }
             }
         }
-
-        CoachCard(
-            step = step,
-            last = last,
-            onAdvance = advance,
-            onSkip = onSkip,
-            modifier = Modifier.padding(top = spacing.md),
-        )
     }
 }
 
+private fun Modifier.spot(
+    key: TourSpot,
+    state: RevealState,
+): Modifier =
+    revealable(
+        key = key,
+        state = state,
+        shape = RevealShape.RoundRect(RING_RADIUS),
+        padding = PaddingValues(RING_PADDING),
+        borderStroke = BorderStroke(RING_WIDTH, Tokens.Blue500),
+    )
+
 @Composable
-private fun CoachCard(
+private fun RevealOverlayScope.CoachCard(
     step: TourStep,
     last: Boolean,
+    ready: Boolean,
+    onStart: (() -> Unit)?,
     onAdvance: () -> Unit,
     onSkip: () -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     val spacing = BrainXPTheme.spacing
     val scheme = MaterialTheme.colorScheme
+    val arrangement = if (step.below) RevealOverlayArrangement.Bottom else RevealOverlayArrangement.Top
 
     Surface(
-        modifier = modifier.fillMaxWidth(),
+        modifier =
+            Modifier
+                .align(arrangement)
+                .padding(spacing.lg)
+                .fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         color = scheme.surface,
-        border = BorderStroke(HAIRLINE, scheme.outline),
         shadowElevation = CARD_ELEVATION,
     ) {
         Column(
@@ -230,35 +305,27 @@ private fun CoachCard(
                 style = MaterialTheme.typography.bodySmall,
                 color = scheme.onSurfaceVariant,
             )
+            if (step.swipe) {
+                SwipeHint(modifier = Modifier.padding(top = spacing.sm))
+            }
 
             Column(
                 modifier = Modifier.padding(top = spacing.sm),
                 verticalArrangement = Arrangement.spacedBy(spacing.xs),
             ) {
-                if (step.waits != null) {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = MaterialTheme.shapes.medium,
-                        color = scheme.secondaryContainer,
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(spacing.md),
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
-                            Text(
-                                text = stringResource(R.string.tour_wait),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = scheme.onSecondaryContainer,
-                            )
-                        }
-                    }
+                if (step.waits) {
+                    WaitHint()
                 } else {
                     PrimaryButton(
                         text = stringResource(if (last) R.string.tour_start else R.string.tour_next),
                         onClick = onAdvance,
                     )
                 }
-                if (!last) {
+                if (ready && onStart != null) {
+                    TextButton(onClick = onStart, modifier = Modifier.fillMaxWidth()) {
+                        Text(text = stringResource(R.string.preparing_start))
+                    }
+                } else if (!last) {
                     TextButton(onClick = onSkip, modifier = Modifier.fillMaxWidth()) {
                         Text(text = stringResource(R.string.tour_skip))
                     }
@@ -269,14 +336,25 @@ private fun CoachCard(
 }
 
 @Composable
-private fun Spotlight(
-    lit: Boolean,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
-    val dim by animateFloatAsState(targetValue = if (lit) 1f else DIMMED, label = "spotlight")
+private fun WaitHint(modifier: Modifier = Modifier) {
+    val scheme = MaterialTheme.colorScheme
 
-    Column(modifier = modifier.alpha(dim)) { content() }
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        color = scheme.secondaryContainer,
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(BrainXPTheme.spacing.md),
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                text = stringResource(R.string.tour_wait),
+                style = MaterialTheme.typography.labelMedium,
+                color = scheme.onSecondaryContainer,
+            )
+        }
+    }
 }
 
 @Composable
@@ -333,9 +411,12 @@ private fun practiceState(
         doubts = if (marked) setOf(questions.first().id) else emptySet(),
     )
 
-private const val DIMMED = 0.3f
-private val HAIRLINE = 1.dp
-private val CARD_ELEVATION = 8.dp
+private const val SCRIM = 0.62f
+private const val REVEAL_TRIES = 60
+private val CARD_ELEVATION = 10.dp
+private val RING_RADIUS = 16.dp
+private val RING_WIDTH = 2.dp
+private val RING_PADDING = 6.dp
 
 @Preview(heightDp = 900)
 @Composable

@@ -27,10 +27,14 @@ import com.example.brainxp.core.ui.EmptyState
 import com.example.brainxp.core.ui.LoadingState
 import com.example.brainxp.core.ui.ParentPinDialog
 import com.example.brainxp.core.ui.PillTone
+import com.example.brainxp.core.ui.ScreenNav
 import com.example.brainxp.core.ui.StatusPill
 
 @Composable
-fun AppPickerRoute(modifier: Modifier = Modifier) {
+fun AppPickerRoute(
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val viewModel: AppPickerViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -38,6 +42,7 @@ fun AppPickerRoute(modifier: Modifier = Modifier) {
         state = state,
         onQueryChange = viewModel::onQueryChange,
         onToggle = viewModel::onToggle,
+        onBack = onBack,
         modifier = modifier,
     )
 
@@ -56,6 +61,7 @@ fun AppPickerScreen(
     state: AppPickerUiState,
     onQueryChange: (String) -> Unit,
     onToggle: (String) -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val spacing = BrainXPTheme.spacing
@@ -67,12 +73,7 @@ fun AppPickerScreen(
                 .padding(horizontal = spacing.screenHorizontal),
         verticalArrangement = Arrangement.spacedBy(spacing.md),
     ) {
-        Text(
-            text = stringResource(R.string.app_picker_title),
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(top = spacing.xxl),
-        )
+        ScreenNav(title = stringResource(R.string.app_picker_title), onBack = onBack)
 
         OutlinedTextField(
             value = state.query,
@@ -166,6 +167,7 @@ private fun AppPickerPreview() {
                 ),
             onQueryChange = {},
             onToggle = {},
+            onBack = {},
         )
     }
 }

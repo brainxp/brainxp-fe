@@ -6,6 +6,7 @@ import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.result.AppResult
 import com.example.brainxp.data.db.QuestionSessionDao
 import com.example.brainxp.data.repo.QuizRepository
+import com.example.brainxp.data.repo.RewardReconciler
 import com.example.brainxp.domain.model.ReceiptLine
 import com.example.brainxp.domain.model.SessionReceipt
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,6 +29,7 @@ class ReceiptViewModel
     constructor(
         private val quizzes: QuizRepository,
         private val sessions: QuestionSessionDao,
+        private val rewards: RewardReconciler,
     ) : ViewModel() {
         private val mutableState = MutableStateFlow(ReceiptLoad())
         val state: StateFlow<ReceiptLoad> = mutableState.asStateFlow()
@@ -47,6 +49,7 @@ class ReceiptViewModel
                         score = result.value.correctCount.toDouble() / result.value.questionCount.coerceAtLeast(1),
                         rewardSeconds = result.value.creditedSeconds,
                     )
+                    rewards.reconcile()
                 } else {
                     submittedFor = null
                 }

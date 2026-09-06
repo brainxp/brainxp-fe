@@ -1,7 +1,9 @@
 package com.example.brainxp
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
@@ -27,6 +29,7 @@ import com.example.brainxp.core.ui.ErrorState
 import com.example.brainxp.core.ui.LoadingState
 import com.example.brainxp.core.ui.ParentPinDialog
 import com.example.brainxp.core.ui.levelLabel
+import com.example.brainxp.core.upload.PreparingStage
 import com.example.brainxp.domain.model.AcademicLevel
 import com.example.brainxp.domain.model.DeviceRole
 import com.example.brainxp.feature.SAMPLE_ESTIMATE_SECONDS
@@ -40,8 +43,8 @@ import com.example.brainxp.feature.capture.CaptureMethod
 import com.example.brainxp.feature.capture.CaptureViewModel
 import com.example.brainxp.feature.capture.PickSourceScreen
 import com.example.brainxp.feature.capture.PickSourceViewModel
+import com.example.brainxp.feature.capture.PreparationFooter
 import com.example.brainxp.feature.capture.PreparingScreen
-import com.example.brainxp.feature.capture.PreparingStage
 import com.example.brainxp.feature.capture.PreparingViewModel
 import com.example.brainxp.feature.capture.RejectedScreen
 import com.example.brainxp.feature.capture.RejectedViewModel
@@ -64,6 +67,9 @@ import com.example.brainxp.feature.history.HistoryViewModel
 import com.example.brainxp.feature.home.HomeEffect
 import com.example.brainxp.feature.home.HomeScreen
 import com.example.brainxp.feature.home.HomeViewModel
+import com.example.brainxp.feature.legal.DeleteAccountScreen
+import com.example.brainxp.feature.legal.DeleteAccountViewModel
+import com.example.brainxp.feature.legal.PrivacyPolicyScreen
 import com.example.brainxp.feature.library.LibraryEffect
 import com.example.brainxp.feature.library.LibraryScreen
 import com.example.brainxp.feature.library.LibraryViewModel
@@ -125,6 +131,7 @@ internal fun EntryProviderScope<NavKey>.onboardingEntries(backStack: NavBackStac
 
         LaunchedEffect(state.signedIn) {
             if (!state.signedIn) return@LaunchedEffect
+            viewModel.consumeSignIn()
             if (key.family) {
                 backStack.add(OnboardingRoute.PermissionSetup)
             } else {
@@ -136,9 +143,13 @@ internal fun EntryProviderScope<NavKey>.onboardingEntries(backStack: NavBackStac
             mode = if (key.family) SetupMode.FAMILY else SetupMode.PERSONAL,
             onBack = { backStack.popOrIgnore() },
             onSubmit = viewModel::submit,
+            onPrivacyPolicy = { backStack.add(OnboardingRoute.PrivacyPolicy) },
             busy = state.busy,
             error = state.error,
         )
+    }
+    entry<OnboardingRoute.PrivacyPolicy> {
+        PrivacyPolicyScreen(onBack = { backStack.popOrIgnore() })
     }
     entry<OnboardingRoute.PairDevice> { PairDeviceEntry(backStack) }
     entry<OnboardingRoute.SetParentPin> { SetParentPinEntry(backStack) }
@@ -153,7 +164,9 @@ internal fun EntryProviderScope<NavKey>.onboardingTailEntries(
         val state by viewModel.state.collectAsStateWithLifecycle()
 
         LaunchedEffect(state.saved) {
-            if (state.saved) backStack.add(OnboardingRoute.PermissionSetup)
+            if (!state.saved) return@LaunchedEffect
+            viewModel.consumeSaved()
+            backStack.add(OnboardingRoute.PermissionSetup)
         }
 
         LevelScreen(
@@ -186,6 +199,8 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(backStack: NavBackStack<Nav
                     HomeEffect.OpenPermissionSetup -> backStack.add(MainRoute.PermissionSetup)
                     HomeEffect.OpenLibrary -> backStack.add(MainRoute.MaterialList)
                     HomeEffect.OpenProgress -> backStack.add(MainRoute.Progress)
+                    HomeEffect.OpenPreparing -> backStack.add(MainRoute.Preparing(PENDING_MATERIAL))
+                    HomeEffect.OpenApps -> backStack.add(MainRoute.AppPicker)
                     is HomeEffect.OpenQuestions -> backStack.add(MainRoute.Questions(effect.materialId))
                     is HomeEffect.LaunchApp -> launchApp(context, effect.packageName)
                 }
@@ -209,7 +224,7 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(backStack: NavBackStack<Nav
             )
         }
     }
-    entry<MainRoute.AppPicker> { AppPickerRoute() }
+    entry<MainRoute.AppPicker> { AppPickerRoute(onBack = { backStack.popOrIgnore() }) }
     entry<MainRoute.History> { HistoryEntry(backStack) }
     entry<MainRoute.Progress> {
         val viewModel: ProgressViewModel = hiltViewModel()
@@ -223,6 +238,10 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(backStack: NavBackStack<Nav
     }
     entry<MainRoute.ActivityLog> { ActivityLogEntry(backStack) }
     entry<MainRoute.Settings> { SettingsEntry(backStack) }
+    entry<MainRoute.PrivacyPolicy> {
+        PrivacyPolicyScreen(onBack = { backStack.popOrIgnore() })
+    }
+    entry<MainRoute.DeleteAccount> { DeleteAccountEntry(backStack) }
     entry<MainRoute.PermissionSetup> {
         PermissionSetupRoute(
             onDone = { backStack.popOrIgnore() },
@@ -298,18 +317,31 @@ internal fun EntryProviderScope<NavKey>.captureEntries(backStack: NavBackStack<N
             }
         }
 
-        PreparingScreen(
-            materialName = state.materialName,
-            stage = state.stage,
-            readyQuestions = state.readyQuestions,
-            stalled = state.error != null,
-            onRetry = viewModel::retry,
-            onStart = {
-                val id = state.materialId ?: return@PreparingScreen
+        val start = {
+            state.materialId?.let { id ->
                 viewModel.done()
+                backStack.popOrIgnore()
                 backStack.add(MainRoute.Questions(id))
-            },
-        )
+            }
+            Unit
+        }
+
+        if (state.guide) {
+            QuizTourScreen(
+                onDone = { viewModel.showGuide(false) },
+                onSkip = { viewModel.showGuide(false) },
+                ready = state.ready,
+                onStart = start,
+                footer = { PreparationFooter(state = state, onStart = start) },
+            )
+        } else {
+            PreparingScreen(
+                state = state,
+                onRetry = viewModel::retry,
+                onLeave = { backStack.popOrIgnore() },
+                onStart = start,
+            )
+        }
     }
     entry<MainRoute.Rejected> { key -> RejectedEntry(key, backStack) }
 }
@@ -557,6 +589,8 @@ private fun SettingsEntry(backStack: NavBackStack<NavKey>) {
                 onLanguage = viewModel::chooseLanguage,
                 onApps = { backStack.add(MainRoute.AppPicker) },
                 onPermissions = { backStack.add(MainRoute.PermissionSetup) },
+                onPrivacyPolicy = { backStack.add(MainRoute.PrivacyPolicy) },
+                onDeleteAccount = { backStack.add(MainRoute.DeleteAccount) },
                 onSignOut = viewModel::signOut,
                 onBack = { backStack.popOrIgnore() },
                 saving = state.saving,
@@ -576,12 +610,55 @@ private fun SettingsEntry(backStack: NavBackStack<NavKey>) {
 }
 
 @Composable
+private fun DeleteAccountEntry(backStack: NavBackStack<NavKey>) {
+    val viewModel: DeleteAccountViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    var noMailApp by remember { mutableStateOf(false) }
+    val address = stringResource(R.string.privacy_contact_email)
+    val subject = stringResource(R.string.delete_account_mail_subject)
+    val body = stringResource(R.string.delete_account_mail_body, state.subjectId.orEmpty())
+
+    DeleteAccountScreen(
+        onSendRequest = {
+            noMailApp = !launchMailRequest(context, address, subject, body)
+        },
+        onBack = { backStack.popOrIgnore() },
+        onPrivacyPolicy = { backStack.add(MainRoute.PrivacyPolicy) },
+        noMailApp = noMailApp,
+    )
+}
+
+@Suppress("SwallowedException")
+private fun launchMailRequest(
+    context: Context,
+    address: String,
+    subject: String,
+    body: String,
+): Boolean {
+    val intent =
+        Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("mailto:$address")
+            putExtra(Intent.EXTRA_SUBJECT, subject)
+            putExtra(Intent.EXTRA_TEXT, body)
+        }
+    return try {
+        context.startActivity(intent)
+        true
+    } catch (ignored: ActivityNotFoundException) {
+        false
+    }
+}
+
+@Composable
 private fun PairDeviceEntry(backStack: NavBackStack<NavKey>) {
     val viewModel: PairDeviceViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(state.paired) {
-        if (state.paired) backStack.add(OnboardingRoute.SetParentPin)
+        if (!state.paired) return@LaunchedEffect
+        viewModel.consumePaired()
+        backStack.add(OnboardingRoute.SetParentPin)
     }
 
     PairDeviceScreen(
@@ -600,7 +677,9 @@ private fun SetParentPinEntry(backStack: NavBackStack<NavKey>) {
     val saved by viewModel.saved.collectAsStateWithLifecycle()
 
     LaunchedEffect(saved) {
-        if (saved) backStack.add(OnboardingRoute.PermissionSetup)
+        if (!saved) return@LaunchedEffect
+        viewModel.consumeSaved()
+        backStack.add(OnboardingRoute.PermissionSetup)
     }
 
     SetParentPinScreen(

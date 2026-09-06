@@ -10,11 +10,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -38,6 +44,7 @@ fun PermissionSetupScreen(
     reentrant: Boolean = false,
 ) {
     val spacing = BrainXPTheme.spacing
+    var disclosing by remember { mutableStateOf(false) }
 
     Column(
         modifier =
@@ -67,7 +74,13 @@ fun PermissionSetupScreen(
             PermissionStepCard(
                 step = step,
                 total = state.steps.size,
-                onOpenSettings = { onOpenSettings(step.permission) },
+                onOpenSettings = {
+                    if (step.permission == SpecialPermission.ACCESSIBILITY) {
+                        disclosing = true
+                    } else {
+                        onOpenSettings(step.permission)
+                    }
+                },
                 modifier = Modifier.padding(top = spacing.xs),
             )
         }
@@ -99,6 +112,61 @@ fun PermissionSetupScreen(
             modifier = Modifier.padding(top = spacing.xxxl),
         )
     }
+
+    if (disclosing) {
+        AccessibilityDisclosureDialog(
+            onAccept = {
+                disclosing = false
+                onOpenSettings(SpecialPermission.ACCESSIBILITY)
+            },
+            onDismiss = { disclosing = false },
+        )
+    }
+}
+
+@Composable
+private fun AccessibilityDisclosureDialog(
+    onAccept: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val spacing = BrainXPTheme.spacing
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        shape = MaterialTheme.shapes.large,
+        title = {
+            Text(
+                text = stringResource(R.string.accessibility_disclosure_title),
+                style = MaterialTheme.typography.titleMedium,
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(spacing.sm)) {
+                Text(
+                    text = stringResource(R.string.accessibility_disclosure_reads),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Text(
+                    text = stringResource(R.string.accessibility_disclosure_not),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Text(
+                    text = stringResource(R.string.accessibility_disclosure_optional),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onAccept) {
+                Text(text = stringResource(R.string.accessibility_disclosure_continue))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(R.string.detail_delete_cancel))
+            }
+        },
+    )
 }
 
 @Composable

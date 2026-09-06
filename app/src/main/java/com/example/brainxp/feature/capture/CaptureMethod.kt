@@ -4,10 +4,3 @@ enum class CaptureMethod {
     PHOTO,
     DOCUMENT,
 }
-
-enum class PreparingStage {
-    READING,
-    VALIDATING,
-    PARTIAL,
-    READY,
-}

@@ -24,7 +24,9 @@ import com.composables.icons.lucide.ChartNoAxesColumn
 import com.composables.icons.lucide.FileText
 import com.composables.icons.lucide.Flame
 import com.composables.icons.lucide.Library
+import com.composables.icons.lucide.Lock
 import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Sparkles
 import com.example.brainxp.R
 import com.example.brainxp.blocking.ProtectionStatus
 import com.example.brainxp.core.result.ApiError
@@ -193,6 +195,24 @@ private fun ReadyContent(
             SessionStarter(state = state, onEvent = onEvent)
         }
 
+        state.preparing?.let { preparing ->
+            ChoiceRow(
+                title =
+                    stringResource(
+                        if (preparing.ready > 0) R.string.home_preparing_ready else R.string.home_preparing_title,
+                    ),
+                subtitle =
+                    if (preparing.total > 0) {
+                        stringResource(R.string.home_preparing_sub, preparing.ready, preparing.total)
+                    } else {
+                        stringResource(R.string.home_preparing_sub_waiting)
+                    },
+                icon = Lucide.Sparkles,
+                highlight = preparing.ready > 0,
+                onClick = { onEvent(HomeEvent.OpenPreparing) },
+            )
+        }
+
         state.pending?.let { pending ->
             ChoiceRow(
                 title = stringResource(R.string.home_resume_title),
@@ -218,15 +238,17 @@ private fun ReadyContent(
             RunningSession(state = state, onEvent = onEvent)
         }
 
-        Text(
-            text =
-                stringResource(
-                    if (state.appsOpen) R.string.home_apps_open else R.string.home_apps_locked,
-                ),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = spacing.sm),
-        )
+        if (state.lockedApps.isNotEmpty()) {
+            Text(
+                text =
+                    stringResource(
+                        if (state.appsOpen) R.string.home_apps_open else R.string.home_apps_locked,
+                    ),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = spacing.sm),
+            )
+        }
 
         LockedApps(state = state, onEvent = onEvent)
 
@@ -362,29 +384,40 @@ private fun LockedApps(
     state: HomeUiState,
     onEvent: (HomeEvent) -> Unit,
 ) {
+    if (state.lockedApps.isEmpty()) {
+        ChoiceRow(
+            title =
+                stringResource(
+                    if (state.managed) R.string.home_no_apps_title else R.string.home_apps_pick_title,
+                ),
+            subtitle =
+                stringResource(
+                    if (state.managed) R.string.home_no_apps_managed else R.string.home_apps_pick_sub,
+                ),
+            icon = Lucide.Lock,
+            onClick = { onEvent(HomeEvent.OpenApps) },
+        )
+        return
+    }
+
     RowGroup {
-        if (state.lockedApps.isEmpty()) {
+        state.lockedApps.forEach { app ->
             item(
-                title = stringResource(R.string.home_no_apps_title),
-                subtitle =
+                title = app.label,
+                subtitle = app.packageName,
+                value =
                     stringResource(
-                        if (state.managed) R.string.home_no_apps_managed else R.string.home_no_apps_sub,
+                        if (state.appsOpen) R.string.home_app_open else R.string.home_app_locked,
                     ),
+                emphasiseValue = state.appsOpen,
+                onClick = { onEvent(HomeEvent.OpenApp(app.packageName)) },
             )
-        } else {
-            state.lockedApps.forEach { app ->
-                item(
-                    title = app.label,
-                    subtitle = app.packageName,
-                    value =
-                        stringResource(
-                            if (state.appsOpen) R.string.home_app_open else R.string.home_app_locked,
-                        ),
-                    emphasiseValue = state.appsOpen,
-                    onClick = { onEvent(HomeEvent.OpenApp(app.packageName)) },
-                )
-            }
         }
+        item(
+            title = stringResource(R.string.home_apps_manage),
+            leading = { Icon(imageVector = Lucide.Lock, contentDescription = null) },
+            onClick = { onEvent(HomeEvent.OpenApps) },
+        )
     }
 }
 
@@ -480,6 +513,24 @@ private fun HomeDegradedPreview() {
                     dailyCapSeconds = 5_400,
                     protection = ProtectionStatus.DEGRADED,
                     lockedApps = PREVIEW_APPS,
+                ),
+            onEvent = {},
+        )
+    }
+}
+
+@Preview(name = "Home managed with nothing locked", showBackground = true, heightDp = 940)
+@Composable
+private fun HomeManagedPreview() {
+    BrainXPTheme {
+        HomeScreen(
+            state =
+                HomeUiState(
+                    phase = HomeUiState.Phase.Ready,
+                    balanceSeconds = 900,
+                    dailyCapSeconds = 5_400,
+                    protection = ProtectionStatus.ACTIVE,
+                    managed = true,
                 ),
             onEvent = {},
         )

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BrainXP</string>
+    <string name="app_name" translatable="false">BrainXP</string>
 
     <string name="action_retry">Coba lagi</string>
     <string name="action_back">Kembali</string>
@@ -268,7 +268,9 @@ kehilangan kontak.</string>
     <string name="home_app_open">Terbuka</string>
     <string name="home_app_locked">Terkunci</string>
     <string name="home_no_apps_title">Belum ada aplikasi dikunci</string>
-    <string name="home_no_apps_sub">Pilih dulu aplikasi yang mau dibatasi</string>
+    <string name="home_apps_pick_title">Pilih aplikasi yang mau dikunci</string>
+    <string name="home_apps_pick_sub">Yang kamu pilih cuma bisa dibuka kalau ada waktu bermain</string>
+    <string name="home_apps_manage">Atur aplikasi terkunci</string>
     <string name="home_no_apps_managed">Orang tua yang menentukan daftarnya</string>
 
     <string name="home_library_title">Pustaka materi</string>    <string name="home_library_sub">Soal lama bisa dipelajari ulang</string>
@@ -286,9 +288,11 @@ kehilangan kontak.</string>
     <string name="source_note">Materi diproses layanan AI dan tidak dipakai melatih model. Materi yang sama diunggah ulang tetap boleh dipelajari, tapi hadiahnya menurun.</string>
 
     <string name="preparing_title">Menyiapkan soal</string>
-    <string name="preparing_ready_count">%1$d siap</string>
-    <string name="preparing_reading">Membaca materimu…</string>
-    <string name="preparing_first_ready">Soal pertama sudah bisa dikerjakan</string>
+    <string name="preparing_status_working">Sedang disusun</string>
+    <string name="preparing_status_ready">Semua soal siap</string>
+    <string name="preparing_count_label">soal siap dikerjakan</string>
+    <string name="preparing_count_none">Belum ada soal yang siap</string>
+    <string name="preparing_count_waiting">Soalnya sedang ditulis dari materimu</string>
     <string name="preparing_step_reading">Materi dibaca</string>
     <string name="preparing_step_validating">Diperiksa dan dikalibrasi</string>
     <string name="preparing_step_partial">Soal pertama siap</string>
@@ -376,9 +380,21 @@ kehilangan kontak.</string>
     <string name="reject_level_unknown">belum diketahui</string>
     <string name="preparing_stalled">Server belum menjawab. Materinya mungkin sudah selesai — coba periksa lagi.</string>
     <string name="preparing_retry">Periksa lagi</string>
-    <string name="preparing_note">Mulai saja begitu soal pertama siap. Sisanya menyusul sambil kamu mengerjakan.</string>
-    <string name="preparing_wait">Menyiapkan…</string>
+    <string name="preparing_note">Boleh ditinggal. Penyusunannya jalan terus walau kamu pindah ke layar lain, dan kamu dikabari kalau sudah siap.</string>
     <string name="preparing_start">Mulai kerjakan</string>
+    <string name="preparing_start_count">Mulai kerjakan · %1$d soal</string>
+    <string name="preparing_leave">Tinggalkan berjalan</string>
+    <string name="ready_channel_name">Soal siap</string>
+    <string name="ready_channel_description">Kabar begitu soal dari materimu selesai disusun.</string>
+    <string name="ready_notification_title">Soalmu siap dikerjakan</string>
+    <string name="ready_notification_body">%1$s · %2$d soal menunggu</string>
+    <string name="ready_notification_action">Mulai kerjakan</string>
+    <string name="ready_notification_rejected_title">Materi belum bisa dipakai</string>
+    <string name="ready_notification_rejected_body">%1$s tidak lolos pemeriksaan. Buka untuk lihat alasannya.</string>
+    <string name="home_preparing_title">Soal sedang disusun</string>
+    <string name="home_preparing_ready">Soal pertama sudah siap</string>
+    <string name="home_preparing_sub">%1$d dari %2$d soal</string>
+    <string name="home_preparing_sub_waiting">Materi sedang dibaca</string>
 
     <string name="rejected_title">Materi belum bisa dipakai</string>
     <string name="rejected_alert">Materi ini dinilai setara tingkat %1$s, sedangkan jenjangmu %2$s.</string>
@@ -397,6 +413,7 @@ kehilangan kontak.</string>
     <string name="quiz_jump">Soal %1$d</string>
     <string name="quiz_jump_doubted">Soal %1$d, ragu-ragu</string>
     <string name="quiz_guide">Cara mengerjakan</string>
+    <string name="quiz_guide_mark" translatable="false">?</string>
     <string name="quiz_excerpt">Dari materimu: %1$s</string>
     <string name="quiz_answer_label">Jawabanmu</string>
     <string name="quiz_answer_hint">Tulis dengan kalimatmu sendiri, minimal delapan kata.</string>
@@ -426,7 +443,7 @@ kehilangan kontak.</string>
     <string name="tour_q2_c">4a + 7</string>
     <string name="tour_q2_d">11</string>
     <string name="tour_answer_title">Coba jawab yang ini</string>
-    <string name="tour_answer_body">Soal aslinya dibikin dari materi yang kamu setor. Sekarang latihan dulu: ketuk salah satu jawaban.</string>
+    <string name="tour_answer_body">Soal aslinya dibikin dari materi yang kamu setor. Ini contohnya — ketuk kartu soalnya buat lihat jawabannya masuk.</string>
     <string name="tour_autosave_title">Tersimpan sendiri</string>
     <string name="tour_autosave_body">Nggak ada tombol simpan. Begitu kamu memilih atau berhenti mengetik sebentar, jawabannya masuk.</string>
     <string name="tour_doubt_title">Kalau ragu, tandai</string>
@@ -434,9 +451,12 @@ kehilangan kontak.</string>
     <string name="tour_dots_title">Titiknya berubah kuning</string>
     <string name="tour_dots_body">Baris titik di atas menunjukkan mana yang sudah terisi dan mana yang kamu tandai ragu.</string>
     <string name="tour_move_title">Pindah soal</string>
-    <string name="tour_move_body">Geser halamannya ke kiri atau kanan buat maju mundur, titik di atas buat lompat jauh. Coba geser sekarang.</string>
+    <string name="tour_move_body">Geser halaman soalnya ke kiri atau kanan buat maju mundur. Mau lompat jauh, ketuk titiknya — coba sekarang.</string>
     <string name="tour_leave_title">Berhenti kapan saja</string>
-    <string name="tour_leave_body">Tekan Kembali buat keluar. Sesinya nunggu di Pustaka materi dan bisa kamu lanjutkan nanti.</string>
+    <string name="tour_leave_body">Penyusunan soalnya jalan terus di latar. Tekan Kembali kapan saja — kamu dikabari begitu soalnya siap.</string>
+    <string name="tour_prep_working">Soal masih disusun · %1$d siap</string>
+    <string name="tour_prep_reading">Materimu sedang dibaca</string>
+    <string name="tour_prep_ready">Semua soal siap</string>
     <string name="tour_receipt_title">Nilainya keluar di akhir</string>
     <string name="tour_receipt_body">Benar salahnya dan tambahan waktu mainnya baru muncul setelah semua soal dikumpulkan.</string>
 
@@ -571,4 +591,66 @@ kehilangan kontak.</string>
 
     <string name="source_too_large">Berkasnya lebih dari 32 MB. Pilih yang lebih kecil.</string>
     <string name="source_unreadable">Berkasnya tidak bisa dibaca. Coba pilih ulang.</string>
+
+    <string name="privacy_title">Kebijakan privasi</string>
+    <string name="privacy_open">Baca kebijakan privasi</string>
+    <string name="privacy_updated">Berlaku sejak 6 September 2026</string>
+    <string name="privacy_summary">Singkatnya: BrainXP menyimpan materi yang kamu setor, jawabanmu, dan catatan waktu bermain. Tidak ada iklan, tidak ada pelacak, dan tidak ada data yang dijual.</string>
+
+    <string name="privacy_collect_heading">Yang kami kumpulkan</string>
+    <string name="privacy_collect_body">Saat mendaftar: alamat email, kata sandi, dan nama yang kamu pakai di dalam app. Kata sandi disimpan dalam bentuk teracak, bukan apa adanya. Kalau HP ini dipasangkan orang tua lewat kode, HP ini tidak mengirim email atau kata sandi apa pun — yang terkirim hanya kode pasangannya, model HP, dan penanda pemasangan.</string>
+
+    <string name="privacy_apps_heading">Aplikasi dan waktu pemakaian</string>
+    <string name="privacy_apps_body">Daftar aplikasi yang kamu kunci tersimpan di server supaya aturannya sama di semua tempat. Saat kamu memakai waktu bermain, BrainXP mengirim nama aplikasi yang kamu buka dan berapa detik terpakai, karena dari situ saldo waktumu dihitung. BrainXP membaca aplikasi apa yang sedang di depan hanya selama layar menyala, dan aplikasi yang tidak kamu kunci tidak dicatat ke mana pun.</string>
+
+    <string name="privacy_material_heading">Materi dan jawaban</string>
+    <string name="privacy_material_body">Foto catatan atau berkas yang kamu setor dikirim ke server, karena di sanalah teksnya dibaca dan soalnya dibuat. Jawaban pilihanmu dan tulisan esaimu juga dikirim untuk dinilai. BrainXP tidak membaca isi berkas di HP-mu dan tidak menyentuh foto lain di galerimu — hanya yang kamu pilih sendiri.</string>
+
+    <string name="privacy_accessibility_heading">Layanan aksesibilitas</string>
+    <string name="privacy_accessibility_body">Ini pilihan, bukan kewajiban, dan melewatinya tidak mengurangi apa pun. Kalau kamu nyalakan, BrainXP hanya menerima nama paket aplikasi yang baru muncul di depan, supaya pemblokirannya lebih cepat. BrainXP tidak membaca isi layar, tidak membaca teks yang kamu ketik, dan tidak merekam apa pun dari aplikasi lain.</string>
+
+    <string name="privacy_family_heading">Mode Keluarga</string>
+    <string name="privacy_family_body">Di Mode Keluarga, orang tua melihat jenjang, materi yang disetor, hasil sesi, dan pemakaian waktu bermain anak. Orang tua juga diberi tahu kalau perlindungan di HP anak berhenti bekerja atau izinnya dicabut. Orang tua tidak melihat isi catatan yang difoto anak dan tidak melihat aplikasi lain yang dipakai di luar yang dikunci.</string>
+
+    <string name="privacy_share_heading">Kami tidak membaginya</string>
+    <string name="privacy_share_body">Tidak ada data yang dijual atau ditukar. BrainXP tidak memasang iklan, tidak memasang alat analitik, dan tidak memasang pelaporan kerusakan pihak ketiga. Data hanya berpindah antara HP-mu dan server BrainXP, selalu lewat sambungan terenkripsi.</string>
+
+    <string name="privacy_keep_heading">Berapa lama disimpan</string>
+    <string name="privacy_keep_body">Materi dan riwayat tersimpan selama akunmu masih ada, supaya bisa kamu pakai ulang. Materi bisa kamu hapus satu per satu kapan saja dari daftar materi. Data di HP hanya salinan supaya app tetap jalan tanpa sinyal, dan hilang saat app dihapus.</string>
+
+    <string name="privacy_delete_heading">Menghapus akun</string>
+    <string name="privacy_delete_body">Kamu bisa minta akun dan seluruh datanya dihapus dari Pengaturan, lewat menu Hapus akun. Permintaan diproses dalam 30 hari, dan setelah itu materi, riwayat, saldo, serta profilmu hilang dan tidak bisa dikembalikan.</string>
+
+    <string name="privacy_children_heading">Anak-anak</string>
+    <string name="privacy_children_body">BrainXP ditujukan untuk usia 13 tahun ke atas. Anak di bawah 13 tahun sebaiknya memakai BrainXP lewat Mode Keluarga, dipasangkan oleh orang tua dengan kode, karena jalur itu tidak meminta email, kata sandi, atau nama dari anak sama sekali.</string>
+
+    <string name="privacy_contact_heading">Menghubungi kami</string>
+    <string name="privacy_contact_body">Pertanyaan soal data, atau permintaan menghapus akun, kirim ke dukungan@satu-miliar-pertama-di-2027.biz.id.</string>
+    <string name="privacy_contact_email">dukungan@satu-miliar-pertama-di-2027.biz.id</string>
+
+    <string name="delete_account_title">Hapus akun</string>
+    <string name="delete_account_body">Ini menghapus akunmu beserta seluruh data yang menempel padanya. Kalau kamu cuma ingin berhenti memakai app ini di HP ini, keluar dari akun saja sudah cukup.</string>
+    <string name="delete_account_removed_label">Yang ikut terhapus</string>
+    <string name="delete_account_removed_materials">Semua materi yang pernah kamu setor</string>
+    <string name="delete_account_removed_sessions">Seluruh riwayat sesi dan jawaban</string>
+    <string name="delete_account_removed_balance">Saldo waktu bermain yang tersisa</string>
+    <string name="delete_account_removed_profile">Profil, jenjang, dan aturanmu</string>
+    <string name="delete_account_timeline">Permintaanmu diproses dalam 30 hari. Sampai selesai, kamu masih bisa masuk seperti biasa.</string>
+    <string name="delete_account_warning">Setelah terhapus, tidak ada cara mengembalikannya. Materi yang sama harus disetor ulang dari awal.</string>
+    <string name="delete_account_start">Minta akun dihapus</string>
+    <string name="delete_account_confirm">Ya, kirim permintaannya</string>
+    <string name="delete_account_no_mail">Tidak ada aplikasi email di HP ini. Kirim manual ke %1$s.</string>
+    <string name="delete_account_mail_subject">Permintaan hapus akun BrainXP</string>
+    <string name="delete_account_mail_body">Saya minta akun BrainXP saya beserta seluruh datanya dihapus.\n\nPenanda akun: %1$s\n\nSaya mengerti materi, riwayat, dan saldo waktu bermain saya akan hilang dan tidak bisa dikembalikan.</string>
+
+    <string name="settings_privacy">Kebijakan privasi</string>
+    <string name="settings_delete_account">Hapus akun</string>
+
+    <string name="accessibility_disclosure_title">Sebelum menyalakannya</string>
+    <string name="accessibility_disclosure_reads">BrainXP akan menerima nama aplikasi yang baru kamu buka, supaya aplikasi yang kamu kunci bisa dihadang lebih cepat.</string>
+    <string name="accessibility_disclosure_not">BrainXP tidak membaca isi layarmu, tidak membaca yang kamu ketik, dan tidak merekam apa pun dari aplikasi lain.</string>
+    <string name="accessibility_disclosure_optional">Ini pilihan. Kalau dilewati, pendeteksi utama tetap bekerja dan tidak ada yang berkurang.</string>
+    <string name="accessibility_disclosure_continue">Mengerti, buka pengaturan</string>
+
+    <string name="signin_privacy">Kebijakan privasi</string>
 </resources>

@@ -93,7 +93,7 @@ class MaterialUploadWorker
             return when (val result = materials.upload(title, type, path)) {
                 is AppResult.Success -> {
                     file.delete()
-                    preparation.watch(result.value.id)
+                    preparation.watch(result.value.id, title)
                     Result.success()
                 }
 

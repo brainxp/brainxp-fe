@@ -21,6 +21,10 @@ sealed interface HomeEvent {
 
     data object OpenProgress : HomeEvent
 
+    data object OpenPreparing : HomeEvent
+
+    data object OpenApps : HomeEvent
+
     data class OpenApp(
         val packageName: String,
     ) : HomeEvent
@@ -42,6 +46,10 @@ sealed interface HomeEffect {
     data object OpenLibrary : HomeEffect
 
     data object OpenProgress : HomeEffect
+
+    data object OpenPreparing : HomeEffect
+
+    data object OpenApps : HomeEffect
 
     data class LaunchApp(
         val packageName: String,

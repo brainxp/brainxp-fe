@@ -33,6 +33,9 @@ sealed interface OnboardingRoute : NavKey {
 
     @Serializable
     data object SetupDone : OnboardingRoute
+
+    @Serializable
+    data object PrivacyPolicy : OnboardingRoute
 }
 
 @Serializable
@@ -117,4 +120,10 @@ sealed interface MainRoute : NavKey {
     data class FamilyBalance(
         val childId: String,
     ) : MainRoute
+
+    @Serializable
+    data object PrivacyPolicy : MainRoute
+
+    @Serializable
+    data object DeleteAccount : MainRoute
 }

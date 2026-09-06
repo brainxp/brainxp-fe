@@ -81,7 +81,9 @@ private fun NewChildEntry(backStack: NavBackStack<NavKey>) {
     val load by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(load.createdId) {
-        load.createdId?.let { backStack.add(MainRoute.FamilyPairing(it)) }
+        val created = load.createdId ?: return@LaunchedEffect
+        viewModel.consumeCreated()
+        backStack.add(MainRoute.FamilyPairing(created))
     }
 
     NewChildScreen(
