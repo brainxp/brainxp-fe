@@ -21,11 +21,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.composables.icons.lucide.ChartNoAxesColumn
+import com.composables.icons.lucide.Clock
 import com.composables.icons.lucide.FileText
 import com.composables.icons.lucide.Flame
 import com.composables.icons.lucide.Library
 import com.composables.icons.lucide.Lock
 import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.ScrollText
+import com.composables.icons.lucide.Settings
 import com.composables.icons.lucide.Sparkles
 import com.example.brainxp.R
 import com.example.brainxp.blocking.ProtectionStatus
@@ -134,6 +137,16 @@ private fun TopBar(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            IconButton(
+                onClick = { onEvent(HomeEvent.OpenSettings) },
+                modifier = Modifier.size(NAV_TAP),
+            ) {
+                Icon(
+                    imageVector = Lucide.Settings,
+                    contentDescription = stringResource(R.string.settings_title),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
@@ -232,6 +245,18 @@ private fun ReadyContent(
                 subtitle = stringResource(R.string.home_library_sub),
                 leading = { Icon(imageVector = Lucide.Library, contentDescription = null) },
                 onClick = { onEvent(HomeEvent.OpenLibrary) },
+            )
+            item(
+                title = stringResource(R.string.history_title),
+                subtitle = stringResource(R.string.home_history_sub),
+                leading = { Icon(imageVector = Lucide.Clock, contentDescription = null) },
+                onClick = { onEvent(HomeEvent.OpenHistory) },
+            )
+            item(
+                title = stringResource(R.string.activity_title),
+                subtitle = stringResource(R.string.home_activity_sub),
+                leading = { Icon(imageVector = Lucide.ScrollText, contentDescription = null) },
+                onClick = { onEvent(HomeEvent.OpenActivity) },
             )
             item(
                 title = stringResource(R.string.home_daily_cap),

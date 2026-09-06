@@ -277,6 +277,8 @@
 
     <string name="home_library_title">Material library</string>
     <string name="home_library_sub">Old questions can be studied again</string>
+    <string name="home_history_sub">Sessions and play time you already used</string>
+    <string name="home_activity_sub">Everything that happened on this device</string>
     <string name="home_daily_cap">Today\'s playtime allowance</string>
 
     <string name="source_title">Hand in material</string>

@@ -70,6 +70,7 @@ private fun FamilyHomeEntry(backStack: NavBackStack<NavKey>) {
                     }
                 },
                 onJoinRules = { viewModel.claimOwnRules(AcademicLevel.UMUM) },
+                onSettings = { backStack.add(MainRoute.Settings) },
             )
         }
     }

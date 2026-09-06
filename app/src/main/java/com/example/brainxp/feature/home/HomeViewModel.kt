@@ -34,6 +34,18 @@ class HomeViewModel
         protection: ProtectionStateHolder,
     ) : ViewModel() {
         private companion object {
+            val NAVIGATION =
+                mapOf<HomeEvent, HomeEffect>(
+                    HomeEvent.StartEarning to HomeEffect.OpenAddMaterial,
+                    HomeEvent.FixPermissions to HomeEffect.OpenPermissionSetup,
+                    HomeEvent.OpenLibrary to HomeEffect.OpenLibrary,
+                    HomeEvent.OpenProgress to HomeEffect.OpenProgress,
+                    HomeEvent.OpenPreparing to HomeEffect.OpenPreparing,
+                    HomeEvent.OpenApps to HomeEffect.OpenApps,
+                    HomeEvent.OpenSettings to HomeEffect.OpenSettings,
+                    HomeEvent.OpenHistory to HomeEffect.OpenHistory,
+                    HomeEvent.OpenActivity to HomeEffect.OpenActivity,
+                )
             val PRESET_SECONDS = listOf(300, 600, 900, 1_800)
             const val MILLIS_PER_SECOND = 1_000L
         }
@@ -89,20 +101,18 @@ class HomeViewModel
         }
 
         fun onEvent(event: HomeEvent) {
+            NAVIGATION[event]?.let { destination ->
+                emit(destination)
+                return
+            }
             when (event) {
                 HomeEvent.Retry -> viewModelScope.launch { reconciler.reconcile() }
-                HomeEvent.StartEarning -> emit(HomeEffect.OpenAddMaterial)
-                HomeEvent.FixPermissions -> emit(HomeEffect.OpenPermissionSetup)
-                HomeEvent.OpenLibrary -> emit(HomeEffect.OpenLibrary)
-                HomeEvent.OpenProgress -> emit(HomeEffect.OpenProgress)
-                HomeEvent.OpenPreparing -> emit(HomeEffect.OpenPreparing)
-                HomeEvent.OpenApps -> emit(HomeEffect.OpenApps)
                 HomeEvent.EndUnlockEarly -> viewModelScope.launch { unlocks.endEarly() }
-                HomeEvent.ToggleProtection -> toggleProtection()
+                HomeEvent.StartSession -> startSession()
                 is HomeEvent.OpenApp -> emit(HomeEffect.LaunchApp(event.packageName))
                 is HomeEvent.Resume -> emit(HomeEffect.OpenQuestions(event.materialId))
                 is HomeEvent.SelectDuration -> selectDuration(event.seconds)
-                HomeEvent.StartSession -> startSession()
+                else -> Unit
             }
         }
 

@@ -15,7 +15,11 @@ sealed interface HomeEvent {
 
     data object FixPermissions : HomeEvent
 
-    data object ToggleProtection : HomeEvent
+    data object OpenSettings : HomeEvent
+
+    data object OpenHistory : HomeEvent
+
+    data object OpenActivity : HomeEvent
 
     data object OpenLibrary : HomeEvent
 
@@ -46,6 +50,12 @@ sealed interface HomeEffect {
     data object OpenLibrary : HomeEffect
 
     data object OpenProgress : HomeEffect
+
+    data object OpenSettings : HomeEffect
+
+    data object OpenHistory : HomeEffect
+
+    data object OpenActivity : HomeEffect
 
     data object OpenPreparing : HomeEffect
 

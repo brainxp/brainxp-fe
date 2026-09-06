@@ -187,6 +187,26 @@ internal fun EntryProviderScope<NavKey>.onboardingTailEntries(
     }
 }
 
+private fun openHome(
+    effect: HomeEffect,
+    backStack: NavBackStack<NavKey>,
+    context: android.content.Context,
+) {
+    when (effect) {
+        HomeEffect.OpenAddMaterial -> backStack.add(MainRoute.Capture)
+        HomeEffect.OpenPermissionSetup -> backStack.add(MainRoute.PermissionSetup)
+        HomeEffect.OpenLibrary -> backStack.add(MainRoute.MaterialList)
+        HomeEffect.OpenProgress -> backStack.add(MainRoute.Progress)
+        HomeEffect.OpenSettings -> backStack.add(MainRoute.Settings)
+        HomeEffect.OpenHistory -> backStack.add(MainRoute.History)
+        HomeEffect.OpenActivity -> backStack.add(MainRoute.ActivityLog)
+        HomeEffect.OpenApps -> backStack.add(MainRoute.AppPicker)
+        HomeEffect.OpenPreparing -> backStack.add(MainRoute.Preparing(PENDING_MATERIAL))
+        is HomeEffect.OpenQuestions -> backStack.add(MainRoute.Questions(effect.materialId))
+        is HomeEffect.LaunchApp -> launchApp(context, effect.packageName)
+    }
+}
+
 internal fun EntryProviderScope<NavKey>.dailyEntries(backStack: NavBackStack<NavKey>) {
     entry<MainRoute.Home> {
         val viewModel: HomeViewModel = hiltViewModel()
@@ -194,18 +214,7 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(backStack: NavBackStack<Nav
         val context = LocalContext.current
 
         LaunchedEffect(viewModel) {
-            viewModel.effects.collect { effect ->
-                when (effect) {
-                    HomeEffect.OpenAddMaterial -> backStack.add(MainRoute.Capture)
-                    HomeEffect.OpenPermissionSetup -> backStack.add(MainRoute.PermissionSetup)
-                    HomeEffect.OpenLibrary -> backStack.add(MainRoute.MaterialList)
-                    HomeEffect.OpenProgress -> backStack.add(MainRoute.Progress)
-                    HomeEffect.OpenPreparing -> backStack.add(MainRoute.Preparing(PENDING_MATERIAL))
-                    HomeEffect.OpenApps -> backStack.add(MainRoute.AppPicker)
-                    is HomeEffect.OpenQuestions -> backStack.add(MainRoute.Questions(effect.materialId))
-                    is HomeEffect.LaunchApp -> launchApp(context, effect.packageName)
-                }
-            }
+            viewModel.effects.collect { effect -> openHome(effect, backStack, context) }
         }
 
         Column {

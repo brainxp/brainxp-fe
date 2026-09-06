@@ -6,10 +6,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -18,9 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.composables.icons.lucide.Lock
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Plus
+import com.composables.icons.lucide.Settings
 import com.composables.icons.lucide.User
 import com.example.brainxp.R
 import com.example.brainxp.core.ui.BrainXPTheme
@@ -42,6 +46,7 @@ fun FamilyHomeScreen(
     onSelfRules: () -> Unit,
     onJoinRules: () -> Unit,
     modifier: Modifier = Modifier,
+    onSettings: (() -> Unit)? = null,
     onBack: (() -> Unit)? = null,
 ) {
     val spacing = BrainXPTheme.spacing
@@ -59,6 +64,15 @@ fun FamilyHomeScreen(
     ) {
         ScreenNav(title = stringResource(R.string.family_title), onBack = onBack) {
             StatusPill(text = stringResource(R.string.family_role), tone = PillTone.BLUE)
+            if (onSettings != null) {
+                IconButton(onClick = onSettings, modifier = Modifier.size(NAV_TAP)) {
+                    Icon(
+                        imageVector = Lucide.Settings,
+                        contentDescription = stringResource(R.string.settings_title),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         }
 
         Text(
@@ -177,3 +191,5 @@ private fun FamilyHomeEmptyPreview() {
         )
     }
 }
+
+private val NAV_TAP = 40.dp

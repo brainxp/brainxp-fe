@@ -282,6 +282,8 @@ kehilangan kontak.</string>
     <string name="home_no_apps_managed">Orang tua yang menentukan daftarnya</string>
 
     <string name="home_library_title">Pustaka materi</string>    <string name="home_library_sub">Soal lama bisa dipelajari ulang</string>
+    <string name="home_history_sub">Sesi dan waktu bermain yang sudah lewat</string>
+    <string name="home_activity_sub">Apa saja yang terjadi di perangkat ini</string>
     <string name="home_daily_cap">Jatah main hari ini</string>
 
     <string name="source_title">Setor materi</string>
