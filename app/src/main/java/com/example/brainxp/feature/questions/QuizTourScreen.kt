@@ -191,7 +191,7 @@ private fun TourBody(
             }
 
             Column(
-                modifier = Modifier.padding(top = spacing.md),
+                modifier = Modifier.padding(top = spacing.md).spot(TourSpot.FOOTER, reveal),
                 verticalArrangement = Arrangement.spacedBy(spacing.sm),
             ) {
                 Text(
@@ -210,7 +210,7 @@ private fun TourBody(
                     onClick = {},
                     modifier = Modifier.spot(TourSpot.DOUBT, reveal),
                 )
-                Column(modifier = Modifier.spot(TourSpot.FOOTER, reveal)) { footer() }
+                footer()
 
                 if (step.swipe) {
                     CoachCard(
