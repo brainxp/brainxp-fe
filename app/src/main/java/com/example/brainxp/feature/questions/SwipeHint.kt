@@ -14,7 +14,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -40,10 +39,10 @@ internal fun SwipeHint(modifier: Modifier = Modifier) {
                         animation =
                             keyframes {
                                 durationMillis = CYCLE_MILLIS
-                                0f at 0 using LinearEasing
-                                0f at HOLD_MILLIS using LinearEasing
-                                1f at HOLD_MILLIS + TURN_MILLIS using LinearEasing
-                                1f at CYCLE_MILLIS
+                                0f at 0
+                                0f at HOLD_MILLIS
+                                1f at HOLD_MILLIS + TURN_MILLIS
+                                1f at CYCLE_MILLIS using LinearEasing
                             },
                     ),
                 label = "turn",
@@ -52,95 +51,83 @@ internal fun SwipeHint(modifier: Modifier = Modifier) {
     Canvas(modifier = modifier.fillMaxWidth().height(STRIP)) {
         val pageWidth = size.width * PAGE_SHARE
         val gap = GAP.toPx()
-        val pageHeight = size.height - THUMB_ROOM.toPx()
-        val start = (size.width - pageWidth) / 2f
+        val centred = (size.width - pageWidth) / 2f
         val shift = (pageWidth + gap) * turn
+        val ahead = turn > HALF
 
-        clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
-            val leaving =
-                PageInk(
-                    lead = if (turn < HALF) scheme.primary else scheme.outline,
-                    quiet = scheme.outline,
-                    paper = scheme.surface,
-                    filled = scheme.surfaceContainerHigh,
-                )
-            val arriving = leaving.copy(lead = if (turn < HALF) scheme.outline else scheme.primary)
+        val quiet = CardInk(edge = scheme.outline, quiet = scheme.surfaceContainerHigh, paper = scheme.surface)
+        val live = quiet.copy(edge = scheme.primary)
+        val span = Size(pageWidth, size.height)
 
-            page(origin = Offset(start - shift, 0f), size = Size(pageWidth, pageHeight), ink = leaving)
-            page(
-                origin = Offset(start + pageWidth + gap - shift, 0f),
-                size = Size(pageWidth, pageHeight),
-                ink = arriving,
+        clipRect {
+            card(at = Offset(centred - shift, 0f), span = span, ink = if (ahead) quiet else live, answered = !ahead)
+            card(
+                at = Offset(centred + pageWidth + gap - shift, 0f),
+                span = span,
+                ink = if (ahead) live else quiet,
+                answered = ahead,
             )
         }
 
-        thumb(
-            centre =
-                Offset(
-                    x = size.width * (THUMB_FROM + (THUMB_TO - THUMB_FROM) * turn),
-                    y = size.height - THUMB_ROOM.toPx() / 2f,
-                ),
-        )
+        thumb(at = Offset(size.width * (THUMB_FROM + (THUMB_TO - THUMB_FROM) * turn), size.height / 2f))
     }
 }
 
-private data class PageInk(
-    val lead: Color,
+private data class CardInk(
+    val edge: Color,
     val quiet: Color,
     val paper: Color,
-    val filled: Color,
 )
 
-private fun DrawScope.page(
-    origin: Offset,
-    size: Size,
-    ink: PageInk,
+private fun DrawScope.card(
+    at: Offset,
+    span: Size,
+    ink: CardInk,
+    answered: Boolean,
 ) {
+    val radius = CornerRadius(CARD_RADIUS.toPx())
+    drawRoundRect(color = ink.paper, topLeft = at, size = span, cornerRadius = radius)
     drawRoundRect(
-        color = ink.paper,
-        topLeft = origin,
-        size = size,
-        cornerRadius = CornerRadius(PAGE_RADIUS.toPx()),
-    )
-    drawRoundRect(
-        color = ink.lead,
-        topLeft = origin,
-        size = size,
-        cornerRadius = CornerRadius(PAGE_RADIUS.toPx()),
+        color = ink.edge,
+        topLeft = at,
+        size = span,
+        cornerRadius = radius,
         style = Stroke(width = EDGE.toPx()),
     )
 
-    val pad = PAGE_PADDING.toPx()
-    val line = LINE.toPx()
+    val pad = CARD_PADDING.toPx()
+    val inner = span.width - pad * 2
+    val stroke = LINE.toPx()
+
     drawLine(
-        color = ink.lead,
-        start = Offset(origin.x + pad, origin.y + pad + line),
-        end = Offset(origin.x + size.width * STEM_SHARE, origin.y + pad + line),
-        strokeWidth = line,
+        color = ink.quiet,
+        start = Offset(at.x + pad, at.y + pad + stroke),
+        end = Offset(at.x + pad + inner * STEM_SHARE, at.y + pad + stroke),
+        strokeWidth = stroke,
         cap = StrokeCap.Round,
     )
+
     repeat(ROWS) { row ->
-        val y = origin.y + pad * ROW_GAP + (row + 1) * (pad * ROW_STEP)
-        drawLine(
-            color = if (row == 0) ink.quiet else ink.filled,
-            start = Offset(origin.x + pad, y),
-            end = Offset(origin.x + size.width - pad, y),
-            strokeWidth = line,
-            cap = StrokeCap.Round,
+        val y = at.y + span.height * (ROW_FIRST + row * ROW_STEP)
+        drawRoundRect(
+            color = if (answered && row == PICKED_ROW) Tokens.Blue300 else ink.quiet,
+            topLeft = Offset(at.x + pad, y),
+            size = Size(inner, ROW_HEIGHT.toPx()),
+            cornerRadius = CornerRadius(ROW_HEIGHT.toPx()),
         )
     }
 }
 
-private fun DrawScope.thumb(centre: Offset) {
+private fun DrawScope.thumb(at: Offset) {
     val width = THUMB_WIDTH.toPx()
     val height = THUMB_HEIGHT.toPx()
 
     repeat(TRAILS) { index ->
-        val back = (index + 1) * TRAIL_STEP.toPx()
+        val gap = THUMB_WIDTH.toPx() + index * TRAIL_STEP.toPx()
         drawLine(
             color = Tokens.Amber400.copy(alpha = TRAIL_ALPHA / (index + 1)),
-            start = Offset(centre.x + back, centre.y),
-            end = Offset(centre.x + back + TRAIL_LENGTH.toPx(), centre.y),
+            start = Offset(at.x + gap, at.y),
+            end = Offset(at.x + gap + TRAIL_LENGTH.toPx(), at.y),
             strokeWidth = LINE.toPx(),
             cap = StrokeCap.Round,
         )
@@ -148,36 +135,37 @@ private fun DrawScope.thumb(centre: Offset) {
 
     drawRoundRect(
         color = Tokens.Amber500,
-        topLeft = Offset(centre.x - width / 2f, centre.y - height / 2f),
+        topLeft = Offset(at.x - width / 2f, at.y - height / 2f),
         size = Size(width, height),
         cornerRadius = CornerRadius(width / 2f),
     )
 }
 
-private val STRIP = 62.dp
-private val GAP = 8.dp
-private val PAGE_RADIUS = 8.dp
+private val STRIP = 66.dp
+private val GAP = 10.dp
+private val CARD_RADIUS = 10.dp
 private val EDGE = 1.5.dp
-private val LINE = 2.dp
-private val PAGE_PADDING = 7.dp
-private val THUMB_ROOM = 18.dp
-private val THUMB_WIDTH = 9.dp
-private val THUMB_HEIGHT = 16.dp
-private val TRAIL_STEP = 6.dp
-private val TRAIL_LENGTH = 5.dp
-private const val PAGE_SHARE = 0.52f
-private const val THUMB_FROM = 0.68f
-private const val THUMB_TO = 0.3f
-private const val STEM_SHARE = 0.62f
-private const val ROWS = 2
-private const val ROW_GAP = 2.6f
-private const val ROW_STEP = 1.5f
-private const val TRAILS = 2
-private const val TRAIL_ALPHA = 0.5f
+private val LINE = 3.dp
+private val CARD_PADDING = 8.dp
+private val ROW_HEIGHT = 5.dp
+private val THUMB_WIDTH = 11.dp
+private val THUMB_HEIGHT = 20.dp
+private val TRAIL_STEP = 7.dp
+private val TRAIL_LENGTH = 7.dp
+private const val PAGE_SHARE = 0.46f
+private const val STEM_SHARE = 0.78f
+private const val ROWS = 3
+private const val ROW_FIRST = 0.42f
+private const val ROW_STEP = 0.18f
+private const val PICKED_ROW = 1
+private const val TRAILS = 3
+private const val TRAIL_ALPHA = 0.55f
 private const val HALF = 0.5f
-private const val HOLD_MILLIS = 420
-private const val TURN_MILLIS = 620
-private const val CYCLE_MILLIS = 1_700
+private const val THUMB_FROM = 0.74f
+private const val THUMB_TO = 0.26f
+private const val HOLD_MILLIS = 450
+private const val TURN_MILLIS = 650
+private const val CYCLE_MILLIS = 1_750
 
 @Preview(showBackground = true)
 @Composable

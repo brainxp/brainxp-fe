@@ -56,7 +56,7 @@ val BrainXPTypography =
         displaySmall = sans(28, FontWeight.ExtraBold, -0.04f, lineHeight = 32),
         headlineMedium = sans(22, FontWeight.ExtraBold, -0.035f, lineHeight = 26),
         headlineSmall = sans(20, FontWeight.ExtraBold, -0.03f, lineHeight = 24),
-        titleLarge = sans(19, FontWeight.ExtraBold, -0.035f, lineHeight = 26),
+        titleLarge = sans(19, FontWeight.Medium, -0.02f, lineHeight = 27),
         titleMedium = sans(17, FontWeight.Bold, -0.025f, lineHeight = 22),
         titleSmall = sans(15, FontWeight.Bold, -0.02f, lineHeight = 20),
         bodyLarge = sans(15, FontWeight.Medium, -0.01f),

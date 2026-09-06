@@ -380,7 +380,7 @@ internal fun OptionRow(
             }
             Text(
                 text = text,
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.bodyLarge,
                 color = if (selected) Tokens.Blue800 else scheme.onSurface,
             )
         }
