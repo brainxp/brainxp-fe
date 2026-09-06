@@ -83,6 +83,7 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.serialization)
+    implementation(libs.lottie.compose)
     implementation(libs.reveal.core)
     implementation(libs.reveal.shapes)
     debugImplementation(libs.okhttp.logging)
