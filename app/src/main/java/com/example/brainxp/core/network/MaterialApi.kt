@@ -33,6 +33,14 @@ data class MaterialDto(
     @SerialName("times_studied") val timesStudied: Int = 0,
     @SerialName("question_count") val questionCount: Int = 0,
     @SerialName("created_at") val createdAt: String? = null,
+    val unfinished: UnfinishedDto? = null,
+)
+
+@Serializable
+data class UnfinishedDto(
+    @SerialName("session_id") val sessionId: String,
+    val answered: Int,
+    val total: Int,
 )
 
 interface MaterialApi {

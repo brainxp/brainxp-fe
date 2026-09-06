@@ -14,6 +14,7 @@ import com.example.brainxp.domain.model.Material
 import com.example.brainxp.domain.model.MaterialPage
 import com.example.brainxp.domain.model.MaterialStatus
 import com.example.brainxp.domain.model.MaterialType
+import com.example.brainxp.domain.model.UnfinishedSession
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -115,6 +116,10 @@ internal fun MaterialDto.toMaterial(): Material =
         declaredLevel = declaredLevel,
         gateReason = gateReason,
         topicSummary = topicSummary,
+        unfinished =
+            unfinished?.let {
+                UnfinishedSession(sessionId = it.sessionId, answered = it.answered, total = it.total)
+            },
     )
 
 private fun statusOf(raw: String): MaterialStatus =
@@ -139,6 +144,9 @@ private fun Material.toEntity(): MaterialEntity =
         declaredLevel = declaredLevel,
         gateReason = gateReason,
         topicSummary = topicSummary,
+        unfinishedSessionId = unfinished?.sessionId,
+        unfinishedAnswered = unfinished?.answered,
+        unfinishedTotal = unfinished?.total,
     )
 
 private fun MaterialEntity.toMaterial(): Material =
@@ -154,7 +162,17 @@ private fun MaterialEntity.toMaterial(): Material =
         declaredLevel = declaredLevel,
         gateReason = gateReason,
         topicSummary = topicSummary,
+        unfinished = unfinishedSession(),
     )
+
+private fun MaterialEntity.unfinishedSession(): UnfinishedSession? {
+    val sessionId = unfinishedSessionId ?: return null
+    return UnfinishedSession(
+        sessionId = sessionId,
+        answered = unfinishedAnswered ?: 0,
+        total = unfinishedTotal ?: 0,
+    )
+}
 
 private const val FALLBACK_TITLE = "Materi"
 private const val STATUS_READY = "ready"

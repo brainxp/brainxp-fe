@@ -21,6 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.composables.icons.lucide.ChartNoAxesColumn
+import com.composables.icons.lucide.FileText
 import com.composables.icons.lucide.Flame
 import com.composables.icons.lucide.Library
 import com.composables.icons.lucide.Lucide
@@ -28,6 +29,7 @@ import com.example.brainxp.R
 import com.example.brainxp.blocking.ProtectionStatus
 import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.ui.BrainXPTheme
+import com.example.brainxp.core.ui.ChoiceRow
 import com.example.brainxp.core.ui.ErrorState
 import com.example.brainxp.core.ui.HeroCard
 import com.example.brainxp.core.ui.HeroTone
@@ -191,6 +193,22 @@ private fun ReadyContent(
             SessionStarter(state = state, onEvent = onEvent)
         }
 
+        state.pending?.let { pending ->
+            ChoiceRow(
+                title = stringResource(R.string.home_resume_title),
+                subtitle =
+                    stringResource(
+                        R.string.home_resume_sub,
+                        pending.title,
+                        pending.answered,
+                        pending.total,
+                    ),
+                icon = Lucide.FileText,
+                highlight = true,
+                onClick = { onEvent(HomeEvent.Resume(pending.materialId)) },
+            )
+        }
+
         PrimaryButton(
             text = stringResource(R.string.home_start_earning),
             onClick = { onEvent(HomeEvent.StartEarning) },
@@ -348,7 +366,10 @@ private fun LockedApps(
         if (state.lockedApps.isEmpty()) {
             item(
                 title = stringResource(R.string.home_no_apps_title),
-                subtitle = stringResource(R.string.home_no_apps_sub),
+                subtitle =
+                    stringResource(
+                        if (state.managed) R.string.home_no_apps_managed else R.string.home_no_apps_sub,
+                    ),
             )
         } else {
             state.lockedApps.forEach { app ->

@@ -18,6 +18,9 @@ data class MaterialEntity(
     val declaredLevel: String? = null,
     val gateReason: String? = null,
     val topicSummary: String? = null,
+    val unfinishedSessionId: String? = null,
+    val unfinishedAnswered: Int? = null,
+    val unfinishedTotal: Int? = null,
 )
 
 @Entity(

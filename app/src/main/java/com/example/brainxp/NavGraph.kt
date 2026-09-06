@@ -186,6 +186,7 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(backStack: NavBackStack<Nav
                     HomeEffect.OpenPermissionSetup -> backStack.add(MainRoute.PermissionSetup)
                     HomeEffect.OpenLibrary -> backStack.add(MainRoute.MaterialList)
                     HomeEffect.OpenProgress -> backStack.add(MainRoute.Progress)
+                    is HomeEffect.OpenQuestions -> backStack.add(MainRoute.Questions(effect.materialId))
                     is HomeEffect.LaunchApp -> launchApp(context, effect.packageName)
                 }
             }

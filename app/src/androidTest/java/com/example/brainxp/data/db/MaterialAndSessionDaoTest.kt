@@ -25,6 +25,32 @@ class MaterialAndSessionDaoTest : DbTest() {
         }
 
     @Test
+    fun theUnfinishedColumnsSurviveARoundTrip() =
+        runTest {
+            db.materialDao().upsert(
+                listOf(
+                    MaterialEntity(
+                        id = "m1",
+                        title = "Bab 4",
+                        type = "PDF",
+                        status = "READY",
+                        createdAt = 1_000L,
+                        unfinishedSessionId = "s1",
+                        unfinishedAnswered = 3,
+                        unfinishedTotal = 9,
+                    ),
+                ),
+            )
+
+            val row = db.materialDao().findById("m1")
+
+            assertEquals("s1", row?.unfinishedSessionId)
+            assertEquals(3, row?.unfinishedAnswered)
+            assertEquals(9, row?.unfinishedTotal)
+            assertNull(db.materialDao().findById("m1")?.gateReason)
+        }
+
+    @Test
     fun upsertReplacesExistingMaterialRatherThanDuplicating() =
         runTest {
             seedMaterial("m1", title = "first")

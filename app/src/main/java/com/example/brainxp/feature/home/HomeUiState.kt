@@ -11,6 +11,18 @@ data class LockedApp(
     val label: String,
 )
 
+data class LockedApps(
+    val apps: List<LockedApp> = emptyList(),
+    val managed: Boolean = false,
+)
+
+data class PendingSession(
+    val materialId: String,
+    val title: String,
+    val answered: Int,
+    val total: Int,
+)
+
 data class HomeUiState(
     val phase: Phase = Phase.Loading,
     val balanceSeconds: Int = 0,
@@ -24,12 +36,14 @@ data class HomeUiState(
     val remaining: Duration = Duration.ZERO,
     val protection: ProtectionStatus = ProtectionStatus.OFF,
     val lockedApps: List<LockedApp> = emptyList(),
+    val managed: Boolean = false,
     val sessionOptions: List<Int> = emptyList(),
     val selectedOption: Int? = null,
     val starting: Boolean = false,
     val consumedSeconds: Int = 0,
     val idleDays: Int = 0,
     val idleDaysAllowed: Int = 0,
+    val pending: PendingSession? = null,
     val pinRequired: Boolean = false,
     val pinVerified: Boolean = false,
     val pinWrong: Boolean = false,

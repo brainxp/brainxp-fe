@@ -79,6 +79,8 @@
     <string name="library_never_studied">belum dikerjakan</string>
     <string name="library_reward">reward %1$s</string>
     <string name="library_swipe_hint">Geser sebuah materi ke kiri untuk menghapusnya.</string>
+    <string name="library_pending">Tertunda · %1$d dari %2$d terisi</string>
+    <string name="library_resume">Lanjutkan</string>
     <string name="library_remove">Hapus</string>
     <string name="library_remove_title">Hapus materi ini?</string>
     <string name="library_remove_body">%1$s beserta %2$d soalnya hilang untuk selamanya. Menit yang sudah kamu kumpulkan dari materi ini tetap utuh.</string>
@@ -254,6 +256,8 @@ kehilangan kontak.</string>
     <string name="home_cap_reached">Batas harian tercapai. Saldomu tidak berkurang dan menunggu — hari berganti sekitar %1$s lagi.</string>
 
     <string name="home_start_earning">Setor materi</string>
+    <string name="home_resume_title">Lanjutkan sesi yang tertunda</string>
+    <string name="home_resume_sub">%1$s · %2$d dari %3$d terisi</string>
     <string name="home_session_label">Pakai waktumu sekarang</string>
     <string name="home_session_start">Mulai waktu bermain</string>
     <string name="home_session_starting">Menyiapkan…</string>
@@ -265,6 +269,7 @@ kehilangan kontak.</string>
     <string name="home_app_locked">Terkunci</string>
     <string name="home_no_apps_title">Belum ada aplikasi dikunci</string>
     <string name="home_no_apps_sub">Pilih dulu aplikasi yang mau dibatasi</string>
+    <string name="home_no_apps_managed">Orang tua yang menentukan daftarnya</string>
 
     <string name="home_library_title">Pustaka materi</string>    <string name="home_library_sub">Soal lama bisa dipelajari ulang</string>
     <string name="home_daily_cap">Jatah main hari ini</string>
@@ -275,8 +280,8 @@ kehilangan kontak.</string>
     <string name="source_hero_sub">Perkiraan sampai +%1$s</string>
     <string name="source_pick">Pilih cara menyetor</string>
     <string name="source_photo">Foto catatan</string>
-    <string name="source_photo_sub">Buku, papan tulis, tulisan tangan. Rumus dan diagram terbaca.</string>
-    <string name="source_document">Kirim dokumen</string>
+    <string name="source_photo_sub">Kamera langsung terbuka. Buku, papan tulis, tulisan tangan.</string>
+    <string name="source_document">Kirim berkas</string>
     <string name="source_document_sub">PDF, DOCX, PPTX, TXT, atau foto yang sudah ada — sampai 32 MB.</string>
     <string name="source_note">Materi diproses layanan AI dan tidak dipakai melatih model. Materi yang sama diunggah ulang tetap boleh dipelajari, tapi hadiahnya menurun.</string>
 

@@ -2,15 +2,15 @@ package com.example.brainxp.feature.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.brainxp.blocking.InstalledAppsSource
 import com.example.brainxp.blocking.ProtectionStateHolder
 import com.example.brainxp.data.repo.BalanceSource
+import com.example.brainxp.data.repo.MaterialRepository
 import com.example.brainxp.data.repo.ReconciledBalance
-import com.example.brainxp.data.repo.RestrictionRepository
 import com.example.brainxp.data.repo.RewardReconciler
 import com.example.brainxp.domain.ProtectionSwitch
 import com.example.brainxp.domain.UnlockSessionManager
 import com.example.brainxp.domain.model.BlockReason
+import com.example.brainxp.domain.model.Material
 import com.example.brainxp.domain.model.UnlockState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -29,8 +30,8 @@ class HomeViewModel
     constructor(
         private val reconciler: RewardReconciler,
         private val unlocks: UnlockSessionManager,
-        private val restrictions: RestrictionRepository,
-        private val installedApps: InstalledAppsSource,
+        private val lockedApps: LockedAppsSource,
+        private val materials: MaterialRepository,
         private val protectionSwitch: ProtectionSwitch,
         protection: ProtectionStateHolder,
     ) : ViewModel() {
@@ -45,23 +46,22 @@ class HomeViewModel
         private val effectChannel = Channel<HomeEffect>(Channel.BUFFERED)
         val effects: Flow<HomeEffect> = effectChannel.receiveAsFlow()
 
-        private val labels = MutableStateFlow<Map<String, String>>(emptyMap())
-
         init {
             viewModelScope.launch { reconciler.reconcile() }
-            viewModelScope.launch { loadLabels() }
+            viewModelScope.launch { materials.page(cursor = null) }
+            viewModelScope.launch {
+                materials.observeCached().collect { cached ->
+                    mutableState.update { it.copy(pending = cached.pendingSession()) }
+                }
+            }
             viewModelScope.launch {
                 combine(
                     reconciler.state,
                     unlocks.state,
                     unlocks.remainingFlow,
                     protection.snapshot,
-                    combine(restrictions.observeRestricted(), labels) { apps, names ->
-                        apps.filter { it.enabled }.map { app ->
-                            LockedApp(app.packageName, names[app.packageName] ?: app.packageName)
-                        }
-                    },
-                ) { balance, unlock, remaining, snapshot, lockedApps ->
+                    lockedApps.observe(),
+                ) { balance, unlock, remaining, snapshot, locked ->
                     val standing = balance.standing
                     val consumedSeconds =
                         ((unlock as? UnlockState.Active)?.consumedMillis ?: 0L) / MILLIS_PER_SECOND
@@ -79,20 +79,14 @@ class HomeViewModel
                         unlock = unlock,
                         remaining = remaining,
                         protection = snapshot.status,
-                        lockedApps = lockedApps,
+                        lockedApps = locked.apps,
+                        managed = locked.managed,
                         sessionOptions = options,
-                        selectedOption =
-                            mutableState.value.selectedOption?.takeIf { it in options }
-                                ?: options.firstOrNull(),
-                        starting = mutableState.value.starting,
                         consumedSeconds = consumedSeconds.toInt(),
                         idleDays = standing?.idleDays ?: 0,
                         idleDaysAllowed = standing?.idleDaysAllowed ?: 0,
-                        pinRequired = mutableState.value.pinRequired,
-                        pinVerified = mutableState.value.pinVerified,
-                        pinWrong = mutableState.value.pinWrong,
                     )
-                }.collect { mutableState.value = it }
+                }.collect { fresh -> mutableState.update { now -> now.mergedWith(fresh) } }
             }
         }
 
@@ -106,6 +100,7 @@ class HomeViewModel
                 HomeEvent.EndUnlockEarly -> viewModelScope.launch { unlocks.endEarly() }
                 HomeEvent.ToggleProtection -> toggleProtection()
                 is HomeEvent.OpenApp -> emit(HomeEffect.LaunchApp(event.packageName))
+                is HomeEvent.Resume -> emit(HomeEffect.OpenQuestions(event.materialId))
                 is HomeEvent.SelectDuration -> selectDuration(event.seconds)
                 HomeEvent.StartSession -> startSession()
             }
@@ -151,10 +146,6 @@ class HomeViewModel
             }
         }
 
-        private suspend fun loadLabels() {
-            labels.value = installedApps.launchableApps().associate { it.packageName to it.label }
-        }
-
         private fun emit(effect: HomeEffect) {
             viewModelScope.launch { effectChannel.send(effect) }
         }
@@ -182,5 +173,27 @@ class HomeViewModel
                     HomeUiState.Phase.Ready
                 }
             }
+        }
+    }
+
+private fun HomeUiState.mergedWith(fresh: HomeUiState): HomeUiState =
+    fresh.copy(
+        selectedOption = selectedOption?.takeIf { it in fresh.sessionOptions } ?: fresh.sessionOptions.firstOrNull(),
+        starting = starting,
+        pending = pending,
+        pinRequired = pinRequired,
+        pinVerified = pinVerified,
+        pinWrong = pinWrong,
+    )
+
+private fun List<Material>.pendingSession(): PendingSession? =
+    firstNotNullOfOrNull { material ->
+        material.unfinished?.let { open ->
+            PendingSession(
+                materialId = material.id,
+                title = material.title,
+                answered = open.answered,
+                total = open.total,
+            )
         }
     }

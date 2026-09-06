@@ -164,8 +164,12 @@ private fun MaterialRow(
             title = material.title,
             subtitle = subtitleFor(material),
             icon = Lucide.FileText,
-            highlight = material.sessionCount <= 1,
+            highlight = material.unfinished != null || material.sessionCount <= 1,
             onClick = onOpen,
+            trailing =
+                material.unfinished?.let {
+                    { StatusPill(text = stringResource(R.string.library_resume), tone = PillTone.BLUE) }
+                },
         )
     }
 }
@@ -225,8 +229,12 @@ private fun RemoveDialog(
 }
 
 @Composable
-private fun subtitleFor(material: Material): String =
-    listOf(
+private fun subtitleFor(material: Material): String {
+    val open = material.unfinished
+    if (open != null) {
+        return stringResource(R.string.library_pending, open.answered, open.total)
+    }
+    return listOf(
         stringResource(R.string.library_question_count, material.questionCount),
         if (material.sessionCount <= 0) {
             stringResource(R.string.library_never_studied)
@@ -235,6 +243,7 @@ private fun subtitleFor(material: Material): String =
         },
         stringResource(R.string.library_reward, multiplierText(noveltyMultiplier(material.sessionCount))),
     ).joinToString(SEPARATOR)
+}
 
 private const val SEPARATOR = " · "
 private const val SWIPE_SHARE = 0.4f

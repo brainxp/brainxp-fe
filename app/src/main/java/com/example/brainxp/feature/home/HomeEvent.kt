@@ -24,10 +24,18 @@ sealed interface HomeEvent {
     data class OpenApp(
         val packageName: String,
     ) : HomeEvent
+
+    data class Resume(
+        val materialId: String,
+    ) : HomeEvent
 }
 
 sealed interface HomeEffect {
     data object OpenAddMaterial : HomeEffect
+
+    data class OpenQuestions(
+        val materialId: String,
+    ) : HomeEffect
 
     data object OpenPermissionSetup : HomeEffect
 

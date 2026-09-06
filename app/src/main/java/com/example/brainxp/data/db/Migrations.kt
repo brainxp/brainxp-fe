@@ -48,6 +48,15 @@ val MIGRATION_3_4 =
         }
     }
 
+val MIGRATION_5_6 =
+    object : Migration(5, 6) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE `materials` ADD COLUMN `unfinishedSessionId` TEXT")
+            db.execSQL("ALTER TABLE `materials` ADD COLUMN `unfinishedAnswered` INTEGER")
+            db.execSQL("ALTER TABLE `materials` ADD COLUMN `unfinishedTotal` INTEGER")
+        }
+    }
+
 val MIGRATION_4_5 =
     object : Migration(4, 5) {
         override fun migrate(db: SupportSQLiteDatabase) {
