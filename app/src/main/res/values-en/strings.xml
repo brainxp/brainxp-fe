@@ -445,7 +445,7 @@
     <string name="tour_dots_title">The dots turn amber</string>
     <string name="tour_dots_body">The row of dots above shows which are filled in and which you marked unsure.</string>
     <string name="tour_move_title">Move between questions</string>
-    <string name="tour_move_body">Swipe the question page left or right to move back and forth. To jump further, tap a dot — try it now.</string>
+    <string name="tour_move_body">Swipe the question page left or right. Try it now — this one really swipes.</string>
     <string name="tour_leave_title">Stop whenever you like</string>
     <string name="tour_leave_body">The questions keep coming together in the background. Press Back whenever you like — we will tell you the moment they are ready.</string>
     <string name="tour_prep_working">Still writing questions · %1$d ready</string>

@@ -451,7 +451,7 @@ kehilangan kontak.</string>
     <string name="tour_dots_title">Titiknya berubah kuning</string>
     <string name="tour_dots_body">Baris titik di atas menunjukkan mana yang sudah terisi dan mana yang kamu tandai ragu.</string>
     <string name="tour_move_title">Pindah soal</string>
-    <string name="tour_move_body">Geser halaman soalnya ke kiri atau kanan buat maju mundur. Mau lompat jauh, ketuk titiknya — coba sekarang.</string>
+    <string name="tour_move_body">Geser halaman soalnya ke kiri atau kanan. Coba sekarang — beneran bisa digeser.</string>
     <string name="tour_leave_title">Berhenti kapan saja</string>
     <string name="tour_leave_body">Penyusunan soalnya jalan terus di latar. Tekan Kembali kapan saja — kamu dikabari begitu soalnya siap.</string>
     <string name="tour_prep_working">Soal masih disusun · %1$d siap</string>
