@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.brainxp.R
 import com.example.brainxp.core.ui.BrainXPTheme
 import com.example.brainxp.core.ui.EmptyState
+import com.example.brainxp.core.ui.MainHeader
 import com.example.brainxp.core.ui.RowGroup
 import com.example.brainxp.core.ui.ScreenNav
 import com.example.brainxp.core.ui.shortDuration
@@ -26,7 +27,6 @@ import com.example.brainxp.domain.model.LedgerEntry
 fun HistoryScreen(
     entries: List<LedgerEntry>,
     modifier: Modifier = Modifier,
-    onBack: (() -> Unit)? = null,
 ) {
     val spacing = BrainXPTheme.spacing
 
@@ -40,7 +40,7 @@ fun HistoryScreen(
                 .padding(bottom = spacing.screenBottom),
         verticalArrangement = Arrangement.spacedBy(spacing.md),
     ) {
-        ScreenNav(title = stringResource(R.string.history_title), onBack = onBack)
+        MainHeader(title = stringResource(R.string.history_title))
 
         if (entries.isEmpty()) {
             EmptyState(
@@ -108,7 +108,6 @@ private fun HistoryPreview() {
                     LedgerEntry("spent", -PREVIEW_SPENT, "2026-09-05T11:02:10Z", null),
                     LedgerEntry("earned", PREVIEW_SMALL, "2026-09-04T08:00:00Z", "Klasifikasi makhluk hidup"),
                 ),
-            onBack = {},
         )
     }
 }
