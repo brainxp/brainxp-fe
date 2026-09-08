@@ -7,6 +7,7 @@ import android.os.IBinder
 import com.example.brainxp.MainActivity
 import com.example.brainxp.core.detect.ForegroundAppDetector
 import com.example.brainxp.core.detect.ScreenState
+import com.example.brainxp.core.permission.AccessibilityWatch
 import com.example.brainxp.core.permission.PermissionStateProvider
 import com.example.brainxp.data.prefs.SettingsDataStore
 import com.example.brainxp.data.repo.RewardReconciler
@@ -34,6 +35,9 @@ class BlockingService : Service() {
 
     @Inject
     lateinit var permissions: PermissionStateProvider
+
+    @Inject
+    lateinit var accessibilityWatch: AccessibilityWatch
 
     @Inject
     lateinit var protection: ProtectionStateHolder
@@ -77,6 +81,7 @@ class BlockingService : Service() {
         notification.createChannel()
         expiryWarning.createChannel()
         startForeground(ProtectionNotification.ID, render())
+        accessibilityWatch.start()
         scope.launch { protection.reloadUnlock() }
         scope.launch { observeUnlockForWarning() }
         scope.launch { appLabels = installedApps.launchableApps().associate { it.packageName to it.label } }
@@ -95,6 +100,7 @@ class BlockingService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
+        accessibilityWatch.stop()
         overlay.hide()
         scope.cancel()
         super.onDestroy()
