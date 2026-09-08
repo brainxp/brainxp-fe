@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +27,7 @@ import com.example.brainxp.core.ui.BrainXPTheme
 import com.example.brainxp.core.ui.ErrorState
 import com.example.brainxp.core.ui.HeroCard
 import com.example.brainxp.core.ui.LoadingState
+import com.example.brainxp.core.ui.MainHeader
 import com.example.brainxp.core.ui.MiniBarChart
 import com.example.brainxp.core.ui.Note
 import com.example.brainxp.core.ui.PillShape
@@ -47,12 +49,13 @@ fun ProgressScreen(
         modifier =
             modifier
                 .fillMaxSize()
+                .statusBarsPadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = spacing.screenHorizontal)
                 .padding(bottom = spacing.screenBottom),
         verticalArrangement = Arrangement.spacedBy(spacing.md),
     ) {
-        ScreenNav(title = stringResource(R.string.progress_title), onBack = onBack)
+        MainHeader(title = stringResource(R.string.progress_title), onBack = onBack)
 
         when (val phase = state.phase) {
             ProgressUiState.Phase.Loading -> {
