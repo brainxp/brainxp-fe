@@ -36,7 +36,6 @@ data class SettingsSnapshot(
     val protectionEnabled: Boolean = false,
     val warningLeadSeconds: Int = DEFAULT_WARNING_LEAD_SECONDS,
     val role: DeviceRole = DeviceRole.PARENT,
-    val parentPinHash: String? = null,
 )
 
 const val DEFAULT_WARNING_LEAD_SECONDS = 60
@@ -63,7 +62,6 @@ class SettingsDataStore(
                     protectionEnabled = prefs[KEY_PROTECTION] ?: false,
                     warningLeadSeconds = prefs[KEY_WARNING_LEAD] ?: DEFAULT_WARNING_LEAD_SECONDS,
                     role = prefs[KEY_ROLE]?.toEnum(DeviceRole.PARENT) ?: DeviceRole.PARENT,
-                    parentPinHash = prefs[KEY_PARENT_PIN],
                 )
             }
 
@@ -117,7 +115,6 @@ class SettingsDataStore(
         val KEY_PROTECTION = booleanPreferencesKey("protection_enabled")
         val KEY_WARNING_LEAD = intPreferencesKey("warning_lead_seconds")
         val KEY_ROLE = stringPreferencesKey("device_role")
-        val KEY_PARENT_PIN = stringPreferencesKey("parent_pin_hash")
 
         fun from(context: Context): DataStore<Preferences> = context.settingsStore
     }
