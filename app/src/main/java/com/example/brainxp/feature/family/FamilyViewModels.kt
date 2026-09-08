@@ -9,6 +9,8 @@ import com.example.brainxp.data.repo.RewardRepository
 import com.example.brainxp.domain.model.AcademicLevel
 import com.example.brainxp.domain.model.LedgerEntry
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -43,8 +45,9 @@ class NewChildViewModel
             if (mutableState.value.creating) return
             mutableState.update { it.copy(creating = true, error = null) }
             viewModelScope.launch {
+                val result = family.createChild(name, level, language)
                 mutableState.update {
-                    when (val result = family.createChild(name, level, language)) {
+                    when (result) {
                         is AppResult.Success -> it.copy(creating = false, createdId = result.value.childId)
                         is AppResult.Failure -> it.copy(creating = false, error = result.error)
                     }
@@ -69,6 +72,7 @@ class PairingCodeViewModel
         val state: StateFlow<PairingCodeLoad> = mutableState.asStateFlow()
 
         private var loadedFor: String? = null
+        private var ticker: Job? = null
 
         fun load(childId: String) {
             if (loadedFor == childId) return
@@ -82,8 +86,9 @@ class PairingCodeViewModel
                         ?.name
                         .orEmpty()
 
+                val result = family.pairingCode(childId)
                 mutableState.update {
-                    when (val result = family.pairingCode(childId)) {
+                    when (result) {
                         is AppResult.Success -> {
                             it.copy(
                                 code =
@@ -101,7 +106,28 @@ class PairingCodeViewModel
                         }
                     }
                 }
+                countDown()
             }
+        }
+
+        private fun countDown() {
+            ticker?.cancel()
+            ticker =
+                viewModelScope.launch {
+                    while (true) {
+                        delay(SECOND_MILLIS)
+                        val left = mutableState.value.code?.secondsLeft ?: return@launch
+                        if (left <= 0) return@launch
+                        mutableState.update { now ->
+                            now.copy(code = now.code?.copy(secondsLeft = left - 1))
+                        }
+                    }
+                }
+        }
+
+        override fun onCleared() {
+            ticker?.cancel()
+            super.onCleared()
         }
 
         fun refresh() {
@@ -116,6 +142,8 @@ data class ChildReportLoad(
     val loading: Boolean = true,
     val removing: Boolean = false,
     val removed: Boolean = false,
+    val releasing: Boolean = false,
+    val released: Boolean = false,
     val error: ApiError? = null,
 )
 
@@ -126,13 +154,29 @@ class ChildReportViewModel
         private val rewards: RewardRepository,
         private val family: FamilyRepository,
     ) : ViewModel() {
+        fun releaseDevice() {
+            val childId = loadedFor ?: return
+            if (mutableState.value.releasing) return
+            mutableState.update { it.copy(releasing = true, error = null, released = false) }
+            viewModelScope.launch {
+                val result = family.releaseDevice(childId)
+                mutableState.update {
+                    when (result) {
+                        is AppResult.Success -> it.copy(releasing = false, released = true)
+                        is AppResult.Failure -> it.copy(releasing = false, error = result.error)
+                    }
+                }
+            }
+        }
+
         fun remove() {
             val childId = loadedFor ?: return
             if (mutableState.value.removing) return
             mutableState.update { it.copy(removing = true, error = null) }
             viewModelScope.launch {
+                val result = family.removeChild(childId)
                 mutableState.update {
-                    when (val result = family.removeChild(childId)) {
+                    when (result) {
                         is AppResult.Success -> it.copy(removing = false, removed = true)
                         is AppResult.Failure -> it.copy(removing = false, error = result.error)
                     }
@@ -162,8 +206,9 @@ class ChildReportViewModel
                             .orEmpty()
                     }
 
+                val result = rewards.report(REPORT_WINDOW_DAYS, childId)
                 mutableState.update {
-                    when (val result = rewards.report(REPORT_WINDOW_DAYS, childId)) {
+                    when (result) {
                         is AppResult.Success -> {
                             val report = result.value
                             it.copy(
@@ -208,6 +253,8 @@ private fun LedgerEntry.toRow(): LedgerRow =
         note = note,
         deltaSeconds = deltaSeconds,
     )
+
+private const val SECOND_MILLIS = 1_000L
 
 private fun secondsUntil(isoTimestamp: String): Int =
     runCatching {
