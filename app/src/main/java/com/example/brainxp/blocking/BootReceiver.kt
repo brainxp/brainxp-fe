@@ -6,6 +6,7 @@ import android.content.Intent
 import androidx.core.content.ContextCompat
 import com.example.brainxp.data.prefs.SettingsDataStore
 import com.example.brainxp.di.AppScope
+import com.example.brainxp.domain.protectionHeld
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -46,7 +47,7 @@ class BootReceiver : BroadcastReceiver() {
                         .settings()
                         .settings
                         .first()
-                        .protectionEnabled
+                        .protectionHeld
                 if (enabled) {
                     ContextCompat.startForegroundService(
                         appContext,
