@@ -61,6 +61,15 @@ data class BindingCheckDto(
 @Serializable
 data class HeartbeatRequestDto(
     @SerialName("guardian_status") val guardianStatus: String,
+    val events: List<GuardianEventDto> = emptyList(),
+)
+
+@Serializable
+data class GuardianEventDto(
+    val type: String,
+    val permission: String? = null,
+    val at: String? = null,
+    val required: Boolean = false,
 )
 
 interface FamilyApi {
@@ -79,6 +88,11 @@ interface FamilyApi {
 
     @DELETE("subjects/{subjectId}")
     suspend fun deleteSubject(
+        @Path("subjectId") subjectId: String,
+    )
+
+    @DELETE("subjects/{subjectId}/device")
+    suspend fun releaseDevice(
         @Path("subjectId") subjectId: String,
     )
 
