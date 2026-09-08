@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.brainxp.R
 import com.example.brainxp.core.ui.BrainXPTheme
+import com.example.brainxp.core.ui.MainHeader
 import com.example.brainxp.core.ui.Note
 import com.example.brainxp.core.ui.PrimaryButton
 import com.example.brainxp.core.ui.RowGroup
@@ -50,7 +51,7 @@ fun DeleteAccountScreen(
                 .padding(bottom = spacing.screenBottom),
         verticalArrangement = Arrangement.spacedBy(spacing.md),
     ) {
-        ScreenNav(title = stringResource(R.string.delete_account_title), onBack = onBack)
+        MainHeader(title = stringResource(R.string.delete_account_title), onBack = onBack)
 
         Text(
             text = stringResource(R.string.delete_account_body),
