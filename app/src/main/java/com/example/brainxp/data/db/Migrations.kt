@@ -63,3 +63,22 @@ val MIGRATION_4_5 =
             db.execSQL("ALTER TABLE `materials` ADD COLUMN `topicSummary` TEXT")
         }
     }
+
+val MIGRATION_6_7 =
+    object : Migration(6, 7) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "CREATE TABLE IF NOT EXISTS `notifications` (" +
+                    "`id` TEXT NOT NULL, " +
+                    "`kind` TEXT NOT NULL, " +
+                    "`materialId` TEXT, " +
+                    "`materialTitle` TEXT NOT NULL, " +
+                    "`questionCount` INTEGER NOT NULL, " +
+                    "`createdAt` INTEGER NOT NULL, " +
+                    "`readAt` INTEGER, " +
+                    "PRIMARY KEY(`id`))",
+            )
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_notifications_createdAt` ON `notifications` (`createdAt`)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_notifications_readAt` ON `notifications` (`readAt`)")
+        }
+    }
