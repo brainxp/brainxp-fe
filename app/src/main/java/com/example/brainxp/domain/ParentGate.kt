@@ -1,5 +1,6 @@
 package com.example.brainxp.domain
 
+import com.example.brainxp.data.prefs.SettingsSnapshot
 import com.example.brainxp.domain.model.DeviceRole
 
 enum class GuardedAction {
@@ -8,24 +9,36 @@ enum class GuardedAction {
     DISABLE_PROTECTION,
 }
 
+enum class ProtectionControl {
+    HELD,
+    OWNED,
+    ABSENT,
+}
+
+fun protectionControlOf(
+    role: DeviceRole,
+    ownRules: Boolean,
+): ProtectionControl =
+    when {
+        role == DeviceRole.CHILD -> ProtectionControl.HELD
+        ownRules -> ProtectionControl.OWNED
+        else -> ProtectionControl.ABSENT
+    }
+
+val SettingsSnapshot.protectionHeld: Boolean
+    get() = protectionEnabled || role == DeviceRole.CHILD
+
 data class ChildDeviceLock(
     val role: DeviceRole,
-    val pinSet: Boolean,
 ) {
-    val locked: Boolean get() = role == DeviceRole.CHILD && pinSet
+    val locked: Boolean get() = role == DeviceRole.CHILD
 }
 
 object ParentGate {
-    fun requiresPin(
-        lock: ChildDeviceLock,
-        action: GuardedAction,
-    ): Boolean = lock.locked && action in GUARDED
-
     fun allows(
         lock: ChildDeviceLock,
         action: GuardedAction,
-        pinVerified: Boolean,
-    ): Boolean = !requiresPin(lock, action) || pinVerified
+    ): Boolean = !lock.locked || action !in GUARDED
 
     private val GUARDED =
         setOf(
