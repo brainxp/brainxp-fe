@@ -37,8 +37,9 @@ class RejectedViewModel
             loadedFor = materialId
             mutableState.update { it.copy(loading = true, error = null) }
             viewModelScope.launch {
+                val result = materials.detail(materialId)
                 mutableState.update {
-                    when (val result = materials.detail(materialId)) {
+                    when (result) {
                         is AppResult.Success -> {
                             val material = result.value
                             it.copy(
