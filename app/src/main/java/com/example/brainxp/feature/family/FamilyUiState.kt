@@ -1,11 +1,14 @@
 package com.example.brainxp.feature.family
 
 import com.example.brainxp.domain.model.AcademicLevel
+import com.example.brainxp.domain.model.GuardianAlert
 import com.example.brainxp.domain.model.PolicyDraft
 import com.example.brainxp.domain.model.PolicyLimits
 import com.example.brainxp.domain.model.PolicyStep
+import com.example.brainxp.domain.model.StepDirection
 import com.example.brainxp.domain.model.UploadMethod
-import com.example.brainxp.domain.model.stepped
+import com.example.brainxp.domain.model.canNudge
+import com.example.brainxp.domain.model.nudged
 
 enum class QuestionLanguage {
     ID,
@@ -29,6 +32,7 @@ data class FamilyMember(
 data class FamilyHomeUiState(
     val children: List<FamilyMember> = emptyList(),
     val self: FamilyMember? = null,
+    val alerts: List<GuardianAlert> = emptyList(),
 )
 
 data class LockedAppEntry(
@@ -86,27 +90,22 @@ data class ChildReportUiState(
 )
 
 sealed interface PolicyEvent {
-    data object StepQuestions : PolicyEvent
-
-    data object StepEssay : PolicyEvent
-
-    data class StepCap(
-        val day: Int,
+    data class Nudge(
+        val step: PolicyStep,
+        val direction: StepDirection,
     ) : PolicyEvent
 
-    data class StepGrant(
-        val day: Int,
-    ) : PolicyEvent
-
-    data object StepBaseReward : PolicyEvent
-
-    data class ToggleUploadMethod(
+    data class ToggleUpload(
         val method: UploadMethod,
     ) : PolicyEvent
 
-    data object StepIdleDays : PolicyEvent
+    data class SetCaps(
+        val minutes: List<Int>,
+    ) : PolicyEvent
 
-    data object StepResetHour : PolicyEvent
+    data class SetGrants(
+        val minutes: List<Int>,
+    ) : PolicyEvent
 
     data class ToggleApp(
         val packageName: String,
@@ -117,6 +116,22 @@ sealed interface PolicyEvent {
 
 fun PolicyUiState.stepped(event: PolicyEvent): PolicyUiState =
     when (event) {
+        is PolicyEvent.Nudge -> {
+            withDraft(draft().nudged(event.step, event.direction))
+        }
+
+        is PolicyEvent.ToggleUpload -> {
+            withDraft(draft().nudged(PolicyStep.Upload(event.method), StepDirection.UP))
+        }
+
+        is PolicyEvent.SetCaps -> {
+            copy(dailyCapMinutes = event.minutes)
+        }
+
+        is PolicyEvent.SetGrants -> {
+            copy(dailyGrantMinutes = event.minutes)
+        }
+
         is PolicyEvent.ToggleApp -> {
             copy(
                 apps =
@@ -129,24 +144,12 @@ fun PolicyUiState.stepped(event: PolicyEvent): PolicyUiState =
         PolicyEvent.Save -> {
             this
         }
-
-        else -> {
-            event.asStep()?.let { step -> withDraft(draft().stepped(step)) } ?: this
-        }
     }
 
-private fun PolicyEvent.asStep(): PolicyStep? =
-    when (this) {
-        PolicyEvent.StepQuestions -> PolicyStep.Questions
-        PolicyEvent.StepEssay -> PolicyStep.Essays
-        PolicyEvent.StepBaseReward -> PolicyStep.BaseReward
-        PolicyEvent.StepIdleDays -> PolicyStep.IdleDays
-        PolicyEvent.StepResetHour -> PolicyStep.ResetHour
-        is PolicyEvent.StepCap -> PolicyStep.Cap(day)
-        is PolicyEvent.StepGrant -> PolicyStep.Grant(day)
-        is PolicyEvent.ToggleUploadMethod -> PolicyStep.Upload(method)
-        is PolicyEvent.ToggleApp, PolicyEvent.Save -> null
-    }
+fun PolicyUiState.canNudge(
+    step: PolicyStep,
+    direction: StepDirection,
+): Boolean = draft().canNudge(step, direction)
 
 fun PolicyUiState.draft(): PolicyDraft =
     PolicyDraft(
