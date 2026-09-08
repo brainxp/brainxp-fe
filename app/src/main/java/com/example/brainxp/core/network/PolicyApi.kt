@@ -3,7 +3,9 @@ package com.example.brainxp.core.network
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 
@@ -56,4 +58,16 @@ interface PolicyApi {
         @Path("subjectId") subjectId: String,
         @Body body: PolicyPatchDto,
     ): PolicyChangeDto
+
+    @POST("policies/{subjectId}/locked-apps/{packageName}")
+    suspend fun lockApp(
+        @Path("subjectId") subjectId: String,
+        @Path("packageName") packageName: String,
+    )
+
+    @DELETE("policies/{subjectId}/locked-apps/{packageName}")
+    suspend fun unlockApp(
+        @Path("subjectId") subjectId: String,
+        @Path("packageName") packageName: String,
+    )
 }
