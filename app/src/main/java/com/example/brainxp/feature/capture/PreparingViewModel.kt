@@ -7,17 +7,12 @@ import com.example.brainxp.core.upload.MaterialPreparation
 import com.example.brainxp.core.upload.PreparationState
 import com.example.brainxp.core.upload.PreparingStage
 import com.example.brainxp.core.upload.QuestionGenerationQueue
-import com.example.brainxp.data.prefs.GuideStore
 import com.example.brainxp.domain.model.MaterialStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class PreparingUiState(
@@ -29,7 +24,6 @@ data class PreparingUiState(
     val rejected: Boolean = false,
     val reasonCode: String? = null,
     val error: ApiError? = null,
-    val guide: Boolean = false,
 ) {
     val done: Boolean get() = stage == PreparingStage.READY
 
@@ -43,14 +37,12 @@ data class PreparingUiState(
 }
 
 enum class PreparingMode {
-    TUTORIAL,
     GAME,
     START,
 }
 
 fun modeOf(state: PreparingUiState): PreparingMode =
     when {
-        state.guide -> PreparingMode.TUTORIAL
         state.done || state.rejected || state.error != null -> PreparingMode.START
         else -> PreparingMode.GAME
     }
@@ -61,24 +53,13 @@ class PreparingViewModel
     constructor(
         private val preparation: MaterialPreparation,
         private val generation: QuestionGenerationQueue,
-        private val guides: GuideStore,
     ) : ViewModel() {
-        private val guideOpen = MutableStateFlow(false)
-
         val state: StateFlow<PreparingUiState> =
-            combine(preparation.state.map(::viewOf), guideOpen) { view, guide -> view.copy(guide = guide) }
+            preparation.state
+                .map(::viewOf)
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), PreparingUiState())
 
-        init {
-            viewModelScope.launch { guideOpen.value = !guides.quizGuideSeen() }
-        }
-
         fun done() = preparation.forget()
-
-        fun showGuide(visible: Boolean) {
-            guideOpen.value = visible
-            if (!visible) viewModelScope.launch { guides.rememberQuizGuide() }
-        }
 
         fun retry() {
             state.value.materialId?.let { materialId ->
