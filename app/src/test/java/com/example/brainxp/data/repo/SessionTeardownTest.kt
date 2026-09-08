@@ -49,7 +49,6 @@ class SessionTeardownTest {
         settings.setRole(DeviceRole.CHILD)
         settings.setMode(AppMode.FAMILY)
         settings.setOnboardingComplete(true)
-        settings.setProtectionEnabled(true)
     }
 
     @Test
@@ -78,7 +77,6 @@ class SessionTeardownTest {
             assertEquals(DeviceRole.PARENT, snapshot.role)
             assertEquals(AppMode.UNSET, snapshot.mode)
             assertFalse(snapshot.onboardingComplete)
-            assertFalse(snapshot.protectionEnabled)
         }
 
     @Test

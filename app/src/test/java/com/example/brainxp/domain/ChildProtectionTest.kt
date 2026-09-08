@@ -1,67 +1,40 @@
 package com.example.brainxp.domain
 
-import com.example.brainxp.data.prefs.SettingsSnapshot
 import com.example.brainxp.domain.model.DeviceRole
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ChildProtectionTest {
     @Test
-    fun `a child device is protected even though nobody switched it on`() {
-        val snapshot = SettingsSnapshot(role = DeviceRole.CHILD, protectionEnabled = false)
-
-        assertTrue(snapshot.protectionHeld)
-    }
-
-    @Test
-    fun `a child device stays protected when it is also switched on`() {
-        val snapshot = SettingsSnapshot(role = DeviceRole.CHILD, protectionEnabled = true)
-
-        assertTrue(snapshot.protectionHeld)
-    }
-
-    @Test
-    fun `a parent device is only protected once someone switches it on`() {
-        val off = SettingsSnapshot(role = DeviceRole.PARENT, protectionEnabled = false)
-        val on = SettingsSnapshot(role = DeviceRole.PARENT, protectionEnabled = true)
-
-        assertFalse(off.protectionHeld)
-        assertTrue(on.protectionHeld)
-    }
-
-    @Test
-    fun `the child device holds protection on with no switch to touch`() {
-        assertEquals(
-            ProtectionControl.HELD,
-            protectionControlOf(role = DeviceRole.CHILD, ownRules = false),
-        )
-        assertEquals(
-            ProtectionControl.HELD,
-            protectionControlOf(role = DeviceRole.CHILD, ownRules = true),
-        )
-    }
-
-    @Test
-    fun `a phone that carries its own rules owns the switch`() {
-        assertEquals(
-            ProtectionControl.OWNED,
-            protectionControlOf(role = DeviceRole.PARENT, ownRules = true),
-        )
-    }
-
-    @Test
-    fun `a parent who never joined the rules is offered no switch to guard nothing`() {
-        assertEquals(
-            ProtectionControl.ABSENT,
-            protectionControlOf(role = DeviceRole.PARENT, ownRules = false),
-        )
-    }
-
-    @Test
-    fun `the child device cannot be talked out of protection`() {
+    fun `a paired child device is locked out of its own rules`() {
         assertTrue(ChildDeviceLock(DeviceRole.CHILD).locked)
-        assertFalse(ParentGate.allows(ChildDeviceLock(DeviceRole.CHILD), GuardedAction.DISABLE_PROTECTION))
+    }
+
+    @Test
+    fun `a parent device is free to change its own rules`() {
+        assertFalse(ChildDeviceLock(DeviceRole.PARENT).locked)
+    }
+
+    @Test
+    fun `a child cannot uncheck the apps that hold protection up`() {
+        assertFalse(
+            ParentGate.allows(ChildDeviceLock(DeviceRole.CHILD), GuardedAction.CHANGE_RESTRICTIONS),
+        )
+    }
+
+    @Test
+    fun `a child cannot switch modes to shake protection off`() {
+        assertFalse(
+            ParentGate.allows(ChildDeviceLock(DeviceRole.CHILD), GuardedAction.SWITCH_MODE),
+        )
+    }
+
+    @Test
+    fun `a parent keeps both of those doors open`() {
+        val unlocked = ChildDeviceLock(DeviceRole.PARENT)
+
+        assertTrue(ParentGate.allows(unlocked, GuardedAction.CHANGE_RESTRICTIONS))
+        assertTrue(ParentGate.allows(unlocked, GuardedAction.SWITCH_MODE))
     }
 }

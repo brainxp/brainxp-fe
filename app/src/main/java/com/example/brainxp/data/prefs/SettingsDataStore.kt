@@ -33,7 +33,6 @@ data class SettingsSnapshot(
     val permissionSetupComplete: Boolean = false,
     val ocrModelReady: Boolean = false,
     val detector: DetectorChoice = DetectorChoice.USAGE_STATS,
-    val protectionEnabled: Boolean = false,
     val warningLeadSeconds: Int = DEFAULT_WARNING_LEAD_SECONDS,
     val role: DeviceRole = DeviceRole.PARENT,
 )
@@ -59,7 +58,6 @@ class SettingsDataStore(
                     detector =
                         prefs[KEY_DETECTOR]?.toEnum(DetectorChoice.USAGE_STATS)
                             ?: DetectorChoice.USAGE_STATS,
-                    protectionEnabled = prefs[KEY_PROTECTION] ?: false,
                     warningLeadSeconds = prefs[KEY_WARNING_LEAD] ?: DEFAULT_WARNING_LEAD_SECONDS,
                     role = prefs[KEY_ROLE]?.toEnum(DeviceRole.PARENT) ?: DeviceRole.PARENT,
                 )
@@ -89,10 +87,6 @@ class SettingsDataStore(
         store.edit { it[KEY_DETECTOR] = choice.name }
     }
 
-    suspend fun setProtectionEnabled(enabled: Boolean) {
-        store.edit { it[KEY_PROTECTION] = enabled }
-    }
-
     suspend fun setWarningLeadSeconds(seconds: Int) {
         store.edit { it[KEY_WARNING_LEAD] = seconds }
     }
@@ -112,7 +106,6 @@ class SettingsDataStore(
         val KEY_PERMISSIONS = booleanPreferencesKey("permission_setup_complete")
         val KEY_OCR_READY = booleanPreferencesKey("ocr_model_ready")
         val KEY_DETECTOR = stringPreferencesKey("detector")
-        val KEY_PROTECTION = booleanPreferencesKey("protection_enabled")
         val KEY_WARNING_LEAD = intPreferencesKey("warning_lead_seconds")
         val KEY_ROLE = stringPreferencesKey("device_role")
 

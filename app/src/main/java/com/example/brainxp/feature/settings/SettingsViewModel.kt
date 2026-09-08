@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.result.AppResult
-import com.example.brainxp.data.prefs.AuthDataStore
 import com.example.brainxp.data.repo.AuthRepository
 import com.example.brainxp.data.repo.PolicyChange
 import com.example.brainxp.data.repo.PolicyRepository
@@ -12,10 +11,8 @@ import com.example.brainxp.data.repo.SubjectPolicy
 import com.example.brainxp.data.repo.toDraft
 import com.example.brainxp.domain.GuardedAction
 import com.example.brainxp.domain.ParentLock
-import com.example.brainxp.domain.ProtectionControl
 import com.example.brainxp.domain.model.DeviceRole
 import com.example.brainxp.domain.model.PolicyDraft
-import com.example.brainxp.domain.protectionControlOf
 import com.example.brainxp.feature.home.LockedApp
 import com.example.brainxp.feature.home.LockedAppsSource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -39,12 +36,9 @@ data class SettingsUiState(
     val error: ApiError? = null,
     val signedOut: Boolean = false,
     val role: DeviceRole = DeviceRole.PARENT,
-    val ownRules: Boolean = false,
     val blocked: Boolean = false,
 ) {
     val rulesLocked: Boolean get() = role == DeviceRole.CHILD
-
-    val protection: ProtectionControl get() = protectionControlOf(role, ownRules)
 
     val dirty: Boolean
         get() {
@@ -64,7 +58,6 @@ class SettingsViewModel
         private val editor: PolicySettingsEditor,
         private val auth: AuthRepository,
         private val parentLock: ParentLock,
-        private val identity: AuthDataStore,
         lockedApps: LockedAppsSource,
     ) : ViewModel() {
         private val mutableState = MutableStateFlow(SettingsUiState())
@@ -72,11 +65,6 @@ class SettingsViewModel
 
         init {
             retry()
-            viewModelScope.launch {
-                identity.auth.collect { snapshot ->
-                    mutableState.update { it.copy(ownRules = !snapshot.subjectId.isNullOrBlank()) }
-                }
-            }
             viewModelScope.launch {
                 parentLock.lock.collect { lock ->
                     mutableState.update { it.copy(role = lock.role) }

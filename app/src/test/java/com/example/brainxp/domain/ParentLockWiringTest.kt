@@ -10,7 +10,6 @@ private val GUARDED_CALL_SITES =
     mapOf(
         GuardedAction.CHANGE_RESTRICTIONS to "com/example/brainxp/feature/apps/AppPickerViewModel.kt",
         GuardedAction.SWITCH_MODE to "com/example/brainxp/feature/settings/SettingsViewModel.kt",
-        GuardedAction.DISABLE_PROTECTION to "com/example/brainxp/domain/ProtectionSwitch.kt",
     )
 
 private fun sourceOf(relative: String): java.io.File {
@@ -55,7 +54,7 @@ class ParentLockWiringTest {
     }
 
     @Test
-    fun `a paired child device refuses all three with no way to unlock`() {
+    fun `a paired child device refuses every guarded action with no way to unlock`() {
         val locked = ChildDeviceLock(role = DeviceRole.CHILD)
 
         GUARDED_CALL_SITES.keys.forEach { action ->

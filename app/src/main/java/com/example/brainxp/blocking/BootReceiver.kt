@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.ContextCompat
-import com.example.brainxp.data.prefs.SettingsDataStore
+import com.example.brainxp.data.repo.RestrictionRepository
 import com.example.brainxp.di.AppScope
 import com.example.brainxp.domain.protectionHeld
 import dagger.hilt.EntryPoint
@@ -19,7 +19,7 @@ class BootReceiver : BroadcastReceiver() {
     @EntryPoint
     @InstallIn(SingletonComponent::class)
     interface Dependencies {
-        fun settings(): SettingsDataStore
+        fun restrictions(): RestrictionRepository
 
         @AppScope
         fun scope(): CoroutineScope
@@ -43,11 +43,13 @@ class BootReceiver : BroadcastReceiver() {
         dependencies.scope().launch {
             try {
                 val enabled =
-                    dependencies
-                        .settings()
-                        .settings
-                        .first()
-                        .protectionHeld
+                    protectionHeld(
+                        dependencies
+                            .restrictions()
+                            .observeRestricted()
+                            .first()
+                            .count { it.enabled },
+                    )
                 if (enabled) {
                     ContextCompat.startForegroundService(
                         appContext,
