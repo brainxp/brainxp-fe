@@ -155,4 +155,42 @@ class SelectableForegroundAppDetectorTest {
 
         assertTrue(detector.missingRequirements().isEmpty())
     }
+
+    @Test
+    fun `a dead accessibility service falls back to usage stats so blocking survives`() =
+        runTest {
+            accessibility.available = false
+            usageStats.available = true
+            choice.value = DetectorChoice.ACCESSIBILITY
+
+            val seen = mutableListOf<String>()
+            val job = backgroundScope.launch { detector.foregroundPackage.collect { seen += it } }
+            runCurrent()
+
+            usageStats.emit("com.game.one")
+            runCurrent()
+
+            assertEquals(listOf("com.game.one"), seen)
+            job.cancel()
+        }
+
+    @Test
+    fun `falling back never hides that the chosen detector is broken`() {
+        accessibility.available = false
+        accessibility.missing = listOf(SpecialPermission.ACCESSIBILITY)
+        usageStats.available = true
+        choice.value = DetectorChoice.ACCESSIBILITY
+
+        assertFalse("a working spare must not be reported as the chosen detector", detector.isAvailable())
+        assertEquals(listOf(SpecialPermission.ACCESSIBILITY), detector.missingRequirements())
+    }
+
+    @Test
+    fun `with both detectors down the chosen one is still what gets reported`() {
+        accessibility.available = false
+        usageStats.available = false
+        choice.value = DetectorChoice.ACCESSIBILITY
+
+        assertFalse(detector.isAvailable())
+    }
 }
