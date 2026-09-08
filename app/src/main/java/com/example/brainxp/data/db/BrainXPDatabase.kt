@@ -14,8 +14,9 @@ import androidx.room.TypeConverters
         RestrictedAppEntity::class,
         ActivityEventEntity::class,
         PendingOperationEntity::class,
+        NotificationEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = false,
 )
 @TypeConverters(Converters::class, JsonConverters::class)
@@ -35,6 +36,8 @@ abstract class BrainXPDatabase : RoomDatabase() {
     abstract fun activityEventDao(): ActivityEventDao
 
     abstract fun pendingOperationDao(): PendingOperationDao
+
+    abstract fun notificationDao(): NotificationDao
 
     companion object {
         const val NAME = "brainxp.db"
