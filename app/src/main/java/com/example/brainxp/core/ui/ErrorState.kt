@@ -122,6 +122,9 @@ private fun ApiError.titleRes(): Int =
     }
 
 @Composable
+fun apiErrorBody(error: ApiError): String = error.bodyText()
+
+@Composable
 private fun ApiError.bodyText(): String =
     when (this) {
         is ApiError.RateLimited -> {
