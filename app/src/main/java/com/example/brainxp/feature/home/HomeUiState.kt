@@ -1,5 +1,6 @@
 package com.example.brainxp.feature.home
 
+import androidx.compose.ui.graphics.ImageBitmap
 import com.example.brainxp.blocking.ProtectionStatus
 import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.domain.model.BlockReason
@@ -9,6 +10,7 @@ import kotlin.time.Duration
 data class LockedApp(
     val packageName: String,
     val label: String,
+    val icon: ImageBitmap? = null,
 )
 
 data class LockedApps(
@@ -30,6 +32,7 @@ data class HomeUiState(
     val dailyCapSeconds: Int = 0,
     val secondsUntilReset: Int = 0,
     val streakDays: Int = 0,
+    val unreadNotifications: Int = 0,
     val blockReason: BlockReason = BlockReason.NONE,
     val balanceStale: Boolean = false,
     val unlock: UnlockState = UnlockState.Locked,
@@ -37,17 +40,12 @@ data class HomeUiState(
     val protection: ProtectionStatus = ProtectionStatus.OFF,
     val lockedApps: List<LockedApp> = emptyList(),
     val managed: Boolean = false,
-    val sessionOptions: List<Int> = emptyList(),
-    val selectedOption: Int? = null,
-    val starting: Boolean = false,
+    val displayName: String = "",
     val consumedSeconds: Int = 0,
     val idleDays: Int = 0,
     val idleDaysAllowed: Int = 0,
     val pending: PendingSession? = null,
     val preparing: PreparingRow? = null,
-    val pinRequired: Boolean = false,
-    val pinVerified: Boolean = false,
-    val pinWrong: Boolean = false,
 ) {
     sealed interface Phase {
         data object Loading : Phase
@@ -73,9 +71,6 @@ data class HomeUiState(
     val guardianStale: Boolean get() = blockReason == BlockReason.GUARDIAN_STALE
 
     val appsOpen: Boolean get() = unlockRunning
-
-    val canStartSession: Boolean
-        get() = !unlockRunning && balanceSeconds > 0 && !capReached && sessionOptions.isNotEmpty()
 
     val spentFraction: Float
         get() = if (dailyCapSeconds <= 0) 0f else (spentTodaySeconds.toFloat() / dailyCapSeconds)
