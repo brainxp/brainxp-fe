@@ -3,11 +3,16 @@ package com.example.brainxp.blocking
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.PixelFormat
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.view.KeyEvent
+import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
+import android.window.OnBackInvokedCallback
+import android.window.OnBackInvokedDispatcher
+import androidx.annotation.RequiresApi
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
@@ -160,8 +165,25 @@ private class OverlayContainer(
     context: Context,
     private val onConfiguration: (Configuration) -> Unit,
 ) : FrameLayout(context) {
+    private var backGuard: BackGuard? = null
+
     init {
         isFocusableInTouchMode = true
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            backGuard = BackGuard(this).also { it.register() }
+        }
+    }
+
+    override fun onDetachedFromWindow() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            backGuard?.unregister()
+        }
+        backGuard = null
+        super.onDetachedFromWindow()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {
@@ -171,6 +193,24 @@ private class OverlayContainer(
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean =
         if (event.keyCode == KeyEvent.KEYCODE_BACK) true else super.dispatchKeyEvent(event)
+}
+
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+private class BackGuard(
+    private val view: View,
+) {
+    private val callback = OnBackInvokedCallback {}
+
+    fun register() {
+        view.findOnBackInvokedDispatcher()?.registerOnBackInvokedCallback(
+            OnBackInvokedDispatcher.PRIORITY_OVERLAY,
+            callback,
+        )
+    }
+
+    fun unregister() {
+        view.findOnBackInvokedDispatcher()?.unregisterOnBackInvokedCallback(callback)
+    }
 }
 
 private data class BlockContent(
