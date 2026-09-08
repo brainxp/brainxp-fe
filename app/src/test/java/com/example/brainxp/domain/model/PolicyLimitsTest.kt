@@ -117,4 +117,57 @@ class PolicyLimitsTest {
     fun `a session with no questions reports no essay ratio instead of dividing by zero`() {
         assertEquals(0.0, PolicyLimits.essayRatioOf(essayCount = 3, questionsPerSession = 0), 0.0001)
     }
+
+    @Test
+    fun `the reward steps reach both ends of what the server allows`() {
+        assertEquals(PolicyLimits.BASE_REWARD_SECONDS.first, PolicyLimits.REWARD_STEPS.first())
+        assertEquals(PolicyLimits.BASE_REWARD_SECONDS.last, PolicyLimits.REWARD_STEPS.last())
+    }
+
+    @Test
+    fun `every reward step is a value the server would accept`() {
+        PolicyLimits.REWARD_STEPS.forEach { step ->
+            assertTrue("$step outside the server bounds", step in PolicyLimits.BASE_REWARD_SECONDS)
+        }
+    }
+
+    @Test
+    fun `the reward steps only ever climb`() {
+        assertEquals(PolicyLimits.REWARD_STEPS.sorted(), PolicyLimits.REWARD_STEPS)
+        assertEquals(PolicyLimits.REWARD_STEPS.distinct(), PolicyLimits.REWARD_STEPS)
+    }
+
+    private fun rewardAfter(
+        from: Int,
+        direction: StepDirection,
+    ): Int = base.copy(baseRewardSeconds = from).nudged(PolicyStep.BaseReward, direction).baseRewardSeconds
+
+    @Test
+    fun `nudging a reward that sits on a step moves to the neighbouring step`() {
+        assertEquals(90, rewardAfter(from = 60, direction = StepDirection.UP))
+        assertEquals(45, rewardAfter(from = 60, direction = StepDirection.DOWN))
+    }
+
+    @Test
+    fun `a reward the server set between steps climbs to the next step up`() {
+        assertEquals(180, rewardAfter(from = 137, direction = StepDirection.UP))
+    }
+
+    @Test
+    fun `a reward the server set between steps falls to the next step down`() {
+        assertEquals(120, rewardAfter(from = 137, direction = StepDirection.DOWN))
+    }
+
+    @Test
+    fun `an off-step reward never jumps back to the floor`() {
+        val climbed = rewardAfter(from = 1_000, direction = StepDirection.UP)
+
+        assertEquals(1_200, climbed)
+    }
+
+    @Test
+    fun `the ends of the step list hold instead of wrapping`() {
+        assertEquals(15, rewardAfter(from = 15, direction = StepDirection.DOWN))
+        assertEquals(1_800, rewardAfter(from = 1_800, direction = StepDirection.UP))
+    }
 }
