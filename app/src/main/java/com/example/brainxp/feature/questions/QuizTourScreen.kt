@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
@@ -161,6 +163,8 @@ private fun TourBody(
             modifier =
                 Modifier
                     .fillMaxSize()
+                    .statusBarsPadding()
+                    .navigationBarsPadding()
                     .padding(horizontal = spacing.screenHorizontal)
                     .padding(bottom = spacing.screenBottom),
         ) {
@@ -443,7 +447,6 @@ private fun practiceState(
     marked: Boolean,
 ): QuizUiState =
     QuizUiState(
-        title = "",
         questions = questions,
         index = index,
         answers =
