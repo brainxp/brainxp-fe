@@ -12,12 +12,10 @@ class ProtectionSwitch
         private val settings: SettingsDataStore,
         private val parentLock: ParentLock,
     ) {
-        suspend fun toggle(pinVerified: Boolean): Boolean {
+        suspend fun toggle(): Boolean {
             val enabled = settings.settings.first().protectionEnabled
-            if (enabled && !parentLock.allows(GuardedAction.DISABLE_PROTECTION, pinVerified)) return false
+            if (enabled && !parentLock.allows(GuardedAction.DISABLE_PROTECTION)) return false
             settings.setProtectionEnabled(!enabled)
             return true
         }
-
-        suspend fun verify(pin: String): Boolean = parentLock.verify(pin)
     }
