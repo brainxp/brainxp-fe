@@ -1,12 +1,15 @@
 package com.example.brainxp.blocking
 
+import com.example.brainxp.core.permission.PermissionSnapshot
 import com.example.brainxp.core.permission.PermissionStateProvider
 import com.example.brainxp.core.permission.SpecialPermission
+import com.example.brainxp.data.prefs.DetectorChoice
 import com.example.brainxp.data.prefs.SettingsDataStore
 import com.example.brainxp.data.repo.RestrictionRepository
 import com.example.brainxp.di.AppScope
 import com.example.brainxp.domain.UnlockSessionManager
 import com.example.brainxp.domain.model.RestrictionState
+import com.example.brainxp.domain.protectionHeld
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -23,6 +26,18 @@ enum class ProtectionStatus {
     ACTIVE,
     DEGRADED,
 }
+
+private data class GuardConfig(
+    val enabled: Boolean,
+    val detector: DetectorChoice,
+)
+
+private fun PermissionSnapshot.detectorGap(detector: DetectorChoice): List<SpecialPermission> =
+    if (detector == DetectorChoice.ACCESSIBILITY && !isGranted(SpecialPermission.ACCESSIBILITY)) {
+        listOf(SpecialPermission.ACCESSIBILITY)
+    } else {
+        emptyList()
+    }
 
 data class ProtectionSnapshot(
     val status: ProtectionStatus = ProtectionStatus.OFF,
@@ -50,9 +65,10 @@ class ProtectionStateHolder
                 },
                 unlocks.state,
                 permissions.state,
-                settings.settings.map { it.protectionEnabled }.distinctUntilChanged(),
-            ) { packages, unlock, permissionState, enabled ->
-                val missing = permissionState.missingRequired
+                settings.settings.map { GuardConfig(it.protectionHeld, it.detector) }.distinctUntilChanged(),
+            ) { packages, unlock, permissionState, config ->
+                val enabled = config.enabled
+                val missing = permissionState.missingRequired + permissionState.detectorGap(config.detector)
                 ProtectionSnapshot(
                     status =
                         when {
@@ -76,9 +92,9 @@ class ProtectionStateHolder
         private fun reportStatusTransitions() {
             scope.launch {
                 snapshot
-                    .map { it.status }
+                    .map { it.status to it.missingPermissions }
                     .distinctUntilChanged()
-                    .collect { status -> health.report(status) }
+                    .collect { (status, missing) -> health.report(status, missing) }
             }
         }
     }
