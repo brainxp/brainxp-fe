@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brainxp.core.capture.CaptureStore
 import com.example.brainxp.core.capture.CapturedPage
+import com.example.brainxp.core.time.AppClock
 import com.example.brainxp.core.upload.UploadQueue
 import com.example.brainxp.domain.model.MaterialType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,6 +14,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import java.io.File
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import javax.inject.Inject
 
 data class CaptureUiState(
@@ -49,6 +54,7 @@ class CaptureViewModel
     @Inject
     constructor(
         private val store: CaptureStore,
+        private val clock: AppClock,
         private val uploads: UploadQueue,
     ) : ViewModel() {
         private val shot = MutableStateFlow(Shot())
@@ -89,9 +95,11 @@ class CaptureViewModel
             store.reorder(state.value.movePage(id, by).pages)
         }
 
-        fun uploadAll() {
-            state.value.pages.forEach { page ->
-                uploads.enqueue(page.path, page.id, MaterialType.PHOTO)
+        fun uploadAll(titlePrefix: String) {
+            val pages = state.value.pages
+            val titles = captureTitles(titlePrefix, stampOf(clock.wallClock()), pages.size)
+            pages.forEachIndexed { index, page ->
+                uploads.enqueue(page.path, titles[index], MaterialType.PHOTO)
             }
             store.reorder(emptyList())
         }
@@ -100,3 +108,11 @@ class CaptureViewModel
             store.clear()
         }
     }
+
+private fun stampOf(wallClock: Long): String =
+    Instant
+        .ofEpochMilli(wallClock)
+        .atZone(ZoneId.systemDefault())
+        .format(DateTimeFormatter.ofPattern(STAMP_PATTERN, Locale.getDefault()))
+
+private const val STAMP_PATTERN = "d MMM HH.mm"
