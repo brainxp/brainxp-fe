@@ -28,6 +28,7 @@ class AuthRepository
         private val store: AuthDataStore,
         private val tokens: AuthTokenStore,
         private val errors: ErrorMapper,
+        private val teardown: SessionTeardown,
     ) {
         suspend fun register(
             email: String,
@@ -56,13 +57,14 @@ class AuthRepository
                 runCatching { api.logout(RefreshRequestDto(refresh)) }
             }
             tokens.update(null)
-            store.clear()
+            teardown.run()
         }
 
         private suspend fun call(block: suspend () -> TokenDto): AppResult<Identity> =
             runCatching { block() }
                 .fold(
                     onSuccess = { token ->
+                        teardown.run()
                         store.saveTokens(token.accessToken, token.refreshToken)
                         store.saveIdentity(token.subjectId, token.familyId, token.role)
                         tokens.update(AuthTokens(token.accessToken, token.refreshToken))
