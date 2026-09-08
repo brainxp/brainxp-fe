@@ -25,6 +25,7 @@ import javax.inject.Inject
 data class FamilyHomeLoad(
     val home: FamilyHomeUiState = FamilyHomeUiState(),
     val loading: Boolean = true,
+    val refreshing: Boolean = false,
     val error: ApiError? = null,
     val signedOut: Boolean = false,
 ) {
@@ -49,6 +50,8 @@ class FamilyHomeViewModel
         }
 
         fun retry() = load()
+
+        fun refresh() = load(quietly = true)
 
         fun signOut() {
             if (mutableState.value.signedOut) return
@@ -75,12 +78,12 @@ class FamilyHomeViewModel
 
         private suspend fun ownSubjectId(): String? = auth.current().subjectId
 
-        private fun load() {
-            mutableState.update { it.copy(loading = true, error = null) }
+        private fun load(quietly: Boolean = false) {
+            mutableState.update { it.copy(loading = !quietly, refreshing = quietly, error = null) }
             viewModelScope.launch {
                 when (val listed = family.children()) {
                     is AppResult.Failure -> {
-                        mutableState.update { it.copy(loading = false, error = listed.error) }
+                        mutableState.update { it.copy(loading = false, refreshing = false, error = listed.error) }
                     }
 
                     is AppResult.Success -> {
@@ -98,6 +101,7 @@ class FamilyHomeViewModel
                                         alerts = raised,
                                     ),
                                 loading = false,
+                                refreshing = false,
                             )
                         }
                     }
