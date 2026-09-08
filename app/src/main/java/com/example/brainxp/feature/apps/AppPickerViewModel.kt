@@ -1,5 +1,7 @@
 package com.example.brainxp.feature.apps
 
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brainxp.blocking.InstalledApp
@@ -19,10 +21,9 @@ data class AppPickerUiState(
     val loading: Boolean = true,
     val query: String = "",
     val apps: List<InstalledApp> = emptyList(),
+    val icons: Map<String, ImageBitmap> = emptyMap(),
     val restricted: Set<String> = emptySet(),
-    val pinRequired: Boolean = false,
-    val pinVerified: Boolean = false,
-    val pinWrong: Boolean = false,
+    val blocked: Boolean = false,
 ) {
     val visible: List<InstalledApp>
         get() =
@@ -57,35 +58,28 @@ class AppPickerViewModel
         fun onToggle(packageName: String) {
             val enabled = packageName !in mutableState.value.restricted
             viewModelScope.launch {
-                if (!parentLock.allows(GuardedAction.CHANGE_RESTRICTIONS, pinVerified = mutableState.value.pinVerified)) {
-                    mutableState.value = mutableState.value.copy(pinRequired = true)
+                if (!parentLock.allows(GuardedAction.CHANGE_RESTRICTIONS)) {
+                    mutableState.value = mutableState.value.copy(blocked = true)
                     return@launch
                 }
                 restrictions.setRestricted(packageName, enabled)
             }
         }
 
-        fun submitPin(pin: String) {
-            viewModelScope.launch {
-                val ok = parentLock.verify(pin)
-                mutableState.value =
-                    mutableState.value.copy(
-                        pinVerified = ok,
-                        pinRequired = !ok,
-                        pinWrong = !ok,
-                    )
-            }
-        }
-
-        fun dismissPin() {
-            mutableState.value = mutableState.value.copy(pinRequired = false, pinWrong = false)
-        }
-
         private fun load() {
             viewModelScope.launch {
                 val apps = SystemCriticalFilter.selectable(source.launchableApps(), source.protectedPackages())
-                mutableState.value = mutableState.value.copy(loading = false, apps = apps)
+                val icons = iconsOf(apps)
+                mutableState.value = mutableState.value.copy(loading = false, apps = apps, icons = icons)
             }
+        }
+
+        private suspend fun iconsOf(apps: List<InstalledApp>): Map<String, ImageBitmap> {
+            val icons = mutableMapOf<String, ImageBitmap>()
+            apps.forEach { app ->
+                source.icon(app.packageName)?.let { icons[app.packageName] = it.asImageBitmap() }
+            }
+            return icons.toMap()
         }
 
         private fun observeRestricted() {
