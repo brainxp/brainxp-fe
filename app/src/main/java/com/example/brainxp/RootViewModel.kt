@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brainxp.data.prefs.AuthDataStore
 import com.example.brainxp.data.prefs.SettingsDataStore
+import com.example.brainxp.data.repo.NotificationRepository
 import com.example.brainxp.domain.model.familyParent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -27,6 +28,7 @@ class RootViewModel
     constructor(
         private val settings: SettingsDataStore,
         private val auth: AuthDataStore,
+        private val notifications: NotificationRepository,
     ) : ViewModel() {
         val familyRoot: StateFlow<Boolean> =
             combine(settings.settings, auth.auth) { snapshot, session ->
@@ -48,6 +50,10 @@ class RootViewModel
 
         fun markSetupComplete() {
             viewModelScope.launch { settings.setOnboardingComplete(true) }
+        }
+
+        fun markNotificationRead(id: String) {
+            viewModelScope.launch { notifications.markRead(id) }
         }
 
         private companion object {
