@@ -86,7 +86,10 @@ class QuizViewModel
             }
         }
 
-        fun showGuide(visible: Boolean) = mutableState.update { it.copy(tour = visible) }
+        fun showGuide(visible: Boolean) {
+            mutableState.update { it.copy(tour = visible) }
+            if (!visible) viewModelScope.launch { guides.rememberQuizGuide() }
+        }
 
         private suspend fun open(materialId: String) {
             val existing = sessions.findForMaterial(materialId).firstOrNull { it.status == STATUS_OPEN }
@@ -99,7 +102,6 @@ class QuizViewModel
 
             val session = (result as AppResult.Success).value
             val guided = guides.quizGuideSeen()
-            if (!guided) guides.rememberQuizGuide()
             if (existing == null) {
                 sessions.upsert(
                     QuestionSessionEntity(
@@ -233,7 +235,6 @@ internal fun QuestionSession.toUiState(): QuizUiState {
     }
 
     return QuizUiState(
-        title = title ?: FALLBACK_TITLE,
         questions = shown,
         answers = settled,
         chosenByQuestion = chosen,
@@ -271,7 +272,6 @@ private fun Question.toUiQuestion(): QuizQuestion? =
         }
     }
 
-private const val FALLBACK_TITLE = "Sesi belajar"
 private const val STATUS_OPEN = "OPEN"
 private const val ESSAY_SETTLE_MILLIS = 900L
 
