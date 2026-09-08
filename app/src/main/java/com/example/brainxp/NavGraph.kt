@@ -6,6 +6,9 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -19,15 +22,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.example.brainxp.core.capture.CameraSession
+import com.example.brainxp.core.result.ApiError
+import com.example.brainxp.core.ui.ConfirmDialog
 import com.example.brainxp.core.ui.ErrorState
 import com.example.brainxp.core.ui.LoadingState
-import com.example.brainxp.core.ui.ParentPinDialog
+import com.example.brainxp.core.ui.apiErrorBody
 import com.example.brainxp.core.ui.levelLabel
 import com.example.brainxp.core.upload.PreparingStage
 import com.example.brainxp.domain.model.AcademicLevel
@@ -35,8 +41,6 @@ import com.example.brainxp.domain.model.DeviceRole
 import com.example.brainxp.feature.SAMPLE_ESTIMATE_SECONDS
 import com.example.brainxp.feature.SAMPLE_MATERIAL_ID
 import com.example.brainxp.feature.SAMPLE_QUESTION_COUNT
-import com.example.brainxp.feature.activity.ActivityLogScreen
-import com.example.brainxp.feature.activity.ActivityLogViewModel
 import com.example.brainxp.feature.apps.AppPickerRoute
 import com.example.brainxp.feature.capture.CameraCaptureScreen
 import com.example.brainxp.feature.capture.CaptureMethod
@@ -44,10 +48,15 @@ import com.example.brainxp.feature.capture.CaptureViewModel
 import com.example.brainxp.feature.capture.PickSourceScreen
 import com.example.brainxp.feature.capture.PickSourceViewModel
 import com.example.brainxp.feature.capture.PreparationFooter
+import com.example.brainxp.feature.capture.PreparingMode
 import com.example.brainxp.feature.capture.PreparingScreen
 import com.example.brainxp.feature.capture.PreparingViewModel
 import com.example.brainxp.feature.capture.RejectedScreen
 import com.example.brainxp.feature.capture.RejectedViewModel
+import com.example.brainxp.feature.capture.isLevelRejection
+import com.example.brainxp.feature.capture.modeOf
+import com.example.brainxp.feature.capture.rejectionNote
+import com.example.brainxp.feature.capture.rejectionReasonRes
 import com.example.brainxp.feature.family.BalanceAdjustScreen
 import com.example.brainxp.feature.family.ChildReportScreen
 import com.example.brainxp.feature.family.FamilyHomeScreen
@@ -76,13 +85,14 @@ import com.example.brainxp.feature.library.LibraryScreen
 import com.example.brainxp.feature.library.LibraryViewModel
 import com.example.brainxp.feature.library.MaterialDetailScreen
 import com.example.brainxp.feature.library.MaterialDetailViewModel
+import com.example.brainxp.feature.notifications.NotificationsEffect
+import com.example.brainxp.feature.notifications.NotificationsScreen
+import com.example.brainxp.feature.notifications.NotificationsViewModel
 import com.example.brainxp.feature.onboarding.LevelScreen
 import com.example.brainxp.feature.onboarding.LevelViewModel
 import com.example.brainxp.feature.onboarding.PairDeviceViewModel
 import com.example.brainxp.feature.onboarding.PickModeScreen
 import com.example.brainxp.feature.onboarding.PickRoleScreen
-import com.example.brainxp.feature.onboarding.SetParentPinScreen
-import com.example.brainxp.feature.onboarding.SetParentPinViewModel
 import com.example.brainxp.feature.onboarding.SetupDoneScreen
 import com.example.brainxp.feature.onboarding.SetupMode
 import com.example.brainxp.feature.onboarding.SignInScreen
@@ -101,7 +111,10 @@ import com.example.brainxp.feature.settings.SettingsScreen
 import com.example.brainxp.feature.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
-internal fun EntryProviderScope<NavKey>.onboardingEntries(backStack: NavBackStack<NavKey>) {
+internal fun EntryProviderScope<NavKey>.onboardingEntries(
+    backStack: NavBackStack<NavKey>,
+    onSetupComplete: () -> Unit,
+) {
     entry<OnboardingRoute.Welcome> {
         WelcomeScreen(onStart = { backStack.add(OnboardingRoute.ModeSelect) })
     }
@@ -134,7 +147,7 @@ internal fun EntryProviderScope<NavKey>.onboardingEntries(backStack: NavBackStac
             if (!state.signedIn) return@LaunchedEffect
             viewModel.consumeSignIn()
             if (key.family) {
-                backStack.add(OnboardingRoute.PermissionSetup)
+                onSetupComplete()
             } else {
                 backStack.add(OnboardingRoute.Level)
             }
@@ -153,7 +166,6 @@ internal fun EntryProviderScope<NavKey>.onboardingEntries(backStack: NavBackStac
         PrivacyPolicyScreen(onBack = { backStack.popOrIgnore() })
     }
     entry<OnboardingRoute.PairDevice> { PairDeviceEntry(backStack) }
-    entry<OnboardingRoute.SetParentPin> { SetParentPinEntry(backStack) }
 }
 
 internal fun EntryProviderScope<NavKey>.onboardingTailEntries(
@@ -193,13 +205,9 @@ private fun openHome(
     context: android.content.Context,
 ) {
     when (effect) {
-        HomeEffect.OpenAddMaterial -> backStack.add(MainRoute.Capture)
         HomeEffect.OpenPermissionSetup -> backStack.add(MainRoute.PermissionSetup)
-        HomeEffect.OpenLibrary -> backStack.add(MainRoute.MaterialList)
         HomeEffect.OpenProgress -> backStack.add(MainRoute.Progress)
-        HomeEffect.OpenSettings -> backStack.add(MainRoute.Settings)
-        HomeEffect.OpenHistory -> backStack.add(MainRoute.History)
-        HomeEffect.OpenActivity -> backStack.add(MainRoute.ActivityLog)
+        HomeEffect.OpenNotifications -> backStack.add(MainRoute.Notifications)
         HomeEffect.OpenApps -> backStack.add(MainRoute.AppPicker)
         HomeEffect.OpenPreparing -> backStack.add(MainRoute.Preparing(PENDING_MATERIAL))
         is HomeEffect.OpenQuestions -> backStack.add(MainRoute.Questions(effect.materialId))
@@ -224,18 +232,9 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(backStack: NavBackStack<Nav
                 modifier = Modifier.weight(1f),
             )
         }
-
-        if (homeState.pinRequired) {
-            ParentPinDialog(
-                title = stringResource(R.string.pin_title_protection),
-                onSubmit = viewModel::submitPin,
-                onDismiss = viewModel::dismissPin,
-                wrong = homeState.pinWrong,
-            )
-        }
     }
     entry<MainRoute.AppPicker> { AppPickerRoute(onBack = { backStack.popOrIgnore() }) }
-    entry<MainRoute.History> { HistoryEntry(backStack) }
+    entry<MainRoute.History> { HistoryEntry() }
     entry<MainRoute.Progress> {
         val viewModel: ProgressViewModel = hiltViewModel()
         val progressState by viewModel.state.collectAsStateWithLifecycle()
@@ -246,7 +245,7 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(backStack: NavBackStack<Nav
             onBack = { backStack.popOrIgnore() },
         )
     }
-    entry<MainRoute.ActivityLog> { ActivityLogEntry(backStack) }
+    entry<MainRoute.Notifications> { NotificationsEntry(backStack) }
     entry<MainRoute.Settings> { SettingsEntry(backStack) }
     entry<MainRoute.PrivacyPolicy> {
         PrivacyPolicyScreen(onBack = { backStack.popOrIgnore() })
@@ -262,6 +261,7 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(backStack: NavBackStack<Nav
 
 internal fun EntryProviderScope<NavKey>.cameraEntries(backStack: NavBackStack<NavKey>) {
     entry<MainRoute.CameraCapture> {
+        val capturePrefix = stringResource(R.string.capture_material_prefix)
         val viewModel: CaptureViewModel = hiltViewModel()
         val captureState by viewModel.state.collectAsStateWithLifecycle()
         val context = LocalContext.current
@@ -288,8 +288,9 @@ internal fun EntryProviderScope<NavKey>.cameraEntries(backStack: NavBackStack<Na
             onDelete = viewModel::delete,
             onMove = viewModel::move,
             onContinue = {
-                viewModel.uploadAll()
+                viewModel.uploadAll(capturePrefix)
                 backStack.popOrIgnore()
+                backStack.add(MainRoute.Preparing(PENDING_MATERIAL))
             },
         )
     }
@@ -324,8 +325,10 @@ internal fun EntryProviderScope<NavKey>.captureEntries(backStack: NavBackStack<N
 
         LaunchedEffect(state.rejected) {
             if (state.rejected) {
+                val materialId = state.materialId ?: PENDING_MATERIAL
                 viewModel.done()
-                backStack.add(MainRoute.Rejected(state.materialId ?: PENDING_MATERIAL))
+                backStack.popOrIgnore()
+                backStack.add(MainRoute.Rejected(materialId))
             }
         }
 
@@ -338,11 +341,11 @@ internal fun EntryProviderScope<NavKey>.captureEntries(backStack: NavBackStack<N
             Unit
         }
 
-        if (state.guide) {
+        if (modeOf(state) == PreparingMode.TUTORIAL) {
             QuizTourScreen(
                 onDone = { viewModel.showGuide(false) },
                 onSkip = { viewModel.showGuide(false) },
-                ready = state.ready,
+                ready = state.done,
                 onStart = start,
                 footer = { PreparationFooter(state = state, onStart = start) },
             )
@@ -383,7 +386,6 @@ internal fun EntryProviderScope<NavKey>.learningEntries(backStack: NavBackStack<
         LibraryScreen(
             state = libraryState,
             onEvent = viewModel::onEvent,
-            onBack = { backStack.popOrIgnore() },
         )
     }
     entry<MainRoute.MaterialDetail> { key -> MaterialDetailEntry(key, backStack) }
@@ -470,8 +472,12 @@ private fun RejectedEntry(
                 assessedLevel = levelText(state.assessedLevel),
                 declaredLevel = levelText(state.declaredLevel),
                 reason = reasonText(state.reasonCode),
+                aboutLevel = isLevelRejection(state.reasonCode),
                 onBack = { backStack.popOrIgnore() },
-                onRetry = { backStack.popOrIgnore() },
+                onRetry = {
+                    backStack.popOrIgnore()
+                    backStack.add(MainRoute.Capture)
+                },
             )
         }
     }
@@ -482,15 +488,7 @@ private fun levelText(wire: String?): String =
     AcademicLevel.fromWire(wire)?.let { levelLabel(it) } ?: stringResource(R.string.reject_level_unknown)
 
 @Composable
-private fun reasonText(code: String?): String =
-    when {
-        code == null -> stringResource(R.string.reject_reason_unknown)
-        code == "level_too_low" -> stringResource(R.string.reject_reason_level_too_low)
-        code == "too_thin" || code == "too_short" -> stringResource(R.string.reject_reason_too_thin)
-        code == "unreadable" -> stringResource(R.string.reject_reason_unreadable)
-        code.contains(' ') -> code
-        else -> stringResource(R.string.reject_reason_unknown)
-    }
+private fun reasonText(code: String?): String = rejectionNote(code) ?: stringResource(rejectionReasonRes(code))
 
 @Composable
 private fun MaterialDetailEntry(
@@ -556,23 +554,35 @@ private fun ReceiptEntry(
 }
 
 @Composable
-private fun HistoryEntry(backStack: NavBackStack<NavKey>) {
+private fun HistoryEntry() {
     val viewModel: HistoryViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     when {
         state.error != null -> ErrorState(error = state.error!!, onRetry = viewModel::retry)
         state.loading -> LoadingState()
-        else -> HistoryScreen(entries = state.entries, onBack = { backStack.popOrIgnore() })
+        else -> HistoryScreen(entries = state.entries)
     }
 }
 
 @Composable
-private fun ActivityLogEntry(backStack: NavBackStack<NavKey>) {
-    val viewModel: ActivityLogViewModel = hiltViewModel()
-    val events by viewModel.events.collectAsStateWithLifecycle()
+private fun NotificationsEntry(backStack: NavBackStack<NavKey>) {
+    val viewModel: NotificationsViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
-    ActivityLogScreen(events = events, onBack = { backStack.popOrIgnore() })
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                is NotificationsEffect.OpenQuestions -> backStack.add(MainRoute.Questions(effect.materialId))
+            }
+        }
+    }
+
+    NotificationsScreen(
+        state = state,
+        onEvent = viewModel::onEvent,
+        onBack = { backStack.popOrIgnore() },
+    )
 }
 
 @Composable
@@ -587,7 +597,11 @@ private fun SettingsEntry(backStack: NavBackStack<NavKey>) {
     val policy = state.policy
     when {
         state.error != null && policy == null -> {
-            ErrorState(error = state.error!!, onRetry = viewModel::retry)
+            StrandedSettings(
+                error = state.error!!,
+                onRetry = viewModel::retry,
+                onSignOut = viewModel::signOut,
+            )
         }
 
         policy == null -> {
@@ -596,27 +610,50 @@ private fun SettingsEntry(backStack: NavBackStack<NavKey>) {
 
         else -> {
             SettingsScreen(
-                policy = policy,
+                state = state,
                 onEdit = viewModel::edit,
+                onSave = viewModel::save,
+                onDiscard = viewModel::discard,
                 onApps = { backStack.add(MainRoute.AppPicker) },
                 onPermissions = { backStack.add(MainRoute.PermissionSetup) },
                 onPrivacyPolicy = { backStack.add(MainRoute.PrivacyPolicy) },
                 onDeleteAccount = { backStack.add(MainRoute.DeleteAccount) },
                 onSignOut = viewModel::signOut,
-                onBack = { backStack.popOrIgnore() },
-                saving = state.saving,
-                notice = state.notice,
                 protection = { ProtectionRow() },
             )
         }
     }
+}
 
-    if (state.pinRequired) {
-        ParentPinDialog(
-            title = stringResource(R.string.pin_title_mode),
-            onSubmit = viewModel::submitPin,
-            onDismiss = viewModel::dismissPin,
-            wrong = state.pinWrong,
+@Composable
+private fun StrandedSettings(
+    error: ApiError,
+    onRetry: () -> Unit,
+    onSignOut: () -> Unit,
+) {
+    var leaving by remember { mutableStateOf(false) }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        ErrorState(error = error, onRetry = onRetry, modifier = Modifier.weight(1f))
+
+        TextButton(
+            onClick = { leaving = true },
+            modifier = Modifier.fillMaxWidth().navigationBarsPadding(),
+        ) {
+            Text(text = stringResource(R.string.settings_sign_out), textAlign = TextAlign.Center)
+        }
+    }
+
+    if (leaving) {
+        ConfirmDialog(
+            title = stringResource(R.string.settings_sign_out),
+            body = stringResource(R.string.settings_sign_out_warning),
+            confirm = stringResource(R.string.settings_sign_out_confirm),
+            onConfirm = {
+                leaving = false
+                onSignOut()
+            },
+            onDismiss = { leaving = false },
         )
     }
 }
@@ -670,7 +707,7 @@ private fun PairDeviceEntry(backStack: NavBackStack<NavKey>) {
     LaunchedEffect(state.paired) {
         if (!state.paired) return@LaunchedEffect
         viewModel.consumePaired()
-        backStack.add(OnboardingRoute.SetParentPin)
+        backStack.add(OnboardingRoute.PermissionSetup)
     }
 
     PairDeviceScreen(
@@ -679,23 +716,9 @@ private fun PairDeviceEntry(backStack: NavBackStack<NavKey>) {
         onKey = viewModel::press,
         onDelete = viewModel::backspace,
         busy = state.busy,
-        error = state.error?.let { stringResource(R.string.pair_failed) },
-    )
-}
-
-@Composable
-private fun SetParentPinEntry(backStack: NavBackStack<NavKey>) {
-    val viewModel: SetParentPinViewModel = hiltViewModel()
-    val saved by viewModel.saved.collectAsStateWithLifecycle()
-
-    LaunchedEffect(saved) {
-        if (!saved) return@LaunchedEffect
-        viewModel.consumeSaved()
-        backStack.add(OnboardingRoute.PermissionSetup)
-    }
-
-    SetParentPinScreen(
-        onSet = viewModel::set,
-        onSkip = { backStack.add(OnboardingRoute.PermissionSetup) },
+        error =
+            state.error?.let { failure ->
+                apiErrorBody(failure).ifBlank { stringResource(R.string.pair_failed) }
+            },
     )
 }
