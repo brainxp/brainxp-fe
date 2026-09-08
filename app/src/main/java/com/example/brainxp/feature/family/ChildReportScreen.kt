@@ -14,6 +14,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,17 +23,48 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.brainxp.R
+import com.example.brainxp.core.result.ApiError
+import com.example.brainxp.core.ui.AlertNote
 import com.example.brainxp.core.ui.BrainXPTheme
 import com.example.brainxp.core.ui.MiniBarChart
 import com.example.brainxp.core.ui.Note
 import com.example.brainxp.core.ui.PrimaryButton
 import com.example.brainxp.core.ui.RowGroup
 import com.example.brainxp.core.ui.ScreenNav
+import com.example.brainxp.core.ui.apiErrorBody
 import com.example.brainxp.core.ui.shortDuration
 
 private enum class ChildAction {
     RELEASE,
     REMOVE,
+}
+
+@Composable
+private fun ReleaseConfirm(
+    subjectName: String,
+    releasing: Boolean,
+    releaseFailed: ApiError?,
+    onConfirm: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    Note(text = stringResource(R.string.report_release_warning, subjectName), alert = true)
+    releaseFailed?.let {
+        AlertNote(
+            title = stringResource(R.string.report_release_failed, subjectName),
+            body = apiErrorBody(it),
+        )
+    }
+    PrimaryButton(
+        text = stringResource(R.string.report_release_confirm, subjectName),
+        onClick = onConfirm,
+        loading = releasing,
+    )
+    TextButton(onClick = onCancel, modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(R.string.report_cancel),
+            style = MaterialTheme.typography.labelLarge,
+        )
+    }
 }
 
 @Composable
@@ -46,9 +78,13 @@ fun ChildReportScreen(
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
     released: Boolean = false,
+    releasing: Boolean = false,
+    releaseFailed: ApiError? = null,
 ) {
     val spacing = BrainXPTheme.spacing
     var asking by remember { mutableStateOf<ChildAction?>(null) }
+
+    LaunchedEffect(released) { if (released) asking = null }
 
     Column(
         modifier =
@@ -129,17 +165,13 @@ fun ChildReportScreen(
         )
 
         if (asking == ChildAction.RELEASE) {
-            Note(text = stringResource(R.string.report_release_warning, state.subjectName), alert = true)
-            PrimaryButton(
-                text = stringResource(R.string.report_release_confirm, state.subjectName),
-                onClick = onReleaseDevice,
+            ReleaseConfirm(
+                subjectName = state.subjectName,
+                releasing = releasing,
+                releaseFailed = releaseFailed,
+                onConfirm = onReleaseDevice,
+                onCancel = { asking = null },
             )
-            TextButton(onClick = { asking = null }, modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = stringResource(R.string.report_cancel),
-                    style = MaterialTheme.typography.labelLarge,
-                )
-            }
         } else if (asking == ChildAction.REMOVE) {
             Note(
                 text =
