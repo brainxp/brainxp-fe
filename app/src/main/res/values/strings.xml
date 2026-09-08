@@ -182,6 +182,7 @@ sedang kosong.</string>
     <string name="block_ledger_idle_value">%1$d hari lalu, jatah %2$d hari</string>
     <string name="block_locked_label">%1$s · dikunci</string>
     <string name="block_screen_action">Setor materi</string>
+    <string name="block_screen_close">Tutup aplikasi</string>
 
     <string name="block_screen_idle_title">Waktunya belum
 kamu mulai.</string>
@@ -228,6 +229,8 @@ kehilangan kontak.</string>
 
     <string name="warning_channel_name">Waktu bermain hampir habis</string>
     <string name="warning_channel_description">Pengingat sebelum waktu bermainmu berakhir, supaya tidak terputus tiba-tiba.</string>
+    <string name="offer_channel_name">Tawaran nambah waktu</string>
+    <string name="offer_channel_description">Ajakan mengerjakan soal saat waktu bermain masih cukup untuk menambah saldo.</string>
 
     <string name="degraded_channel_name">Perlindungan bermasalah</string>
     <string name="degraded_channel_description">Peringatan ketika izin yang dibutuhkan BrainXP dicabut.</string>
@@ -239,6 +242,9 @@ kehilangan kontak.</string>
 
     <string name="expiry_warning_title">Sisa %1$s</string>
     <string name="expiry_warning_body">Waktu bermainmu hampir habis. Selesaikan dulu yang sedang kamu tonton.</string>
+    <string name="expiry_minutes_title">Sisa %1$d menit</string>
+    <string name="expiry_wrapup_body">Beresin dulu yang sedang kamu tonton atau mainkan.</string>
+    <string name="expiry_offer_body">Masih ada waktu buat nambah saldo. Kerjakan soal sekarang, biar tidak berhenti pas seru-serunya.</string>
 
     <string name="duration_hours">%1$dj %2$02dm</string>
     <string name="duration_minutes">%1$d menit</string>
@@ -370,7 +376,7 @@ kehilangan kontak.</string>
     <string name="runner_resume">Main lagi</string>
     <string name="preparing_stalled">Server belum menjawab. Materinya mungkin sudah selesai — coba periksa lagi.</string>
     <string name="preparing_retry">Periksa lagi</string>
-    <string name="preparing_note">Sambil menggu soal dibuat, kamu bisa coba permainan menghindari distraksi diatas.</string>
+    <string name="preparing_note">Sambil menunggu soalnya dibuat, kamu bisa coba permainan menghindari distraksi di atas.</string>
     <string name="preparing_start">Mulai kerjakan</string>
     <string name="preparing_start_count">Mulai kerjakan · %1$d soal</string>
     <string name="preparing_leave">Tinggalkan berjalan</string>
@@ -444,7 +450,12 @@ kehilangan kontak.</string>
     <string name="quiz_submit_now">Kumpulkan sekarang</string>
     <string name="quiz_review_again">Periksa lagi</string>
     <string name="quiz_confirm_doubts">Masih ada %1$d soal bertanda ragu-ragu. Setelah dikumpulkan jawabannya tidak bisa diubah lagi.</string>
-    <string name="quiz_hint_partial">Tersimpan sendiri. Sisa %1$d soal, boleh dilanjutkan nanti.</string>
+    <string name="quiz_hint_partial">Geser ke kiri atau kanan buat ganti soal, atau ketuk titiknya buat melompat.</string>
+    <string name="quiz_leave_title">Ingin melanjutkan nanti?</string>
+    <string name="quiz_leave_body">Jawabanmu tersimpan sendiri. Sisa %1$d soal bisa kamu kerjakan kapan saja.</string>
+    <string name="quiz_leave_body_complete">Semua jawabanmu tersimpan. Kamu bisa kembali dan mengumpulkannya nanti.</string>
+    <string name="quiz_leave_confirm">Iya</string>
+    <string name="quiz_leave_dismiss">Lanjut mengerjakan</string>
     <string name="quiz_hint_complete">Semua sudah terisi. Benar salahnya ketahuan setelah dikumpulkan.</string>
     <string name="tour_title">Latihan sebentar</string>
     <string name="tour_step">%1$d dari %2$d</string>
@@ -474,9 +485,6 @@ kehilangan kontak.</string>
     <string name="tour_move_body">Geser halaman soalnya ke kiri atau kanan. Coba sekarang — beneran bisa digeser.</string>
     <string name="tour_leave_title">Berhenti kapan saja</string>
     <string name="tour_leave_body">Penyusunan soalnya jalan terus di latar. Tekan Kembali kapan saja — kamu dikabari begitu soalnya siap.</string>
-    <string name="tour_prep_working">Soalmu sedang dibuat</string>
-    <string name="tour_prep_reading">Materimu sedang dibaca</string>
-    <string name="tour_prep_ready">Semua soal siap</string>
     <string name="tour_receipt_title">Nilainya keluar di akhir</string>
     <string name="tour_receipt_body">Benar salahnya dan tambahan waktu mainnya baru muncul setelah semua soal dikumpulkan.</string>
 
@@ -537,7 +545,7 @@ kehilangan kontak.</string>
     <string name="policy_idle_days_sub">Saldo ditahan kalau lebih lama dari ini nggak belajar</string>
     <string name="policy_reset_hour">Hari berganti pukul</string>
     <string name="policy_reset_hour_sub">Kuota harian direset pukul %1$02d:00</string>
-    <string name="policy_apps">Aplikasi terkunci</string>
+    <string name="policy_apps">Aplikasi di HP %1$s</string>
     <string name="policy_app_locked">Butuh saldo untuk dibuka</string>
     <string name="policy_app_free">Bebas dibuka kapan saja</string>
     <string name="policy_locked">Terkunci</string>
@@ -691,7 +699,7 @@ kehilangan kontak.</string>
     <string name="rejected_headline_other">Soal tidak bisa dibuat dari materi ini</string>
     <string name="policy_step">2 dari 3</string>
     <string name="policy_issue_code">Terbitkan kode</string>
-    <string name="policy_apps_waiting">Daftar aplikasi muncul setelah HP anak dipasangkan dan mengirim aplikasi yang ada di sana. Setelah itu kamu bisa memilih mana yang dikunci.</string>
+    <string name="policy_apps_waiting">Daftar aplikasi belum sampai. HP anak mengirimnya sendiri setelah dipasangkan dan aplikasinya dibuka.</string>
     <string name="settings_managed">Aturan di HP ini disusun orang tua, jadi tidak bisa diubah dari sini. Yang bisa kamu buka cuma izin sistem dan kebijakan privasi.</string>
     <string name="home_apps_managed_note">Daftar ini disusun orang tuamu. Kamu bisa melihatnya, tapi tidak bisa menambah atau menguranginya.</string>
     <string name="policy_saved">Aturan tersimpan dan sudah berlaku di HP anak.</string>
@@ -703,6 +711,7 @@ kehilangan kontak.</string>
     <string name="report_release">Keluarkan HP %1$s</string>
     <string name="report_release_warning">HP %1$s langsung keluar dari BrainXP dan aplikasinya kebuka semua. Profil, materi, dan riwayatnya tetap tersimpan, dan kamu bisa memasangkannya lagi dengan kode baru.</string>
     <string name="report_release_confirm">Ya, keluarkan HP %1$s</string>
+    <string name="report_release_failed">HP %1$s gagal dikeluarkan</string>
     <string name="report_released">HP %1$s sudah dikeluarkan. Terbitkan kode pemasangan kalau mau menyambungkannya lagi.</string>
     <string name="home_mode_child">Anak</string>
     <string name="home_mode_self">Mandiri</string>
@@ -720,4 +729,15 @@ kehilangan kontak.</string>
     <string name="alert_channel_name">Peringatan perlindungan</string>
     <string name="alert_channel_description">Memberi tahu saat perlindungan di HP anak terganggu</string>
     <string name="alert_title_named">Perlindungan di HP %1$s terganggu</string>
+    <string name="ago_now">baru saja</string>
+    <string name="ago_minutes">%1$d mnt</string>
+    <string name="ago_hours">%1$d jam</string>
+    <string name="ago_yesterday">kemarin</string>
+    <string name="notification_ready_row">Soal %1$s siap</string>
+    <string name="notification_ready_detail">%1$d soal menunggu</string>
+    <string name="notification_rejected_row">%1$s belum bisa dipakai</string>
+    <string name="notification_rejected_detail">Ketuk untuk lihat alasannya</string>
+    <string name="notification_new_count">%1$d baru</string>
+    <string name="policy_apps_count">%1$d dari %2$d aplikasi dikunci</string>
+    <string name="policy_apps_none">Belum ada yang dikunci</string>
 </resources>
