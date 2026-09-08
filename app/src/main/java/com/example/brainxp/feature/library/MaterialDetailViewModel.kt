@@ -38,8 +38,9 @@ class MaterialDetailViewModel
             loadedFor = materialId
             mutableState.update { it.copy(loading = true, error = null) }
             viewModelScope.launch {
+                val result = materials.detail(materialId)
                 mutableState.update {
-                    when (val result = materials.detail(materialId)) {
+                    when (result) {
                         is AppResult.Success -> it.copy(material = result.value, loading = false)
                         is AppResult.Failure -> it.copy(loading = false, error = result.error)
                     }
@@ -58,8 +59,9 @@ class MaterialDetailViewModel
             if (mutableState.value.deleting) return
             mutableState.update { it.copy(deleting = true, error = null) }
             viewModelScope.launch {
+                val result = materials.delete(materialId)
                 mutableState.update {
-                    when (val result = materials.delete(materialId)) {
+                    when (result) {
                         is AppResult.Success -> it.copy(deleting = false, deleted = true)
                         is AppResult.Failure -> it.copy(deleting = false, error = result.error)
                     }
