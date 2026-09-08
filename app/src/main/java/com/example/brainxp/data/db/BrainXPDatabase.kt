@@ -13,13 +13,13 @@ import androidx.room.TypeConverters
         UnlockSessionEntity::class,
         RestrictedAppEntity::class,
         ActivityEventEntity::class,
-        OcrDraftEntity::class,
         PendingOperationEntity::class,
+        NotificationEntity::class,
     ],
-    version = 1,
+    version = 7,
     exportSchema = false,
 )
-@TypeConverters(Converters::class)
+@TypeConverters(Converters::class, JsonConverters::class)
 abstract class BrainXPDatabase : RoomDatabase() {
     abstract fun materialDao(): MaterialDao
 
@@ -35,9 +35,9 @@ abstract class BrainXPDatabase : RoomDatabase() {
 
     abstract fun activityEventDao(): ActivityEventDao
 
-    abstract fun ocrDraftDao(): OcrDraftDao
-
     abstract fun pendingOperationDao(): PendingOperationDao
+
+    abstract fun notificationDao(): NotificationDao
 
     companion object {
         const val NAME = "brainxp.db"

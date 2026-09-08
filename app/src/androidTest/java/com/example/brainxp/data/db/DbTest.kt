@@ -35,7 +35,6 @@ abstract class DbTest {
                     id = id,
                     title = title,
                     type = "PDF",
-                    charCount = 1_200,
                     status = status,
                     createdAt = createdAt,
                 ),

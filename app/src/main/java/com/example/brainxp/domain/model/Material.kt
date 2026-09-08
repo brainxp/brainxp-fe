@@ -14,30 +14,28 @@ enum class MaterialStatus {
     FAILED,
 }
 
+data class UnfinishedSession(
+    val sessionId: String,
+    val answered: Int,
+    val total: Int,
+)
+
 data class Material(
     val id: String,
     val title: String,
     val type: MaterialType,
     val status: MaterialStatus,
-    val charCount: Int,
     val createdAt: Long,
     val sessionCount: Int,
+    val questionCount: Int = 0,
+    val assessedLevel: String? = null,
+    val declaredLevel: String? = null,
+    val gateReason: String? = null,
+    val topicSummary: String? = null,
+    val unfinished: UnfinishedSession? = null,
 )
 
 data class MaterialPage(
     val items: List<Material>,
     val nextCursor: String?,
-)
-
-data class MaterialDetail(
-    val material: Material,
-    val sessions: List<SessionSummary>,
-)
-
-data class SessionSummary(
-    val sessionId: String,
-    val mode: SessionMode,
-    val createdAt: Long,
-    val score: Double?,
-    val rewardSeconds: Int?,
 )

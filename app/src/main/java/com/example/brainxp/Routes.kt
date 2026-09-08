@@ -12,10 +12,27 @@ sealed interface OnboardingRoute : NavKey {
     data object ModeSelect : OnboardingRoute
 
     @Serializable
+    data object RoleSelect : OnboardingRoute
+
+    @Serializable
+    data class SignIn(
+        val family: Boolean,
+    ) : OnboardingRoute
+
+    @Serializable
+    data object PairDevice : OnboardingRoute
+
+    @Serializable
+    data object Level : OnboardingRoute
+
+    @Serializable
     data object PermissionSetup : OnboardingRoute
 
     @Serializable
-    data object OcrPrepare : OnboardingRoute
+    data object SetupDone : OnboardingRoute
+
+    @Serializable
+    data object PrivacyPolicy : OnboardingRoute
 }
 
 @Serializable
@@ -38,13 +55,21 @@ sealed interface MainRoute : NavKey {
     data object Capture : MainRoute
 
     @Serializable
-    data class OcrReview(
-        val draftId: String,
+    data object CameraCapture : MainRoute
+
+    @Serializable
+    data class Preparing(
+        val materialId: String,
+    ) : MainRoute
+
+    @Serializable
+    data class Rejected(
+        val materialId: String,
     ) : MainRoute
 
     @Serializable
     data class Questions(
-        val sessionId: String,
+        val materialId: String,
     ) : MainRoute
 
     @Serializable
@@ -59,10 +84,13 @@ sealed interface MainRoute : NavKey {
     data object Progress : MainRoute
 
     @Serializable
-    data object ActivityLog : MainRoute
+    data object Notifications : MainRoute
 
     @Serializable
     data object Settings : MainRoute
+
+    @Serializable
+    data object PermissionSetup : MainRoute
 
     @Serializable
     data object FamilyHome : MainRoute
@@ -75,8 +103,25 @@ sealed interface MainRoute : NavKey {
     @Serializable
     data class FamilyChildPolicy(
         val childId: String,
+        val setup: Boolean = false,
     ) : MainRoute
 
     @Serializable
-    data object FamilyPairing : MainRoute
+    data class FamilyPairing(
+        val childId: String,
+    ) : MainRoute
+
+    @Serializable
+    data object FamilyNewChild : MainRoute
+
+    @Serializable
+    data class FamilyBalance(
+        val childId: String,
+    ) : MainRoute
+
+    @Serializable
+    data object PrivacyPolicy : MainRoute
+
+    @Serializable
+    data object DeleteAccount : MainRoute
 }

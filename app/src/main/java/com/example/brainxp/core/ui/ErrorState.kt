@@ -61,7 +61,7 @@ fun ErrorState(
 }
 
 @Composable
-private fun AlertNote(
+fun AlertNote(
     title: String,
     body: String,
     modifier: Modifier = Modifier,
@@ -115,43 +115,45 @@ private fun ApiError.titleRes(): Int =
         ApiError.Network -> R.string.error_network_title
         ApiError.Unauthorized -> R.string.error_unauthorized_title
         is ApiError.RateLimited -> R.string.error_rate_limited_title
+        ApiError.Timeout -> R.string.error_timeout_title
         ApiError.ServerBusy -> R.string.error_server_busy_title
         is ApiError.Validation -> R.string.error_validation_title
         is ApiError.Unknown -> R.string.error_unknown_title
     }
 
 @Composable
+fun apiErrorBody(error: ApiError): String = error.bodyText()
+
+@Composable
 private fun ApiError.bodyText(): String =
     when (this) {
-        ApiError.Network -> {
-            stringResource(R.string.error_network_body)
-        }
-
-        ApiError.Unauthorized -> {
-            stringResource(R.string.error_unauthorized_body)
-        }
-
         is ApiError.RateLimited -> {
             retryAfterSeconds
                 ?.let { stringResource(R.string.error_rate_limited_body_seconds, it) }
                 ?: stringResource(R.string.error_rate_limited_body)
         }
 
-        ApiError.ServerBusy -> {
-            stringResource(R.string.error_server_busy_body)
-        }
-
         is ApiError.Validation -> {
-            field
-                ?.let { stringResource(R.string.error_validation_body_field, it) }
-                ?: message ?: stringResource(R.string.error_validation_body)
+            message
+                ?: field?.let { stringResource(R.string.error_validation_body_field, it) }
+                ?: stringResource(R.string.error_validation_body)
         }
 
         is ApiError.Unknown -> {
-            code
-                ?.let { stringResource(R.string.error_unknown_body_code, it) }
-                ?: stringResource(R.string.error_unknown_body)
+            message ?: stringResource(R.string.error_unknown_body)
         }
+
+        else -> {
+            stringResource(plainBodyRes())
+        }
+    }
+
+private fun ApiError.plainBodyRes(): Int =
+    when (this) {
+        ApiError.Network -> R.string.error_network_body
+        ApiError.Unauthorized -> R.string.error_unauthorized_body
+        ApiError.Timeout -> R.string.error_timeout_body
+        else -> R.string.error_server_busy_body
     }
 
 private val ICON_SIZE = 20.dp

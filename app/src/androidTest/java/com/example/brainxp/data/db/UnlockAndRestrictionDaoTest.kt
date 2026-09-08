@@ -12,14 +12,14 @@ class UnlockAndRestrictionDaoTest : DbTest() {
         id: String,
         status: UnlockStatus,
         allowed: List<String> = listOf("com.google.android.youtube"),
-        endAtElapsed: Long = 60_000L,
+        budgetMillis: Long = 60_000L,
+        consumed: Map<String, Long> = emptyMap(),
     ) {
         db.unlockSessionDao().upsert(
             UnlockSessionEntity(
                 id = id,
-                endAtElapsed = endAtElapsed,
-                endAtWallClock = 1_700_000_000_000L,
-                bootWallClock = 1_699_999_000_000L,
+                budgetMillis = budgetMillis,
+                consumedByPackage = consumed,
                 allowedPackages = allowed,
                 status = status,
             ),
@@ -45,15 +45,20 @@ class UnlockAndRestrictionDaoTest : DbTest() {
         }
 
     @Test
-    fun bothTimestampsAndAllowedPackagesSurviveStorage() =
+    fun budgetAndPerAppConsumptionSurviveStorage() =
         runTest {
-            unlock("u1", UnlockStatus.ACTIVE, allowed = listOf("com.a", "com.b"), endAtElapsed = 123_456L)
+            unlock(
+                "u1",
+                UnlockStatus.ACTIVE,
+                allowed = listOf("com.a", "com.b"),
+                budgetMillis = 123_456L,
+                consumed = mapOf("com.a" to 4_200L, "com.b" to 900L),
+            )
 
             val stored = db.unlockSessionDao().findActive()
 
-            assertEquals(123_456L, stored?.endAtElapsed)
-            assertEquals(1_700_000_000_000L, stored?.endAtWallClock)
-            assertEquals(1_699_999_000_000L, stored?.bootWallClock)
+            assertEquals(123_456L, stored?.budgetMillis)
+            assertEquals(mapOf("com.a" to 4_200L, "com.b" to 900L), stored?.consumedByPackage)
             assertEquals(listOf("com.a", "com.b"), stored?.allowedPackages)
         }
 

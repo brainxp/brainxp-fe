@@ -28,6 +28,7 @@ class ApiErrorBodyReader
             val root = objectOrNull(body) ?: return body.take(MAX_MESSAGE_LENGTH)
             return stringOf(root[KEY_MESSAGE])
                 ?: stringOf(root[KEY_DETAIL])
+                ?: detailObject(root)?.let { stringOf(it[KEY_MESSAGE]) }
                 ?: firstDetail(root)?.let { stringOf(it[KEY_MSG]) }
         }
 
@@ -35,6 +36,8 @@ class ApiErrorBodyReader
             runCatching {
                 json.parseToJsonElement(raw).jsonObject
             }.getOrNull()
+
+        private fun detailObject(root: JsonObject): JsonObject? = runCatching { root[KEY_DETAIL]?.jsonObject }.getOrNull()
 
         private fun firstDetail(root: JsonObject): JsonObject? =
             runCatching { root[KEY_DETAIL]?.jsonArray?.firstOrNull()?.jsonObject }.getOrNull()

@@ -14,18 +14,19 @@ sealed interface Question {
         override val conceptIds: List<String>,
         val stem: String,
         val options: List<String>,
-    ) : Question
-
-    data class TrueFalse(
-        override val id: String,
-        override val conceptIds: List<String>,
-        val stem: String,
+        val difficulty: String = "",
+        val factor: Double = 1.0,
+        val sourceExcerpt: String? = null,
     ) : Question
 
     data class ShortAnswer(
         override val id: String,
         override val conceptIds: List<String>,
         val stem: String,
+        val difficulty: String = "",
+        val factor: Double = 1.0,
+        val sourceExcerpt: String? = null,
+        val rubricCriteria: Int = 0,
     ) : Question
 
     data class Unsupported(
@@ -35,12 +36,21 @@ sealed interface Question {
     ) : Question
 }
 
+data class SavedAnswer(
+    val questionId: String,
+    val chosenIndex: Int? = null,
+    val essayText: String? = null,
+)
+
 data class QuestionSession(
     val sessionId: String,
+    val title: String? = null,
     val materialId: String,
     val mode: SessionMode,
     val questions: List<Question>,
     val createdAt: Long,
+    val answeredIds: Set<String> = emptySet(),
+    val answers: List<SavedAnswer> = emptyList(),
 )
 
 enum class GenerationStatus {
@@ -56,25 +66,37 @@ data class GenerationJob(
     val error: String?,
 )
 
-data class AnswerVerdict(
+data class AnswerSaved(
     val questionId: String,
-    val correct: Boolean,
-    val explanation: String?,
-    val conceptIds: List<String>,
+    val answeredCount: Int,
+    val totalCount: Int,
 )
 
-data class ConceptCoverage(
-    val conceptId: String,
+data class ReceiptLine(
+    val ordinal: Int,
     val label: String,
-    val correct: Int,
-    val total: Int,
+    val difficulty: String,
+    val multiplier: Double,
+    val rewardSeconds: Int,
+    val voided: Boolean,
+    val voidReason: String?,
+    val explanation: String?,
 )
 
-data class SessionResult(
+data class SessionReceipt(
     val sessionId: String,
-    val score: Double,
-    val rewardSeconds: Int,
-    val rewardGranted: Boolean,
-    val reason: String?,
-    val coverage: List<ConceptCoverage>,
+    val title: String?,
+    val baseRewardSeconds: Int,
+    val lines: List<ReceiptLine>,
+    val subtotalSeconds: Int,
+    val levelFactor: Double,
+    val levelNote: String,
+    val noveltyFactor: Double,
+    val noveltyNote: String,
+    val creditedSeconds: Int,
+    val balanceSeconds: Int,
+    val correctCount: Int,
+    val questionCount: Int,
+    val streakCurrent: Int,
+    val newBadges: List<String>,
 )

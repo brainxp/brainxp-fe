@@ -16,16 +16,21 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
 private class RecordingRefresher(
-    private val issue: (Int) -> AuthTokens?,
+    private val issue: (Int) -> RefreshOutcome,
 ) : TokenRefresher {
     val calls = AtomicInteger(0)
     var beforeRefresh: (() -> Unit)? = null
 
-    override fun refresh(refreshToken: String): AuthTokens? {
+    override fun refresh(refreshToken: String): RefreshOutcome {
         beforeRefresh?.invoke()
         return issue(calls.incrementAndGet())
     }
 }
+
+private fun renewed(
+    access: String,
+    refresh: String,
+) = RefreshOutcome.Renewed(AuthTokens(access, refresh))
 
 class TokenAuthenticatorTest {
     private lateinit var server: MockWebServer
@@ -62,7 +67,7 @@ class TokenAuthenticatorTest {
         store.update(AuthTokens("access-1", "refresh-1"))
         server.enqueue(MockResponse().setResponseCode(200))
 
-        get(client(RecordingRefresher { null })).close()
+        get(client(RecordingRefresher { RefreshOutcome.Rejected })).close()
 
         assertEquals("Bearer access-1", server.takeRequest().getHeader("Authorization"))
     }
@@ -71,7 +76,7 @@ class TokenAuthenticatorTest {
     fun interceptorSendsNoHeaderWhenNoToken() {
         server.enqueue(MockResponse().setResponseCode(200))
 
-        get(client(RecordingRefresher { null })).close()
+        get(client(RecordingRefresher { RefreshOutcome.Rejected })).close()
 
         assertNull(server.takeRequest().getHeader("Authorization"))
     }
@@ -82,7 +87,7 @@ class TokenAuthenticatorTest {
         server.enqueue(MockResponse().setResponseCode(401))
         server.enqueue(MockResponse().setResponseCode(200))
 
-        val refresher = RecordingRefresher { AuthTokens("fresh", "refresh-2") }
+        val refresher = RecordingRefresher { renewed("fresh", "refresh-2") }
         val response = get(client(refresher))
 
         assertEquals(200, response.code)
@@ -94,11 +99,11 @@ class TokenAuthenticatorTest {
     }
 
     @Test
-    fun failedRefreshClearsTokensAndSurfaces401() {
+    fun rejectedRefreshForgetsTheSessionAndSurfaces401() {
         store.update(AuthTokens("stale", "refresh-1"))
         server.enqueue(MockResponse().setResponseCode(401))
 
-        val refresher = RecordingRefresher { null }
+        val refresher = RecordingRefresher { RefreshOutcome.Rejected }
         val response = get(client(refresher))
 
         assertEquals(401, response.code)
@@ -108,13 +113,28 @@ class TokenAuthenticatorTest {
     }
 
     @Test
+    fun anUnreachableServerKeepsTheSession() {
+        val saved = AuthTokens("stale", "refresh-1")
+        store.update(saved)
+        server.enqueue(MockResponse().setResponseCode(401))
+
+        val refresher = RecordingRefresher { RefreshOutcome.Unreachable }
+        val response = get(client(refresher))
+
+        assertEquals(401, response.code)
+        response.close()
+        assertEquals(1, refresher.calls.get())
+        assertEquals("going offline must not sign the user out", saved, store.current())
+    }
+
+    @Test
     fun doesNotLoopWhenRefreshedTokenIsAlsoRejected() {
         store.update(AuthTokens("stale", "refresh-1"))
         server.enqueue(MockResponse().setResponseCode(401))
         server.enqueue(MockResponse().setResponseCode(401))
         server.enqueue(MockResponse().setResponseCode(401))
 
-        val refresher = RecordingRefresher { AuthTokens("fresh-$it", "refresh-next") }
+        val refresher = RecordingRefresher { renewed("fresh-$it", "refresh-next") }
         val response = get(client(refresher))
 
         assertEquals(401, response.code)
@@ -127,7 +147,7 @@ class TokenAuthenticatorTest {
     fun givesUpWhenStoreIsEmpty() {
         server.enqueue(MockResponse().setResponseCode(401))
 
-        val refresher = RecordingRefresher { AuthTokens("fresh", "refresh-2") }
+        val refresher = RecordingRefresher { renewed("fresh", "refresh-2") }
         val response = get(client(refresher))
 
         assertEquals(401, response.code)
@@ -147,7 +167,7 @@ class TokenAuthenticatorTest {
             }
 
         val gate = CountDownLatch(1)
-        val refresher = RecordingRefresher { AuthTokens("fresh", "refresh-2") }
+        val refresher = RecordingRefresher { renewed("fresh", "refresh-2") }
         refresher.beforeRefresh = { gate.await(1, TimeUnit.SECONDS) }
 
         val http = client(refresher)

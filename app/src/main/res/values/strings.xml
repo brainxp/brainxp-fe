@@ -1,8 +1,108 @@
 <resources>
-    <string name="app_name">BrainXP</string>
-    <string name="placeholder_home">BrainXP</string>
+    <string name="app_name" translatable="false">BrainXP</string>
 
     <string name="action_retry">Coba lagi</string>
+    <string name="action_back">Kembali</string>
+
+    <string name="welcome_title">Setor materi,\ndapat menit main.</string>
+    <string name="welcome_body">Foto catatan atau kirim file pelajaranmu. Soalnya dibikin dari situ, dan tiap jawaban benar nambah waktu main.</string>
+    <string name="welcome_start">Mulai</string>
+    <string name="welcome_meter_label">Kartu waktu bermain</string>
+    <string name="welcome_take_motion">Gerak lurus</string>
+    <string name="welcome_take_newton">Hukum Newton</string>
+    <string name="welcome_take_friction">Esai gaya gesek</string>
+    <string name="welcome_level_easy">mudah</string>
+    <string name="welcome_level_medium">sedang</string>
+    <string name="welcome_level_hard">sulit</string>
+    <string name="welcome_gain">+%1$s</string>
+
+    <string name="mode_nav">Pengaturan awal</string>
+    <string name="mode_title">Siapa yang atur?</string>
+    <string name="mode_body">Yang dipilih di sini nanti yang pegang kendali aturannya.</string>
+    <string name="mode_family_title">Mode Keluarga</string>
+    <string name="mode_family_sub">Orang tua yang atur dari HP-nya. Anak tinggal ikut, nggak bisa ubah-ubah.</string>
+    <string name="mode_personal_title">Mode Pribadi</string>
+    <string name="mode_personal_sub">Kamu atur sendiri buat kamu sendiri. Kalau dilonggarkan, jalannya besok.</string>
+    <string name="mode_note">HP ini belum terdaftar di keluarga mana pun.</string>
+
+    <string name="role_nav">Mode Keluarga</string>
+    <string name="role_title">HP ini punya siapa?</string>
+    <string name="role_body">Aturannya dipasang di HP anak. HP orang tua dipakai buat nyusun dan memantau.</string>
+    <string name="role_parent_title">Orang tua</string>
+    <string name="role_parent_sub">Bikin profil anak, susun aturan, terbitkan kode</string>
+    <string name="role_child_title">Anak</string>
+    <string name="role_child_sub">Masukkan kode dari HP orang tua</string>
+    <string name="role_note">Anak nggak punya kata sandi. Yang disimpan cuma nama panggilan dan jenjangnya.</string>
+
+    <string name="signin_nav_login">Masuk</string>
+    <string name="signin_nav_register">Buat akun</string>
+    <string name="signin_title_login">Selamat datang</string>
+    <string name="signin_title_register">Buat akun baru</string>
+    <string name="signin_body_family">Akun ini memegang aturan untuk seluruh anggota keluarga.</string>
+    <string name="signin_body_personal">Akun ini menyimpan aturan yang kamu buat untuk dirimu sendiri.</string>
+    <string name="signin_name">Nama</string>
+    <string name="signin_name_hint">Nama panggilan</string>
+    <string name="signin_email">Email</string>
+    <string name="signin_email_hint">kamu@contoh.id</string>
+    <string name="signin_password">Kata sandi</string>
+    <string name="signin_password_hint">Minimal 10 karakter</string>
+    <string name="signin_submit_login">Masuk</string>
+    <string name="level_title">Jenjang</string>
+    <string name="level_heading">Kamu ada di jenjang apa?</string>
+    <string name="level_body">Ini menentukan seberapa dalam soal yang dibuat dari materimu.</string>
+    <string name="level_sd">SD</string>
+    <string name="level_smp">SMP</string>
+    <string name="level_sma">SMA</string>
+    <string name="level_kuliah">Kuliah</string>
+    <string name="level_umum">Umum</string>
+    <string name="level_note">Jenjang dipakai untuk menolak materi yang jauh di bawah kemampuanmu, bukan untuk membatasi apa yang boleh kamu pelajari.</string>
+    <string name="level_submit">Lanjut</string>
+    <string name="level_error_session_title">Sesi berakhir</string>
+    <string name="level_error_session_body">Masuk ulang untuk melanjutkan.</string>
+    <string name="signin_error_credentials_title">Email atau sandi salah</string>
+    <string name="signin_error_credentials_body">Periksa lagi email dan kata sandinya, lalu coba sekali lagi.</string>
+    <string name="signin_submit_register">Daftar</string>
+    <string name="signin_to_register">Belum punya akun? Daftar</string>
+    <string name="signin_to_login">Sudah punya akun? Masuk</string>
+
+    <string name="pair_nav">Gabung ke keluarga</string>
+    <string name="pair_title">Masukkan kode</string>
+    <string name="pair_body">Minta enam angka dari ponsel orang tuamu.</string>
+    <string name="pair_note">Setelah kode diterima, aturan, jenjang, dan saldo awal langsung terpasang di ponsel ini.</string>
+    <string name="pair_delete">Hapus satu angka</string>
+
+    <string name="library_title">Pustaka materi</string>
+    <string name="library_intro">Soalmu tersimpan sampai kamu yang menghapusnya. Mengerjakan ulang tetap menambah pemahaman, tapi rewardnya menyusut tiap kali diulang.</string>
+    <string name="library_empty">Belum ada materi. Setor satu, dan soalnya jadi milikmu untuk dipelajari ulang.</string>
+    <string name="library_question_count">%1$d soal</string>
+    <string name="library_times_studied">dikerjakan %1$d×</string>
+    <string name="library_never_studied">belum dikerjakan</string>
+    <string name="library_reward">reward %1$s</string>
+    <string name="library_swipe_hint">Geser sebuah materi ke kiri untuk menghapusnya.</string>
+    <string name="library_pending">Tertunda · %1$d dari %2$d terisi</string>
+    <string name="library_resume">Lanjutkan</string>
+    <string name="library_remove">Hapus</string>
+    <string name="library_remove_title">Hapus materi ini?</string>
+    <string name="library_remove_body">%1$s beserta %2$d soalnya hilang untuk selamanya. Menit yang sudah kamu kumpulkan dari materi ini tetap utuh.</string>
+    <string name="library_remove_failed">Materinya gagal dihapus. Coba lagi.</string>
+
+    <string name="progress_title">Kemajuanmu</string>
+    <string name="progress_streak_label">Streak berjalan</string>
+    <string name="progress_days">hari</string>
+    <string name="progress_freeze">Jatah bolong tersisa</string>
+    <string name="progress_freeze_sub">Satu per 7 hari beruntun, maksimal dua</string>
+    <string name="progress_longest">Streak terpanjang</string>
+    <string name="progress_sessions">Sesi selesai</string>
+    <string name="progress_correct">Soal dijawab benar</string>
+    <string name="progress_essays">Esai lolos ambang</string>
+    <string name="progress_badges">Lencana · %1$d dari %2$d</string>
+    <string name="progress_badge_note">Lencana tidak menghasilkan waktu. Sebagian hanya bisa diraih lewat soal sulit dan esai.</string>
+
+    <string name="home_progress_open">Buka kemajuan</string>
+    <string name="home_rest_days">Boleh libur</string>
+    <string name="home_rest_days_sub">Sebelum saldonya ditahan</string>
+    <string name="home_rest_days_value">%1$d hari</string>
+    <string name="home_idle_locked">Terkunci · terakhir belajar %1$d hari lalu</string>
 
     <string name="error_network_title">Tidak ada koneksi</string>
     <string name="error_network_body">Periksa koneksi internetmu, lalu coba lagi.</string>
@@ -14,14 +114,610 @@
     <string name="error_rate_limited_body">Tunggu sebentar sebelum mencoba lagi.</string>
     <string name="error_rate_limited_body_seconds">Coba lagi dalam %1$d detik.</string>
 
+    <string name="error_timeout_title">Kelamaan menunggu</string>
+    <string name="error_timeout_body">Materimu masih diproses di server. Coba periksa lagi sebentar.</string>
     <string name="error_server_busy_title">Server sedang sibuk</string>
     <string name="error_server_busy_body">Ini dari sisi kami, bukan kamu. Coba lagi sebentar.</string>
 
     <string name="error_validation_title">Data tidak diterima</string>
-    <string name="error_validation_body">Periksa isian yang dikirim, lalu ulangi.</string>
+    <string name="error_validation_body">Server menolak data ini. Ganti isinya lalu kirim lagi.</string>
     <string name="error_validation_body_field">Bagian \"%1$s\" perlu diperbaiki.</string>
 
-    <string name="error_unknown_title">Terjadi kesalahan</string>
-    <string name="error_unknown_body">Kami belum tahu penyebabnya. Coba lagi.</string>
-    <string name="error_unknown_body_code">Kami belum tahu penyebabnya (kode %1$d).</string>
+    <string name="error_unknown_title">Gagal diproses</string>
+    <string name="error_unknown_body">Coba lagi sekarang. Kalau tetap gagal, tutup lalu buka lagi aplikasinya.</string>
+
+    <string name="permission_setup_title">Siapkan izin</string>
+    <string name="permission_setup_subtitle">BrainXP butuh beberapa izin sistem untuk bisa menjaga waktu bermainmu. Buka tiap langkah secara berurutan.</string>
+    <string name="permission_setup_step_label">Langkah %1$d dari %2$d</string>
+    <string name="permission_setup_open">Buka pengaturan</string>
+    <string name="permission_setup_granted">Sudah aktif</string>
+    <string name="permission_setup_optional">Opsional</string>
+    <string name="permission_setup_recommended">Disarankan</string>
+    <string name="permission_setup_continue">Lanjut</string>
+    <string name="permission_setup_finish">Selesai</string>
+    <string name="permission_setup_blocked">Dua izin wajib di atas harus aktif sebelum kamu bisa lanjut.</string>
+    <string name="permission_setup_degraded">Perlindungan aktif, tapi belum penuh. Langkah yang kamu lewati membuat BrainXP lebih mudah gagal tanpa memberitahumu.</string>
+    <string name="permission_setup_unavailable">Perangkat ini tidak punya halaman pengaturan untuk izin tersebut.</string>
+
+    <string name="permission_notifications_title">Notifikasi</string>
+    <string name="permission_notifications_breaks">Tanpa ini kamu tidak akan diberi tahu saat waktu bermain hampir habis, dan notifikasi layanan penjaga akan tersembunyi.</string>
+
+    <string name="permission_usage_access_title">Akses penggunaan aplikasi</string>
+    <string name="permission_usage_access_breaks">Tanpa ini BrainXP tidak bisa mengetahui aplikasi apa yang sedang kamu buka, sehingga tidak ada yang bisa dibatasi sama sekali.</string>
+
+    <string name="permission_overlay_title">Tampil di atas aplikasi lain</string>
+    <string name="permission_overlay_breaks">Tanpa ini layar pemblokir tidak bisa muncul, jadi aplikasi yang dibatasi tetap bisa dipakai bebas.</string>
+
+    <string name="permission_battery_title">Bebas dari penghemat baterai</string>
+    <string name="permission_battery_breaks">Tanpa ini sistem bisa mematikan layanan penjaga saat ponsel menganggur, dan pembatasan berhenti tanpa peringatan.</string>
+
+    <string name="permission_accessibility_title">Layanan aksesibilitas</string>
+    <string name="permission_accessibility_breaks">Ini alternatif pendeteksi aplikasi yang sedikit lebih cepat. Melewatinya tidak mengurangi apa pun — pendeteksi utama sudah cukup.</string>
+
+    <string name="accessibility_service_label">Pendeteksi aplikasi BrainXP</string>
+    <string name="accessibility_service_description">Memberi tahu BrainXP aplikasi mana yang sedang kamu buka, supaya aplikasi yang kamu batasi bisa dikunci lebih cepat. BrainXP hanya membaca nama aplikasinya, bukan isi layar.</string>
+
+    <string name="blocking_channel_name">Perlindungan</string>
+    <string name="blocking_channel_description">Menandakan BrainXP sedang menjaga aplikasi yang kamu batasi.</string>
+    <string name="blocking_notification_active">Perlindungan aktif</string>
+    <string name="blocking_notification_blocked">Aplikasi ini sedang dibatasi</string>
+    <string name="blocking_notification_unlocked">Waktu bermain berjalan</string>
+    <string name="blocking_notification_remaining">Sisa %1$s</string>
+
+    <plurals name="blocking_notification_restricted_count">
+        <item quantity="other">%1$d aplikasi dijaga</item>
+    </plurals>
+
+    <string name="block_screen_title">Saldomu
+sedang kosong.</string>
+    <string name="block_screen_body">Aplikasi ini kamu kunci sendiri. Kerjakan satu sesi dari materimu, dan waktunya kebuka lagi.</string>
+    <string name="block_screen_hero_label">Saldo waktu bermain</string>
+    <string name="block_screen_hero_sub">Kerjakan satu sesi buat nambah</string>
+    <string name="block_screen_note">Mengerjakan soal tidak memakan waktu bermainmu.</string>
+    <string name="block_ledger_balance">Saldo tersimpan</string>
+    <string name="block_ledger_today">Terpakai hari ini</string>
+    <string name="block_ledger_today_value">%1$s dari %2$s</string>
+    <string name="block_ledger_reset">Hari berganti dalam</string>
+    <string name="block_ledger_idle">Terakhir belajar</string>
+    <string name="block_ledger_idle_value">%1$d hari lalu, jatah %2$d hari</string>
+    <string name="block_locked_label">%1$s · dikunci</string>
+    <string name="block_screen_action">Setor materi</string>
+
+    <string name="block_screen_idle_title">Waktunya belum
+kamu mulai.</string>
+    <string name="block_screen_idle_body">Saldomu masih ada. Buka BrainXP dan mulai waktu bermain untuk memakainya.</string>
+    <string name="block_screen_idle_hero">Saldo siap dipakai</string>
+    <string name="block_screen_idle_hero_sub">Tinggal kamu mulai</string>
+    <string name="block_screen_idle_note">Saldo cuma berkurang saat kamu benar-benar main.</string>
+    <string name="block_screen_idle_action">Mulai waktu bermain</string>
+
+    <string name="block_screen_cap_title">Batas hari ini
+sudah kepakai.</string>
+    <string name="block_screen_cap_body">Bukan saldomu yang habis — cuma jatah main hari ini. Hari berganti sekitar %1$s lagi.</string>
+    <string name="block_screen_cap_hero">Saldomu aman, tidak berkurang</string>
+    <string name="block_screen_cap_hero_sub">Kuota hari ini penuh</string>
+    <string name="block_screen_cap_note">Mengerjakan soal sekarang tetap menambah saldo dan menjaga streak, tapi tidak membuka aplikasi hari ini.</string>
+    <string name="block_screen_cap_action">Setor materi untuk besok</string>
+
+    <string name="block_screen_hold_title">Saldomu
+lagi ditahan.</string>
+    <string name="block_screen_hold_body">Terakhir kamu belajar %1$d hari lalu, padahal jatah liburnya %2$d hari. Kerjakan satu sesi, dan saldomu kebuka lagi.</string>
+    <string name="block_screen_hold_hero">Saldo utuh, nggak berkurang</string>
+    <string name="block_screen_hold_hero_sub">Nunggu kamu belajar lagi</string>
+    <string name="block_screen_hold_note">Nggak ada yang hangus. Satu sesi selesai, semuanya bisa dipakai lagi.</string>
+    <string name="block_screen_hold_action">Kerjakan satu sesi</string>
+
+    <string name="block_screen_stale_title">Penjaga
+kehilangan kontak.</string>
+    <string name="block_screen_stale_body">BrainXP berhenti melapor, jadi aplikasi terkunci sampai kontaknya pulih. Saldomu tidak berkurang.</string>
+    <string name="block_screen_stale_hero">Saldo tersimpan</string>
+    <string name="block_screen_stale_hero_sub">Menunggu penjaga tersambung lagi</string>
+    <string name="block_screen_stale_note">Buka BrainXP dan biarkan terhubung sebentar. Kuncinya lepas sendiri.</string>
+    <string name="block_screen_stale_action">Setor materi sambil menunggu</string>
+
+    <string name="home_session_spent">Terpakai %1$s sesi ini</string>
+    <string name="home_session_note">Saldo berkurang cuma selama aplikasi yang dikunci kamu buka. Berhenti kapan saja, sisanya tetap tersimpan.</string>
+
+    <string name="app_picker_title">Pilih aplikasi</string>
+    <string name="app_picker_search">Cari aplikasi</string>
+    <string name="app_picker_hint">Pilih aplikasi yang ingin dikunci atau dilepas</string>
+    <string name="app_picker_game">Game</string>
+    <string name="app_picker_loading">Membaca daftar aplikasi</string>
+    <string name="app_picker_empty_title">Tidak ada yang cocok</string>
+    <string name="app_picker_empty_body">Coba kata lain, atau kosongkan pencarian untuk melihat semuanya.</string>
+
+    <string name="warning_channel_name">Waktu bermain hampir habis</string>
+    <string name="warning_channel_description">Pengingat sebelum waktu bermainmu berakhir, supaya tidak terputus tiba-tiba.</string>
+
+    <string name="degraded_channel_name">Perlindungan bermasalah</string>
+    <string name="degraded_channel_description">Peringatan ketika izin yang dibutuhkan BrainXP dicabut.</string>
+    <string name="degraded_notification_title">Perlindungan tidak berjalan penuh</string>
+    <string name="degraded_notification_body">Ada izin yang dicabut. Aplikasi yang kamu batasi bisa dibuka bebas sampai izinnya dipulihkan.</string>
+    <string name="degraded_banner_title">Perlindungan tidak berjalan penuh</string>
+    <string name="degraded_banner_body">Izin yang dibutuhkan dicabut, jadi pembatasan tidak bekerja.</string>
+    <string name="degraded_banner_action">Perbaiki izin</string>
+
+    <string name="expiry_warning_title">Sisa %1$s</string>
+    <string name="expiry_warning_body">Waktu bermainmu hampir habis. Selesaikan dulu yang sedang kamu tonton.</string>
+
+    <string name="duration_hours">%1$dj %2$02dm</string>
+    <string name="duration_minutes">%1$d menit</string>
+    <string name="duration_seconds">%1$d detik</string>
+    <string name="duration_zero">0 menit</string>
+    <string name="duration_short_hours">%1$dj %2$02dm</string>
+    <string name="duration_short_minutes">%1$dm</string>
+    <string name="duration_short_seconds">%1$dd</string>
+    <string name="duration_multiplier">×%1$s</string>
+
+    <string name="home_title">Beranda</string>
+    <string name="home_streak">%1$d hari</string>
+
+    <string name="home_protection_active">Perlindungan aktif</string>
+    <string name="home_protection_degraded">Tidak penuh</string>
+    <string name="home_protection_off">Perlindungan mati</string>
+
+    <string name="home_balance_label">Sisa waktu bermain</string>
+    <string name="home_balance_left">Saldo tersimpan %1$s</string>
+    <string name="home_countdown_label">Waktu bermain berjalan</string>
+    <string name="home_spent_of_cap">Terpakai %1$s dari %2$s hari ini</string>
+    <string name="home_no_cap">Belum ada batas harian</string>
+    <string name="home_stale_balance">Belum tersambung ke server. Angka ini dari catatan terakhir.</string>
+    <string name="home_cap_reached">Batas harian tercapai. Saldomu tidak berkurang dan menunggu — hari berganti sekitar %1$s lagi.</string>
+
+    <string name="home_start_earning">Setor materi</string>
+    <string name="home_resume_title">Lanjutkan sesi yang tertunda</string>
+    <string name="home_resume_sub">%1$s · %2$d dari %3$d terisi</string>
+    <string name="home_end_early">Kunci lagi sekarang</string>
+
+    <string name="home_apps_open">Terbuka selama saldo ada</string>
+    <string name="home_apps_locked">Sedang dikunci</string>
+    <string name="home_app_open">Terbuka</string>
+    <string name="home_app_locked">Terkunci</string>
+    <string name="home_no_apps_title">Belum ada aplikasi dikunci</string>
+    <string name="home_apps_pick_title">Pilih aplikasi yang mau dikunci</string>
+    <string name="home_apps_pick_sub">Yang kamu pilih cuma bisa dibuka kalau ada waktu bermain</string>
+    <string name="home_apps_manage">Atur aplikasi terkunci</string>
+    <string name="home_no_apps_managed">Orang tua yang menentukan daftarnya</string>
+    <string name="home_daily_cap">Jatah main hari ini</string>
+    <string name="home_section_today">Ringkasan hari ini</string>
+    <string name="home_section_earn">Tambah waktu bermain</string>
+
+    <string name="source_title">Setor materi</string>
+    <string name="source_hero_label">Sesi ini</string>
+    <string name="source_unit">soal</string>
+    <string name="source_hero_sub">Perkiraan sampai +%1$s</string>
+    <string name="source_pick">Pilih cara menyetor</string>
+    <string name="source_photo">Foto catatan</string>
+    <string name="source_photo_sub">Kamera langsung terbuka. Buku, papan tulis, tulisan tangan.</string>
+    <string name="source_document">Kirim berkas</string>
+    <string name="source_document_sub">PDF, DOCX, PPTX, TXT, atau foto yang sudah ada — sampai 32 MB.</string>
+    <string name="source_note">Materi diproses layanan AI dan tidak dipakai melatih model. Materi yang sama diunggah ulang tetap boleh dipelajari, tapi hadiahnya menurun.</string>
+
+    <string name="preparing_title">Menyiapkan soal</string>
+    <string name="preparing_status_working">Sedang dibuat</string>
+    <string name="preparing_status_ready">Semua soal siap</string>
+    <string name="preparing_step_reading">Materi dibaca</string>
+    <string name="preparing_step_validating">Diperiksa dan dikalibrasi</string>
+    <string name="preparing_step_partial">Soal disusun satu per satu</string>
+    <string name="preparing_step_ready">Semua soal siap</string>
+    <string name="pair_failed">Kodenya tidak cocok atau sudah kedaluwarsa. Minta kode baru dari orang tua.</string>
+    <string name="done_title">Semua siap</string>
+    <string name="done_body">Akunmu sudah dibuat dan penjaga waktu bermain sudah berjalan.</string>
+    <string name="done_step_account">Akun dibuat</string>
+    <string name="done_step_level">Jenjang dipilih</string>
+    <string name="done_step_protection">Penjaga aktif</string>
+    <string name="done_step_material">Setor materi pertamamu</string>
+    <string name="done_protection_partial">Ada izin yang kamu lewati, jadi penjaganya belum penuh. Bisa dilengkapi nanti dari Pengaturan.</string>
+    <string name="done_next">Langkah berikutnya: setor satu materi, jawab soalnya, dan waktu bermainmu mulai terkumpul.</string>
+    <string name="done_start">Mulai</string>
+    <string name="settings_title">Pengaturan</string>
+    <string name="settings_level">Jenjang</string>
+    <string name="settings_language">Bahasa soal</string>
+    <string name="settings_questions">Soal per sesi</string>
+    <string name="settings_idle_allowed">Jatah libur</string>
+    <string name="settings_protection">Perlindungan</string>
+    <string name="settings_protection_on">Aplikasi terkunci dijaga terus</string>
+    <string name="settings_protection_degraded">Jalan sebagian — izinnya perlu diperbaiki</string>
+    <string name="settings_protection_off">Aplikasi terkunci bisa dibuka bebas</string>
+    <string name="settings_permissions">Izin sistem</string>
+    <string name="settings_pending">Perubahan aturan berlaku mulai %1$s. Sampai saat itu aturan lama yang dipakai.</string>
+    <string name="settings_sign_out">Keluar dari akun</string>
+    <string name="settings_sign_out_confirm">Ya, keluar</string>
+    <string name="settings_sign_out_warning">Materi dan waktu bermainmu tetap tersimpan di server. Kamu perlu masuk lagi untuk memakainya.</string>
+    <string name="progress_chart_title">Menit dari belajar</string>
+    <string name="progress_chart_caption">%1$d hari aktif dalam sepekan terakhir</string>
+    <string name="progress_chart_too_early">Grafik muncul setelah kamu belajar di %1$d hari berbeda. Sebelum itu, garisnya cuma akan menipu.</string>
+    <string name="history_title">Riwayat waktu</string>
+    <string name="history_intro">Setiap perubahan saldo waktu bermainmu, terbaru di atas.</string>
+    <string name="history_empty_title">Belum ada riwayat</string>
+    <string name="history_empty_body">Begitu kamu menyelesaikan sesi pertama, catatan waktunya muncul di sini.</string>
+    <string name="history_type_earn">Dari belajar</string>
+    <string name="history_type_spend">Dipakai bermain</string>
+    <string name="history_type_grant">Ditambah orang tua</string>
+    <string name="history_type_redeem">Ditukar hadiah</string>
+    <string name="history_type_expire">Kedaluwarsa</string>
+    <string name="history_type_other">Penyesuaian</string>
+    <string name="detail_questions">Soal tersimpan</string>
+    <string name="detail_questions_value">%1$d soal</string>
+    <string name="detail_studied">Sudah dikerjakan</string>
+    <string name="detail_studied_value">%1$d kali</string>
+    <string name="detail_assessed">Tingkat materi</string>
+    <string name="detail_status_ready">Siap</string>
+    <string name="detail_status_processing">Diproses</string>
+    <string name="detail_status_failed">Ditolak</string>
+    <string name="detail_start">Mulai sesi</string>
+    <string name="detail_delete">Hapus materi</string>
+    <string name="detail_delete_confirm">Ya, hapus</string>
+    <string name="detail_delete_cancel">Batal</string>
+    <string name="detail_delete_warning">Materi ini beserta %1$d soalnya hilang untuk selamanya. Menit yang sudah kamu kumpulkan tetap aman.</string>
+    <string name="reject_reason_level_too_low">Isinya dinilai jauh di bawah jenjangmu, jadi soalnya tidak akan menantang.</string>
+    <string name="reject_reason_too_thin">Isinya terlalu tipis untuk dijadikan soal — belum ada cukup hal yang bisa diuji.</string>
+    <string name="reject_reason_unreadable">Teksnya tidak terbaca. Coba foto ulang atau kirim berkas aslinya.</string>
+    <string name="reject_reason_unknown">Materi ini tidak bisa dipakai membuat soal.</string>
+    <string name="reject_level_unknown">belum diketahui</string>
+    <string name="preparing_headline_working">Soalmu sedang dibuat</string>
+    <string name="preparing_headline_ready">Semua soal siap</string>
+    <string name="preparing_sub_working">Materimu sedang dibaca dan diperiksa, kamu akan mendapatkan notifikasi apabila soal telah siap.</string>
+    <string name="preparing_sub_ready">%1$d soal siap dikerjakan</string>
+    <string name="home_preparing_sub">Kami kabari begitu semuanya siap</string>
+    <string name="preparing_status_refused">Ditolak</string>
+    <string name="preparing_headline_refused">Materi ini ditolak</string>
+    <string name="preparing_try_again">Coba lagi</string>
+    <string name="runner_board">Permainan menunggu: lompati distraksi dengan mengetuk area permainan</string>
+    <string name="runner_jump">Lompat</string>
+    <string name="runner_skip">Sembunyikan game</string>
+    <string name="runner_avoided">Distraksi dilewati: %1$d</string>
+    <string name="runner_resume">Main lagi</string>
+    <string name="preparing_stalled">Server belum menjawab. Materinya mungkin sudah selesai — coba periksa lagi.</string>
+    <string name="preparing_retry">Periksa lagi</string>
+    <string name="preparing_note">Sambil menggu soal dibuat, kamu bisa coba permainan menghindari distraksi diatas.</string>
+    <string name="preparing_start">Mulai kerjakan</string>
+    <string name="preparing_start_count">Mulai kerjakan · %1$d soal</string>
+    <string name="preparing_leave">Tinggalkan berjalan</string>
+    <string name="week_mon_short">Sen</string>
+    <string name="week_tue_short">Sel</string>
+    <string name="week_wed_short">Rab</string>
+    <string name="week_thu_short">Kam</string>
+    <string name="week_fri_short">Jum</string>
+    <string name="week_sat_short">Sab</string>
+    <string name="week_sun_short">Min</string>
+    <string name="week_mon">Senin</string>
+    <string name="week_tue">Selasa</string>
+    <string name="week_wed">Rabu</string>
+    <string name="week_thu">Kamis</string>
+    <string name="week_fri">Jumat</string>
+    <string name="week_sat">Sabtu</string>
+    <string name="week_sun">Minggu</string>
+    <string name="week_same">Samakan</string>
+    <string name="week_weekdays">Hari kerja</string>
+    <string name="week_weekend">Akhir pekan</string>
+    <string name="week_all">Semua</string>
+    <string name="week_minutes_value">%1$d menit</string>
+
+    <string name="tab_history">Riwayat</string>
+    <string name="tab_home">Beranda</string>
+    <string name="tab_library">Pustaka</string>
+    <string name="tab_settings">Pengaturan</string>
+
+    <string name="notifications_title">Notifikasi</string>
+    <string name="notifications_open">Buka notifikasi</string>
+    <string name="notifications_read">Sudah dibuka</string>
+    <string name="notifications_unread">%1$d belum dibuka</string>
+    <string name="notifications_empty_title">Belum ada notifikasi</string>
+    <string name="notifications_empty_body">Kabar soal yang sudah siap dan materi yang perlu diperbaiki muncul di sini.</string>
+
+    <string name="ready_channel_name">Soal siap</string>
+    <string name="ready_channel_description">Kabar begitu soal dari materimu selesai disusun.</string>
+    <string name="ready_notification_title">Soalmu siap dikerjakan</string>
+    <string name="ready_notification_body">%1$s · %2$d soal menunggu</string>
+    <string name="ready_notification_action">Mulai kerjakan</string>
+    <string name="ready_notification_rejected_title">Materi belum bisa dipakai</string>
+    <string name="ready_notification_rejected_body">%1$s tidak lolos pemeriksaan. Buka untuk lihat alasannya.</string>
+    <string name="home_preparing_title">Soal sedang dibuat</string>
+    <string name="home_preparing_sub_waiting">Materimu sedang dibaca</string>
+
+    <string name="rejected_title">Materi belum bisa dipakai</string>
+    <string name="rejected_alert">Materi ini dinilai setara tingkat %1$s, sedangkan jenjangmu %2$s.</string>
+    <string name="rejected_headline">Soal dari materi ini tidak bisa menguji apa pun</string>
+    <string name="rejected_rules">Aturannya</string>
+    <string name="rejected_rule_at_level">Setara atau di atas jenjang</string>
+    <string name="rejected_rule_one_below">Satu tingkat di bawah</string>
+    <string name="rejected_rule_two_below">Dua tingkat atau lebih</string>
+    <string name="rejected_rule_refused">Ditolak</string>
+    <string name="rejected_deleted">Berkas ini dihapus dalam satu jam dan tidak tersimpan di pustaka.</string>
+    <string name="rejected_action">Setor materi lain</string>
+
+    <string name="quiz_position">Soal %1$d dari %2$d</string>
+    <string name="quiz_filled">%1$d terisi</string>
+    <string name="quiz_pending">%1$d menunggu terkirim</string>
+    <string name="quiz_jump">Soal %1$d</string>
+    <string name="quiz_jump_doubted">Soal %1$d, ragu-ragu</string>
+    <string name="quiz_guide">Cara mengerjakan</string>
+    <string name="quiz_guide_mark" translatable="false">?</string>
+    <string name="quiz_excerpt">Dari materimu: %1$s</string>
+    <string name="quiz_answer_label">Jawabanmu</string>
+    <string name="quiz_answer_hint">Tulis dengan kalimatmu sendiri, minimal delapan kata.</string>
+    <string name="quiz_rubric">Dinilai terhadap %1$d kriteria, lolos di atas 60.</string>
+    <string name="quiz_doubt">Ragu-ragu</string>
+    <string name="quiz_doubt_marked">Ditandai ragu-ragu</string>
+    <string name="quiz_submit">Kumpulkan sesi</string>
+    <string name="quiz_submit_now">Kumpulkan sekarang</string>
+    <string name="quiz_review_again">Periksa lagi</string>
+    <string name="quiz_confirm_doubts">Masih ada %1$d soal bertanda ragu-ragu. Setelah dikumpulkan jawabannya tidak bisa diubah lagi.</string>
+    <string name="quiz_hint_partial">Tersimpan sendiri. Sisa %1$d soal, boleh dilanjutkan nanti.</string>
+    <string name="quiz_hint_complete">Semua sudah terisi. Benar salahnya ketahuan setelah dikumpulkan.</string>
+    <string name="tour_title">Latihan sebentar</string>
+    <string name="tour_step">%1$d dari %2$d</string>
+    <string name="tour_next">Lanjut</string>
+    <string name="tour_start">Mulai yang asli</string>
+    <string name="tour_skip">Lewati panduan</string>
+    <string name="tour_wait">Cobain dulu, baru lanjut</string>
+    <string name="tour_q1">Kalau 3x + 5 = 20, berapa nilai x?</string>
+    <string name="tour_q1_a">x = 3</string>
+    <string name="tour_q1_b">x = 5</string>
+    <string name="tour_q1_c">x = 8</string>
+    <string name="tour_q1_d">x = 15</string>
+    <string name="tour_q2">Bentuk 4a + 7a bisa disederhanakan jadi apa?</string>
+    <string name="tour_q2_a">11a</string>
+    <string name="tour_q2_b">28a</string>
+    <string name="tour_q2_c">4a + 7</string>
+    <string name="tour_q2_d">11</string>
+    <string name="tour_answer_title">Coba jawab yang ini</string>
+    <string name="tour_answer_body">Soal aslinya dibikin dari materi yang kamu setor. Ini contohnya — ketuk kartu soalnya buat lihat jawabannya masuk.</string>
+    <string name="tour_autosave_title">Tersimpan sendiri</string>
+    <string name="tour_autosave_body">Nggak ada tombol simpan. Begitu kamu memilih atau berhenti mengetik sebentar, jawabannya masuk.</string>
+    <string name="tour_doubt_title">Kalau ragu, tandai</string>
+    <string name="tour_doubt_body">Ketuk tombol Ragu-ragu di bawah. Soal bertanda gampang dicari lagi sebelum dikumpulkan.</string>
+    <string name="tour_dots_title">Titiknya berubah kuning</string>
+    <string name="tour_dots_body">Baris titik di atas menunjukkan mana yang sudah terisi dan mana yang kamu tandai ragu.</string>
+    <string name="tour_move_title">Pindah soal</string>
+    <string name="tour_move_body">Geser halaman soalnya ke kiri atau kanan. Coba sekarang — beneran bisa digeser.</string>
+    <string name="tour_leave_title">Berhenti kapan saja</string>
+    <string name="tour_leave_body">Penyusunan soalnya jalan terus di latar. Tekan Kembali kapan saja — kamu dikabari begitu soalnya siap.</string>
+    <string name="tour_prep_working">Soalmu sedang dibuat</string>
+    <string name="tour_prep_reading">Materimu sedang dibaca</string>
+    <string name="tour_prep_ready">Semua soal siap</string>
+    <string name="tour_receipt_title">Nilainya keluar di akhir</string>
+    <string name="tour_receipt_body">Benar salahnya dan tambahan waktu mainnya baru muncul setelah semua soal dikumpulkan.</string>
+
+    <string name="receipt_title">Sesi selesai</string>
+    <string name="receipt_correct">%1$d dari %2$d benar</string>
+    <string name="receipt_header">Rincian reward</string>
+    <string name="receipt_base">DASAR PER SOAL</string>
+    <string name="receipt_subtotal">SUBTOTAL</string>
+    <string name="receipt_level">Kalibrasi level · %1$s</string>
+    <string name="receipt_novelty">Kebaruan · %1$s</string>
+    <string name="receipt_credited">Masuk ke saldo</string>
+    <string name="receipt_new_balance">Saldo baru</string>
+    <string name="receipt_missed">Yang belum tepat</string>
+    <string name="receipt_missed_row">Soal %1$d · %2$s</string>
+    <string name="receipt_streak">Streak %1$d hari. %2$s</string>
+    <string name="receipt_streak_keep">Terus begitu.</string>
+    <string name="receipt_new_badges">Lencana baru: %1$s.</string>
+    <string name="receipt_home">Kembali ke beranda</string>
+    <string name="receipt_library">Lihat pustaka</string>
+
+    <string name="void_wrong">salah</string>
+    <string name="family_title">Keluarga</string>
+    <string name="family_role">Orang tua</string>
+    <string name="family_children">Anak terdaftar</string>
+    <string name="family_child_sub">Streak %1$d hari · sisa kuota %2$s</string>
+    <string name="family_add_child">Tambah orang</string>
+    <string name="family_add_child_sub">Buat profil, susun aturan, terbitkan kode</string>
+    <string name="family_self">Kamu sendiri</string>
+    <string name="family_self_sub">Setor materi dan pakai waktumu</string>
+    <string name="family_self_rules">Aturan untuk diri sendiri</string>
+    <string name="family_self_rules_sub">Pilih aplikasi yang dikunci di HP ini</string>
+    <string name="family_self_invite">Aturan yang sama bisa berlaku buat kamu. Aplikasi di HP ini ikut terkunci sampai kamu sendiri yang mengerjakan soalnya.</string>
+    <string name="family_self_join">Ikut aturan juga</string>
+    <string name="family_empty">Belum ada orang terdaftar. Tambahkan satu untuk mulai menyusun aturan.</string>
+
+    <string name="new_child_title">Profil anak baru</string>
+    <string name="new_child_step">%1$d dari 3</string>
+    <string name="new_child_headline">Kenalkan anakmu</string>
+    <string name="new_child_body">Cukup nama panggilan dan jenjang. Tidak perlu email, nomor telepon, atau tanggal lahir.</string>
+    <string name="new_child_name">Nama panggilan</string>
+    <string name="new_child_name_hint">Raka</string>
+    <string name="new_child_level">Jenjang</string>
+    <string name="new_child_language">Bahasa soal</string>
+    <string name="new_child_note">Jenjang dipakai untuk menolak materi yang jauh di bawah kemampuannya, bukan untuk membatasi apa yang boleh dia pelajari.</string>
+    <string name="new_child_next">Susun aturan</string>
+
+    <string name="policy_title">Aturan untuk %1$s</string>
+    <string name="policy_session">Sesi belajar</string>
+    <string name="policy_questions">Soal per sesi</string>
+    <string name="policy_questions_sub">Paling banyak %1$d soal sekali kerja</string>
+    <string name="policy_essay">Porsi esai</string>
+    <string name="policy_essay_sub">%1$d dari %2$d soal · %3$d pilihan ganda</string>
+    <string name="policy_caps">Jatah main per hari</string>
+    <string name="policy_grants">Saldo harian</string>
+    <string name="policy_grants_sub">Menit gratis yang masuk tiap hari tanpa perlu mengerjakan soal. Isi 0 kalau semua menitnya harus dikerjakan sendiri.</string>
+    <string name="policy_other">Aturan lain</string>
+    <string name="policy_idle_days">Boleh libur</string>
+    <string name="policy_idle_days_sub">Saldo ditahan kalau lebih lama dari ini nggak belajar</string>
+    <string name="policy_reset_hour">Hari berganti pukul</string>
+    <string name="policy_reset_hour_sub">Kuota harian direset pukul %1$02d:00</string>
+    <string name="policy_apps">Aplikasi terkunci</string>
+    <string name="policy_app_locked">Butuh saldo untuk dibuka</string>
+    <string name="policy_app_free">Bebas dibuka kapan saja</string>
+    <string name="policy_locked">Terkunci</string>
+    <string name="policy_free">Bebas</string>
+    <string name="policy_hint">Ketuk baris aturan untuk mengubah nilainya. Daftar kunci tersimpan seketika.</string>
+    <string name="policy_discard">Kembalikan seperti semula</string>
+    <string name="policy_save">Simpan aturan</string>
+    <string name="policy_days">%1$d hari</string>
+    <string name="policy_hour">%1$02d</string>
+    <string name="policy_minutes_short">%1$d</string>
+
+    <string name="code_title">Kode untuk %1$s</string>
+    <string name="code_hero">Masukkan di ponsel %1$s</string>
+    <string name="code_valid">Berlaku %1$s lagi</string>
+    <string name="code_expired">Kode sudah kedaluwarsa</string>
+    <string name="code_device_section">Perangkat sekarang</string>
+    <string name="code_device_sub">Terdaftar %1$s</string>
+    <string name="code_device_active">Aktif</string>
+    <string name="code_replace_warning">Begitu kode ini dipakai di perangkat lain, perangkat di atas langsung keluar dan harus dipasangkan ulang.</string>
+    <string name="code_no_device">Belum ada perangkat yang terdaftar. Perangkat pertama yang memasukkan kode ini yang akan dipakai.</string>
+    <string name="code_done">Selesai</string>
+
+    <string name="report_title">%1$s</string>
+    <string name="report_earned">Menit yang dia hasilkan</string>
+    <string name="report_earned_self">Menit yang kamu hasilkan</string>
+    <string name="report_days">%1$d hari</string>
+    <string name="report_balance">Saldo sekarang</string>
+    <string name="report_materials">Materi dikerjakan</string>
+    <string name="report_correct">Soal dijawab benar</string>
+    <string name="report_essays">Esai lolos ambang</string>
+    <string name="report_recent">Riwayat terakhir</string>
+    <string name="report_recent_empty">Belum ada aktivitas</string>
+    <string name="report_privacy">Kamu melihat judul dan hasilnya, bukan isi catatannya.</string>
+    <string name="report_privacy_self">Aturan yang kamu longgarkan baru berlaku 24 jam kemudian.</string>
+    <string name="report_edit_policy">Ubah aturan</string>
+    <string name="report_issue_code">Terbitkan kode pemasangan</string>
+    <string name="report_adjust">Tambah saldo</string>
+    <string name="report_remove">Hapus profil “%1$s”</string>
+    <string name="report_remove_self">Berhenti ikut aturan</string>
+    <string name="report_remove_warning">Perangkat %1$s langsung keluar dan profilnya hilang dari daftar. Materi dan riwayatnya tetap tersimpan.</string>
+    <string name="report_remove_warning_self">Aturan berhenti berlaku di HP ini dan aplikasinya kebuka semua.</string>
+    <string name="report_remove_confirm">Ya, hapus profil “%1$s”</string>
+    <string name="report_remove_confirm_self">Ya, berhenti ikut aturan</string>
+    <string name="report_cancel">Batal</string>
+
+    <string name="adjust_title">Saldo %1$s</string>
+    <string name="adjust_hero">Saldo saat ini</string>
+    <string name="adjust_hero_sub">Boleh libur %1$d hari</string>
+    <string name="adjust_grant">Tambah waktu</string>
+    <string name="adjust_amount">Tambah waktu bermain</string>
+    <string name="adjust_note">Keterangan untuk %1$s</string>
+    <string name="adjust_note_hint">Bonus rajin belajar minggu ini</string>
+    <string name="adjust_warning">Keterangan wajib diisi dan tampil di riwayat %1$s, supaya dia tahu dari mana tambahan waktunya.</string>
+    <string name="adjust_apply_grant">Tambah %1$s</string>
+
+    <string name="lang_id">Indonesia</string>
+    <string name="lang_en">Inggris</string>
+    <string name="camera_title">Foto catatan</string>
+    <string name="camera_page_count">%1$d halaman</string>
+    <string name="camera_hint">Ambil satu foto per halaman. Bisa beberapa sekaligus, urutannya bisa diubah nanti.</string>
+    <string name="camera_shutter">Ambil foto</string>
+    <string name="camera_continue">Lanjut dengan %1$d halaman</string>
+    <string name="camera_failed">Fotonya gagal disimpan. Coba ambil lagi.</string>
+    <string name="camera_denied_title">Kamera belum diizinkan</string>
+    <string name="camera_denied_body">BrainXP butuh kamera untuk memfoto catatanmu. Izinkan dari pengaturan aplikasi.</string>
+    <string name="camera_move_left">Geser ke kiri</string>
+    <string name="camera_move_right">Geser ke kanan</string>
+    <string name="camera_delete_page">Hapus halaman</string>
+
+    <string name="source_too_large">Berkasnya lebih dari 32 MB. Pilih yang lebih kecil.</string>
+    <string name="source_unreadable">Berkasnya tidak bisa dibaca. Coba pilih ulang.</string>
+
+    <string name="privacy_title">Kebijakan privasi</string>
+    <string name="privacy_open">Baca kebijakan privasi</string>
+    <string name="privacy_updated">Berlaku sejak 6 September 2026</string>
+    <string name="privacy_summary">Singkatnya: BrainXP menyimpan materi yang kamu setor, jawabanmu, dan catatan waktu bermain. Tidak ada iklan, tidak ada pelacak, dan tidak ada data yang dijual.</string>
+
+    <string name="privacy_collect_heading">Yang kami kumpulkan</string>
+    <string name="privacy_collect_body">Saat mendaftar: alamat email, kata sandi, dan nama yang kamu pakai di dalam app. Kata sandi disimpan dalam bentuk teracak, bukan apa adanya. Kalau HP ini dipasangkan orang tua lewat kode, HP ini tidak mengirim email atau kata sandi apa pun — yang terkirim hanya kode pasangannya, model HP, dan penanda pemasangan.</string>
+
+    <string name="privacy_apps_heading">Aplikasi dan waktu pemakaian</string>
+    <string name="privacy_apps_body">Daftar aplikasi yang kamu kunci tersimpan di server supaya aturannya sama di semua tempat. Saat kamu memakai waktu bermain, BrainXP mengirim nama aplikasi yang kamu buka dan berapa detik terpakai, karena dari situ saldo waktumu dihitung. BrainXP membaca aplikasi apa yang sedang di depan hanya selama layar menyala, dan aplikasi yang tidak kamu kunci tidak dicatat ke mana pun.</string>
+
+    <string name="privacy_material_heading">Materi dan jawaban</string>
+    <string name="privacy_material_body">Foto catatan atau berkas yang kamu setor dikirim ke server, karena di sanalah teksnya dibaca dan soalnya dibuat. Jawaban pilihanmu dan tulisan esaimu juga dikirim untuk dinilai. BrainXP tidak membaca isi berkas di HP-mu dan tidak menyentuh foto lain di galerimu — hanya yang kamu pilih sendiri.</string>
+
+    <string name="privacy_accessibility_heading">Layanan aksesibilitas</string>
+    <string name="privacy_accessibility_body">Ini pilihan, bukan kewajiban, dan melewatinya tidak mengurangi apa pun. Kalau kamu nyalakan, BrainXP hanya menerima nama paket aplikasi yang baru muncul di depan, supaya pemblokirannya lebih cepat. BrainXP tidak membaca isi layar, tidak membaca teks yang kamu ketik, dan tidak merekam apa pun dari aplikasi lain.</string>
+
+    <string name="privacy_family_heading">Mode Keluarga</string>
+    <string name="privacy_family_body">Di Mode Keluarga, orang tua melihat jenjang, materi yang disetor, hasil sesi, dan pemakaian waktu bermain anak. Orang tua juga diberi tahu kalau perlindungan di HP anak berhenti bekerja atau izinnya dicabut. Orang tua tidak melihat isi catatan yang difoto anak dan tidak melihat aplikasi lain yang dipakai di luar yang dikunci.</string>
+
+    <string name="privacy_share_heading">Kami tidak membaginya</string>
+    <string name="privacy_share_body">Tidak ada data yang dijual atau ditukar. BrainXP tidak memasang iklan, tidak memasang alat analitik, dan tidak memasang pelaporan kerusakan pihak ketiga. Data hanya berpindah antara HP-mu dan server BrainXP, selalu lewat sambungan terenkripsi.</string>
+
+    <string name="privacy_keep_heading">Berapa lama disimpan</string>
+    <string name="privacy_keep_body">Materi dan riwayat tersimpan selama akunmu masih ada, supaya bisa kamu pakai ulang. Materi bisa kamu hapus satu per satu kapan saja dari daftar materi. Data di HP hanya salinan supaya app tetap jalan tanpa sinyal, dan hilang saat app dihapus.</string>
+
+    <string name="privacy_delete_heading">Menghapus akun</string>
+    <string name="privacy_delete_body">Kamu bisa minta akun dan seluruh datanya dihapus dari Pengaturan, lewat menu Hapus akun. Permintaan diproses dalam 30 hari, dan setelah itu materi, riwayat, saldo, serta profilmu hilang dan tidak bisa dikembalikan.</string>
+
+    <string name="privacy_children_heading">Anak-anak</string>
+    <string name="privacy_children_body">BrainXP ditujukan untuk usia 13 tahun ke atas. Anak di bawah 13 tahun sebaiknya memakai BrainXP lewat Mode Keluarga, dipasangkan oleh orang tua dengan kode, karena jalur itu tidak meminta email, kata sandi, atau nama dari anak sama sekali.</string>
+
+    <string name="privacy_contact_heading">Menghubungi kami</string>
+    <string name="privacy_contact_body">Pertanyaan soal data, atau permintaan menghapus akun, kirim ke dukungan@satu-miliar-pertama-di-2027.biz.id.</string>
+    <string name="privacy_contact_email">dukungan@satu-miliar-pertama-di-2027.biz.id</string>
+
+    <string name="delete_account_title">Hapus akun</string>
+    <string name="delete_account_body">Ini menghapus akunmu beserta seluruh data yang menempel padanya. Kalau kamu cuma ingin berhenti memakai app ini di HP ini, keluar dari akun saja sudah cukup.</string>
+    <string name="delete_account_removed_label">Yang ikut terhapus</string>
+    <string name="delete_account_removed_materials">Semua materi yang pernah kamu setor</string>
+    <string name="delete_account_removed_sessions">Seluruh riwayat sesi dan jawaban</string>
+    <string name="delete_account_removed_balance">Saldo waktu bermain yang tersisa</string>
+    <string name="delete_account_removed_profile">Profil, jenjang, dan aturanmu</string>
+    <string name="delete_account_timeline">Permintaanmu diproses dalam 30 hari. Sampai selesai, kamu masih bisa masuk seperti biasa.</string>
+    <string name="delete_account_warning">Setelah terhapus, tidak ada cara mengembalikannya. Materi yang sama harus disetor ulang dari awal.</string>
+    <string name="delete_account_start">Minta akun dihapus</string>
+    <string name="delete_account_confirm">Ya, kirim permintaannya</string>
+    <string name="delete_account_no_mail">Tidak ada aplikasi email di HP ini. Kirim manual ke %1$s.</string>
+    <string name="delete_account_mail_subject">Permintaan hapus akun BrainXP</string>
+    <string name="delete_account_mail_body">Saya minta akun BrainXP saya beserta seluruh datanya dihapus.\n\nPenanda akun: %1$s\n\nSaya mengerti materi, riwayat, dan saldo waktu bermain saya akan hilang dan tidak bisa dikembalikan.</string>
+
+    <string name="settings_privacy">Kebijakan privasi</string>
+    <string name="settings_delete_account">Hapus akun</string>
+
+    <string name="accessibility_disclosure_title">Sebelum menyalakannya</string>
+    <string name="accessibility_disclosure_reads">BrainXP akan menerima nama aplikasi yang baru kamu buka, supaya aplikasi yang kamu kunci bisa dihadang lebih cepat.</string>
+    <string name="accessibility_disclosure_not">BrainXP tidak membaca isi layarmu, tidak membaca yang kamu ketik, dan tidak merekam apa pun dari aplikasi lain.</string>
+    <string name="accessibility_disclosure_optional">Ini pilihan. Kalau dilewati, pendeteksi utama tetap bekerja dan tidak ada yang berkurang.</string>
+    <string name="accessibility_disclosure_continue">Mengerti, buka pengaturan</string>
+
+    <string name="signin_privacy">Kebijakan privasi</string>
+    <string name="settings_reward">Reward per soal</string>
+    <string name="settings_essay">Porsi esai</string>
+    <string name="settings_apps_sub">Pilih aplikasi yang butuh saldo untuk dibuka</string>
+    <string name="settings_upload">Cara setor materi</string>
+    <string name="settings_upload_photo">Foto catatan</string>
+    <string name="settings_upload_document">Kirim berkas</string>
+    <string name="settings_upload_on">Dipakai</string>
+    <string name="settings_upload_off">Dimatikan</string>
+    <string name="stepper_decrease">Kurangi</string>
+    <string name="stepper_increase">Tambah</string>
+    <string name="policy_reward">Reward per soal</string>
+    <string name="policy_reward_sub">Dasar sebelum kalibrasi level dan kebaruan</string>
+    <string name="policy_upload">Cara setor materi</string>
+    <string name="policy_upload_sub">Setidaknya satu cara harus tetap menyala</string>
+    <string name="home_session_explain">Saldo cuma berkurang selama aplikasi yang dikunci kamu buka. Kerjakan soal sepuasnya, itu tidak memotong apa pun.</string>
+    <string name="capture_material_prefix">Foto catatan</string>
+    <string name="reject_reason_not_study">Isinya tidak terbaca sebagai materi belajar. Foto catatan, halaman buku, atau slide pelajaran supaya soalnya bisa dibuat.</string>
+    <string name="rejected_headline_other">Soal tidak bisa dibuat dari materi ini</string>
+    <string name="policy_step">2 dari 3</string>
+    <string name="policy_issue_code">Terbitkan kode</string>
+    <string name="policy_apps_waiting">Daftar aplikasi muncul setelah HP anak dipasangkan dan mengirim aplikasi yang ada di sana. Setelah itu kamu bisa memilih mana yang dikunci.</string>
+    <string name="settings_managed">Aturan di HP ini disusun orang tua, jadi tidak bisa diubah dari sini. Yang bisa kamu buka cuma izin sistem dan kebijakan privasi.</string>
+    <string name="home_apps_managed_note">Daftar ini disusun orang tuamu. Kamu bisa melihatnya, tapi tidak bisa menambah atau menguranginya.</string>
+    <string name="policy_saved">Aturan tersimpan dan sudah berlaku di HP anak.</string>
+    <string name="settings_upload_photo_sub">Foto catatan atau halaman buku lewat kamera</string>
+    <string name="settings_upload_document_sub">Kirim berkas PDF atau gambar dari HP</string>
+    <string name="policy_save_failed">Aturan gagal disimpan</string>
+    <string name="protection_managed">Perlindungan ini diatur orang tua dan tidak bisa dimatikan dari HP ini.</string>
+    <string name="apps_managed">Daftar aplikasi terkunci diatur orang tua dan tidak bisa diubah dari HP ini.</string>
+    <string name="report_release">Keluarkan HP %1$s</string>
+    <string name="report_release_warning">HP %1$s langsung keluar dari BrainXP dan aplikasinya kebuka semua. Profil, materi, dan riwayatnya tetap tersimpan, dan kamu bisa memasangkannya lagi dengan kode baru.</string>
+    <string name="report_release_confirm">Ya, keluarkan HP %1$s</string>
+    <string name="report_released">HP %1$s sudah dikeluarkan. Terbitkan kode pemasangan kalau mau menyambungkannya lagi.</string>
+    <string name="home_mode_child">Anak</string>
+    <string name="home_mode_self">Mandiri</string>
+    <string name="home_greeting_morning">Selamat pagi, %1$s</string>
+    <string name="home_greeting_midday">Selamat siang, %1$s</string>
+    <string name="home_greeting_afternoon">Selamat sore, %1$s</string>
+    <string name="home_greeting_evening">Selamat malam, %1$s</string>
+    <string name="alert_title">Perlindungan di HP anak terganggu</string>
+    <string name="alert_accessibility_off">Izin aksesibilitas di HP %1$s dimatikan, jadi BrainXP tidak bisa melihat aplikasi yang dibuka.</string>
+    <string name="alert_usage_access_off">Izin akses penggunaan di HP %1$s dimatikan, jadi pemblokiran tidak berjalan.</string>
+    <string name="alert_overlay_off">Izin tampil di atas aplikasi lain di HP %1$s dimatikan, jadi layar pemblokir tidak bisa muncul.</string>
+    <string name="alert_protection_disabled">Perlindungan di HP %1$s dimatikan.</string>
+    <string name="alert_device_silent">HP %1$s berhenti melapor. Aplikasinya mungkin dihentikan paksa atau dihapus.</string>
+    <string name="alert_unknown">Ada masalah perlindungan di HP %1$s.</string>
+    <string name="alert_channel_name">Peringatan perlindungan</string>
+    <string name="alert_channel_description">Memberi tahu saat perlindungan di HP anak terganggu</string>
+    <string name="alert_title_named">Perlindungan di HP %1$s terganggu</string>
 </resources>

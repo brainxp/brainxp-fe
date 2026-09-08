@@ -25,8 +25,11 @@ fun PrimaryButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     loading: Boolean = false,
+    onDark: Boolean = false,
 ) {
     val spacing = BrainXPTheme.spacing
+    val container = if (onDark) Tokens.Neutral0 else MaterialTheme.colorScheme.primary
+    val ink = if (onDark) Tokens.Blue900 else MaterialTheme.colorScheme.onPrimary
 
     Button(
         onClick = onClick,
@@ -38,8 +41,10 @@ fun PrimaryButton(
         shape = MaterialTheme.shapes.medium,
         colors =
             ButtonDefaults.buttonColors(
-                disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = DISABLED_ALPHA),
-                disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = DISABLED_ALPHA),
+                containerColor = container,
+                contentColor = ink,
+                disabledContainerColor = container.copy(alpha = DISABLED_ALPHA),
+                disabledContentColor = ink.copy(alpha = DISABLED_ALPHA),
             ),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = ELEVATION),
     ) {
@@ -51,7 +56,7 @@ fun PrimaryButton(
                 CircularProgressIndicator(
                     modifier = Modifier.size(SPINNER_SIZE),
                     strokeWidth = SPINNER_STROKE,
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    color = ink,
                 )
             }
             Text(text = text, style = MaterialTheme.typography.labelLarge)

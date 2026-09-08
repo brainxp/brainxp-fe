@@ -163,13 +163,14 @@ class SharedComposablesTest {
     }
 
     @Test
-    fun unknownErrorSurfacesTheCode() {
+    fun unknownErrorFallsBackToPlainCopyWithoutTheCode() {
         compose.setContent {
             BrainXPTheme {
                 ErrorState(error = ApiError.Unknown(code = 418, message = null))
             }
         }
 
-        compose.onNodeWithText("Kami belum tahu penyebabnya (kode 418).").assertIsDisplayed()
+        compose.onNodeWithText("Gagal diproses").assertIsDisplayed()
+        compose.onNodeWithText("Coba lagi sekarang. Kalau tetap gagal, tutup lalu buka lagi aplikasinya.").assertIsDisplayed()
     }
 }

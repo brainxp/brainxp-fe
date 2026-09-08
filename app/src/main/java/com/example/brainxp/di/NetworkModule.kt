@@ -1,11 +1,17 @@
 package com.example.brainxp.di
 
+import com.example.brainxp.core.network.AuthApi
 import com.example.brainxp.core.network.AuthInterceptor
 import com.example.brainxp.core.network.AuthTokenStore
-import com.example.brainxp.core.network.InMemoryAuthTokenStore
+import com.example.brainxp.core.network.FamilyApi
+import com.example.brainxp.core.network.MaterialApi
+import com.example.brainxp.core.network.NetworkTokenRefresher
+import com.example.brainxp.core.network.PersistentAuthTokenStore
+import com.example.brainxp.core.network.PolicyApi
+import com.example.brainxp.core.network.QuizApi
+import com.example.brainxp.core.network.RewardApi
 import com.example.brainxp.core.network.TokenAuthenticator
 import com.example.brainxp.core.network.TokenRefresher
-import com.example.brainxp.core.network.UnavailableTokenRefresher
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -36,6 +42,30 @@ object NetworkModule {
             encodeDefaults = true
             isLenient = true
         }
+
+    @Provides
+    @Singleton
+    fun provideAuthApi(retrofit: Retrofit): AuthApi = retrofit.create(AuthApi::class.java)
+
+    @Provides
+    @Singleton
+    fun providePolicyApi(retrofit: Retrofit): PolicyApi = retrofit.create(PolicyApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideFamilyApi(retrofit: Retrofit): FamilyApi = retrofit.create(FamilyApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideRewardApi(retrofit: Retrofit): RewardApi = retrofit.create(RewardApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideQuizApi(retrofit: Retrofit): QuizApi = retrofit.create(QuizApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideMaterialApi(retrofit: Retrofit): MaterialApi = retrofit.create(MaterialApi::class.java)
 
     @Provides
     @Named("baseUrl")
@@ -74,8 +104,8 @@ object NetworkModule {
 @InstallIn(SingletonComponent::class)
 interface NetworkBindings {
     @Binds
-    fun bindAuthTokenStore(impl: InMemoryAuthTokenStore): AuthTokenStore
+    fun bindAuthTokenStore(impl: PersistentAuthTokenStore): AuthTokenStore
 
     @Binds
-    fun bindTokenRefresher(impl: UnavailableTokenRefresher): TokenRefresher
+    fun bindTokenRefresher(impl: NetworkTokenRefresher): TokenRefresher
 }

@@ -1,0 +1,101 @@
+package com.example.brainxp.data.repo
+
+import com.example.brainxp.core.network.AnswerStateDto
+import com.example.brainxp.core.network.QuestionDto
+import com.example.brainxp.core.network.QuizDto
+import com.example.brainxp.core.network.ReceiptDto
+import com.example.brainxp.core.network.ReceiptRowDto
+import com.example.brainxp.domain.model.Question
+import com.example.brainxp.domain.model.QuestionSession
+import com.example.brainxp.domain.model.ReceiptLine
+import com.example.brainxp.domain.model.SavedAnswer
+import com.example.brainxp.domain.model.SessionMode
+import com.example.brainxp.domain.model.SessionReceipt
+
+const val QTYPE_MCQ = "mcq"
+const val QTYPE_ESSAY = "essay"
+
+fun QuestionDto.toQuestion(): Question =
+    when (qtype) {
+        QTYPE_MCQ -> {
+            Question.MultipleChoice(
+                id = id,
+                conceptIds = emptyList(),
+                stem = stem,
+                options = options.orEmpty(),
+                difficulty = difficulty,
+                factor = typeFactor * difficultyFactor,
+                sourceExcerpt = sourceExcerpt,
+            )
+        }
+
+        QTYPE_ESSAY -> {
+            Question.ShortAnswer(
+                id = id,
+                conceptIds = emptyList(),
+                stem = stem,
+                difficulty = difficulty,
+                factor = typeFactor * difficultyFactor,
+                sourceExcerpt = sourceExcerpt,
+                rubricCriteria = rubricCriteria.orEmpty().size,
+            )
+        }
+
+        else -> {
+            Question.Unsupported(
+                id = id,
+                conceptIds = emptyList(),
+                rawType = qtype,
+            )
+        }
+    }
+
+fun QuizDto.toSession(): QuestionSession =
+    QuestionSession(
+        title = title,
+        sessionId = sessionId,
+        materialId = materialId,
+        mode = SessionMode.NEW,
+        questions = questions.sortedBy { it.ordinal }.map { it.toQuestion() },
+        createdAt = 0L,
+        answeredIds = answeredIds.toSet(),
+        answers = answers.map(AnswerStateDto::toSavedAnswer),
+    )
+
+private fun AnswerStateDto.toSavedAnswer(): SavedAnswer =
+    SavedAnswer(
+        questionId = questionId,
+        chosenIndex = chosenIndex,
+        essayText = essayText,
+    )
+
+fun ReceiptDto.toReceipt(): SessionReceipt =
+    SessionReceipt(
+        sessionId = sessionId,
+        title = title,
+        baseRewardSeconds = baseRewardSeconds,
+        lines = rows.sortedBy { it.ordinal }.map(ReceiptRowDto::toLine),
+        subtotalSeconds = subtotalSeconds.toInt(),
+        levelFactor = levelFactor,
+        levelNote = levelNote,
+        noveltyFactor = noveltyFactor,
+        noveltyNote = noveltyNote,
+        creditedSeconds = creditedSeconds,
+        balanceSeconds = balanceSeconds,
+        correctCount = correctCount,
+        questionCount = questionCount,
+        streakCurrent = streakCurrent,
+        newBadges = newBadges,
+    )
+
+private fun ReceiptRowDto.toLine(): ReceiptLine =
+    ReceiptLine(
+        ordinal = ordinal,
+        label = label,
+        difficulty = difficulty,
+        multiplier = multiplier,
+        rewardSeconds = rewardSeconds.toInt(),
+        voided = voided,
+        voidReason = voidReason,
+        explanation = explanation,
+    )

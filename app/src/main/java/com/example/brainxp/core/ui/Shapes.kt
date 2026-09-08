@@ -14,3 +14,5 @@ val BrainXPShapes =
     )
 
 val PillShape = RoundedCornerShape(percent = 50)
+
+val SegmentShape = RoundedCornerShape(11.dp)

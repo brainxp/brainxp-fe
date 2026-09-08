@@ -6,10 +6,13 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.example.brainxp.domain.model.DeviceRole
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
@@ -31,7 +34,11 @@ data class SettingsSnapshot(
     val ocrModelReady: Boolean = false,
     val detector: DetectorChoice = DetectorChoice.USAGE_STATS,
     val protectionEnabled: Boolean = false,
+    val warningLeadSeconds: Int = DEFAULT_WARNING_LEAD_SECONDS,
+    val role: DeviceRole = DeviceRole.PARENT,
 )
+
+const val DEFAULT_WARNING_LEAD_SECONDS = 60
 
 private val Context.settingsStore: DataStore<Preferences> by preferencesDataStore(
     name = "brainxp_settings",
@@ -53,8 +60,14 @@ class SettingsDataStore(
                         prefs[KEY_DETECTOR]?.toEnum(DetectorChoice.USAGE_STATS)
                             ?: DetectorChoice.USAGE_STATS,
                     protectionEnabled = prefs[KEY_PROTECTION] ?: false,
+                    warningLeadSeconds = prefs[KEY_WARNING_LEAD] ?: DEFAULT_WARNING_LEAD_SECONDS,
+                    role = prefs[KEY_ROLE]?.toEnum(DeviceRole.PARENT) ?: DeviceRole.PARENT,
                 )
             }
+
+    suspend fun setRole(role: DeviceRole) {
+        store.edit { it[KEY_ROLE] = role.name }
+    }
 
     suspend fun setMode(mode: AppMode) {
         store.edit { it[KEY_MODE] = mode.name }
@@ -80,6 +93,10 @@ class SettingsDataStore(
         store.edit { it[KEY_PROTECTION] = enabled }
     }
 
+    suspend fun setWarningLeadSeconds(seconds: Int) {
+        store.edit { it[KEY_WARNING_LEAD] = seconds }
+    }
+
     suspend fun clear() {
         store.edit { it.clear() }
     }
@@ -96,6 +113,8 @@ class SettingsDataStore(
         val KEY_OCR_READY = booleanPreferencesKey("ocr_model_ready")
         val KEY_DETECTOR = stringPreferencesKey("detector")
         val KEY_PROTECTION = booleanPreferencesKey("protection_enabled")
+        val KEY_WARNING_LEAD = intPreferencesKey("warning_lead_seconds")
+        val KEY_ROLE = stringPreferencesKey("device_role")
 
         fun from(context: Context): DataStore<Preferences> = context.settingsStore
     }

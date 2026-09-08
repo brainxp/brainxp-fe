@@ -10,10 +10,17 @@ data class MaterialEntity(
     @PrimaryKey val id: String,
     val title: String,
     val type: String,
-    val charCount: Int,
     val status: String,
     val createdAt: Long,
     val sessionCount: Int = 0,
+    val questionCount: Int = 0,
+    val assessedLevel: String? = null,
+    val declaredLevel: String? = null,
+    val gateReason: String? = null,
+    val topicSummary: String? = null,
+    val unfinishedSessionId: String? = null,
+    val unfinishedAnswered: Int? = null,
+    val unfinishedTotal: Int? = null,
 )
 
 @Entity(
@@ -84,9 +91,8 @@ data class AnswerEntity(
 @Entity(tableName = "unlock_sessions", indices = [Index("status")])
 data class UnlockSessionEntity(
     @PrimaryKey val id: String,
-    val endAtElapsed: Long,
-    val endAtWallClock: Long,
-    val bootWallClock: Long,
+    val budgetMillis: Long,
+    val consumedByPackage: Map<String, Long>,
     val allowedPackages: List<String>,
     val status: UnlockStatus,
 )
@@ -107,14 +113,6 @@ data class ActivityEventEntity(
     val syncState: SyncState = SyncState.PENDING,
 )
 
-@Entity(tableName = "ocr_drafts", primaryKeys = ["draftId", "pageIndex"])
-data class OcrDraftEntity(
-    val draftId: String,
-    val pageIndex: Int,
-    val text: String,
-    val updatedAt: Long,
-)
-
 @Entity(tableName = "pending_operations", indices = [Index("nextAttemptAt")])
 data class PendingOperationEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -123,4 +121,15 @@ data class PendingOperationEntity(
     val attempts: Int = 0,
     val nextAttemptAt: Long,
     val createdAt: Long,
+)
+
+@Entity(tableName = "notifications", indices = [Index("createdAt"), Index("readAt")])
+data class NotificationEntity(
+    @PrimaryKey val id: String,
+    val kind: String,
+    val materialId: String?,
+    val materialTitle: String,
+    val questionCount: Int,
+    val createdAt: Long,
+    val readAt: Long? = null,
 )

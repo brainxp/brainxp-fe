@@ -27,19 +27,18 @@ enum class GuardianStatus {
 data class FamilyChild(
     val childId: String,
     val name: String,
-    val guardianStatus: GuardianStatus,
-    val availableMinutes: Int,
-    val sessionsThisWeek: Int,
-    val accuracy: Double?,
+    val level: AcademicLevel?,
 )
 
-data class ChildConfig(
-    val restrictedPackages: List<String>,
-    val dailyCapMinutes: Int,
-    val rewardPerSessionMinutes: Int,
-)
-
-data class PairingResult(
+data class PairingCode(
+    val code: String,
     val childId: String,
-    val childName: String,
+    val expiresAt: String,
+    val attemptsAllowed: Int,
+)
+
+data class DeviceBinding(
+    val bound: Boolean,
+    val familyMode: Boolean,
+    val subjectName: String?,
 )

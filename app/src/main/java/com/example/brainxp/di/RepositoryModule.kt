@@ -1,17 +1,23 @@
 package com.example.brainxp.di
 
+import com.example.brainxp.blocking.InstalledAppsSource
 import com.example.brainxp.data.repo.ActivityLogRepository
+import com.example.brainxp.data.repo.AppLabels
+import com.example.brainxp.data.repo.ConsumptionReporter
 import com.example.brainxp.data.repo.FamilyRepository
+import com.example.brainxp.data.repo.LocalData
 import com.example.brainxp.data.repo.MaterialRepository
+import com.example.brainxp.data.repo.NetworkFamilyRepository
+import com.example.brainxp.data.repo.NetworkMaterialRepository
+import com.example.brainxp.data.repo.NetworkRewardRepository
 import com.example.brainxp.data.repo.RestrictionRepository
+import com.example.brainxp.data.repo.RewardReconciler
 import com.example.brainxp.data.repo.RewardRepository
-import com.example.brainxp.data.repo.SessionRepository
-import com.example.brainxp.data.repo.fake.FakeActivityLogRepository
-import com.example.brainxp.data.repo.fake.FakeFamilyRepository
-import com.example.brainxp.data.repo.fake.FakeMaterialRepository
-import com.example.brainxp.data.repo.fake.FakeRestrictionRepository
-import com.example.brainxp.data.repo.fake.FakeRewardRepository
-import com.example.brainxp.data.repo.fake.FakeSessionRepository
+import com.example.brainxp.data.repo.RoomActivityLogRepository
+import com.example.brainxp.data.repo.RoomRestrictionRepository
+import com.example.brainxp.data.repo.RoomUnlockRepository
+import com.example.brainxp.data.repo.StoredLocalData
+import com.example.brainxp.data.repo.UnlockRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -21,20 +27,29 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 interface RepositoryModule {
     @Binds
-    fun bindMaterialRepository(impl: FakeMaterialRepository): MaterialRepository
+    fun bindLocalData(impl: StoredLocalData): LocalData
 
     @Binds
-    fun bindSessionRepository(impl: FakeSessionRepository): SessionRepository
+    fun bindMaterialRepository(impl: NetworkMaterialRepository): MaterialRepository
 
     @Binds
-    fun bindRewardRepository(impl: FakeRewardRepository): RewardRepository
+    fun bindRewardRepository(impl: NetworkRewardRepository): RewardRepository
 
     @Binds
-    fun bindRestrictionRepository(impl: FakeRestrictionRepository): RestrictionRepository
+    fun bindRestrictionRepository(impl: RoomRestrictionRepository): RestrictionRepository
 
     @Binds
-    fun bindActivityLogRepository(impl: FakeActivityLogRepository): ActivityLogRepository
+    fun bindActivityLogRepository(impl: RoomActivityLogRepository): ActivityLogRepository
 
     @Binds
-    fun bindFamilyRepository(impl: FakeFamilyRepository): FamilyRepository
+    fun bindAppLabels(impl: InstalledAppsSource): AppLabels
+
+    @Binds
+    fun bindFamilyRepository(impl: NetworkFamilyRepository): FamilyRepository
+
+    @Binds
+    fun bindUnlockRepository(impl: RoomUnlockRepository): UnlockRepository
+
+    @Binds
+    fun bindConsumptionReporter(impl: RewardReconciler): ConsumptionReporter
 }

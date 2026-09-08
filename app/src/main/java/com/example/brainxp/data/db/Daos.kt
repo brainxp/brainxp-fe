@@ -24,6 +24,12 @@ interface MaterialDao {
     @Query("DELETE FROM materials WHERE id = :id")
     suspend fun deleteById(id: String)
 
+    @Query("DELETE FROM materials WHERE id NOT IN (:keep)")
+    suspend fun keepOnly(keep: List<String>)
+
+    @Query("DELETE FROM materials")
+    suspend fun clearAll()
+
     @Query("SELECT COUNT(*) FROM materials")
     suspend fun count(): Int
 }
@@ -204,27 +210,6 @@ interface ActivityEventDao {
 }
 
 @Dao
-interface OcrDraftDao {
-    @Upsert
-    suspend fun upsert(page: OcrDraftEntity)
-
-    @Query("SELECT * FROM ocr_drafts WHERE draftId = :draftId ORDER BY pageIndex ASC")
-    suspend fun findForDraft(draftId: String): List<OcrDraftEntity>
-
-    @Query("SELECT * FROM ocr_drafts WHERE draftId = :draftId ORDER BY pageIndex ASC")
-    fun observeForDraft(draftId: String): Flow<List<OcrDraftEntity>>
-
-    @Query("SELECT SUM(LENGTH(text)) FROM ocr_drafts WHERE draftId = :draftId")
-    suspend fun charCountForDraft(draftId: String): Int?
-
-    @Query("DELETE FROM ocr_drafts WHERE draftId = :draftId")
-    suspend fun deleteDraft(draftId: String)
-
-    @Query("SELECT DISTINCT draftId FROM ocr_drafts")
-    suspend fun findDraftIds(): List<String>
-}
-
-@Dao
 interface PendingOperationDao {
     @Insert
     suspend fun insert(operation: PendingOperationEntity): Long
@@ -278,4 +263,31 @@ interface PendingOperationDao {
     companion object {
         const val DEFAULT_BATCH = 20
     }
+}
+
+@Dao
+interface NotificationDao {
+    @Upsert
+    suspend fun upsert(notification: NotificationEntity)
+
+    @Query("SELECT * FROM notifications ORDER BY createdAt DESC LIMIT :limit")
+    fun observeRecent(limit: Int): Flow<List<NotificationEntity>>
+
+    @Query("SELECT COUNT(*) FROM notifications WHERE readAt IS NULL")
+    fun observeUnreadCount(): Flow<Int>
+
+    @Query("SELECT * FROM notifications WHERE materialId = :materialId AND kind = :kind LIMIT 1")
+    suspend fun findFor(
+        materialId: String,
+        kind: String,
+    ): NotificationEntity?
+
+    @Query("UPDATE notifications SET readAt = :at WHERE id = :id AND readAt IS NULL")
+    suspend fun markRead(
+        id: String,
+        at: Long,
+    )
+
+    @Query("DELETE FROM notifications")
+    suspend fun clearAll()
 }
