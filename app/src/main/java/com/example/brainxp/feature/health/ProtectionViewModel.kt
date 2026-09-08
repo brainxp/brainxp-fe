@@ -18,8 +18,7 @@ import javax.inject.Inject
 
 data class ProtectionUiState(
     val status: ProtectionStatus = ProtectionStatus.OFF,
-    val pinRequired: Boolean = false,
-    val pinWrong: Boolean = false,
+    val blocked: Boolean = false,
 )
 
 @HiltViewModel
@@ -36,23 +35,11 @@ class ProtectionViewModel
                 asked.copy(status = status)
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(TIMEOUT), ProtectionUiState())
 
-        private var verified = false
-
         fun toggle() {
             viewModelScope.launch {
-                if (!protectionSwitch.toggle(verified)) gate.update { it.copy(pinRequired = true) }
+                gate.update { it.copy(blocked = !protectionSwitch.toggle()) }
             }
         }
-
-        fun submitPin(pin: String) {
-            viewModelScope.launch {
-                verified = protectionSwitch.verify(pin)
-                gate.update { it.copy(pinRequired = !verified, pinWrong = !verified) }
-                if (verified) toggle()
-            }
-        }
-
-        fun dismissPin() = gate.update { it.copy(pinRequired = false, pinWrong = false) }
 
         private companion object {
             const val TIMEOUT = 5_000L
