@@ -40,8 +40,9 @@ class HistoryViewModel
         private fun load() {
             mutableState.update { it.copy(loading = true, error = null) }
             viewModelScope.launch {
+                val result = rewards.history()
                 mutableState.update {
-                    when (val result = rewards.history()) {
+                    when (result) {
                         is AppResult.Success -> it.copy(entries = result.value, loading = false)
                         is AppResult.Failure -> it.copy(loading = false, error = result.error)
                     }
