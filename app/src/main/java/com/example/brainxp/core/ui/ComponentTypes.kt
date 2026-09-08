@@ -21,3 +21,10 @@ data class ReceiptLine(
     val voided: Boolean = false,
     val heading: Boolean = false,
 )
+
+data class StepperEntry(
+    val value: Int,
+    val range: IntRange,
+    val label: String,
+    val onCommit: (Int) -> Unit,
+)
