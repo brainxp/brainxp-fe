@@ -21,7 +21,6 @@ enum class DotState {
 }
 
 data class QuizUiState(
-    val title: String,
     val questions: List<QuizQuestion> = emptyList(),
     val index: Int = 0,
     val answers: Map<String, String> = emptyMap(),
