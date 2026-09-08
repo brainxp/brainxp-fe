@@ -14,25 +14,6 @@ class PreparingModeTest {
         )
 
     @Test
-    fun `an unseen tutorial takes the screen before anything else`() {
-        assertEquals(PreparingMode.TUTORIAL, modeOf(loading.copy(guide = true)))
-    }
-
-    @Test
-    fun `the tutorial wins even once the questions are ready`() {
-        val ready = loading.copy(guide = true, stage = PreparingStage.READY, readyQuestions = 10)
-
-        assertEquals(PreparingMode.TUTORIAL, modeOf(ready))
-    }
-
-    @Test
-    fun `finishing the tutorial while questions are still being written lands on the game`() {
-        val finished = loading.copy(guide = false, stage = PreparingStage.VALIDATING)
-
-        assertEquals(PreparingMode.GAME, modeOf(finished))
-    }
-
-    @Test
     fun `a partly written set still shows the game rather than the start action`() {
         val partial = loading.copy(stage = PreparingStage.PARTIAL, readyQuestions = 3, totalQuestions = 10)
 
@@ -59,8 +40,8 @@ class PreparingModeTest {
     }
 
     @Test
-    fun `a second material skips the tutorial and goes straight to the game`() {
-        val second = PreparingUiState(stage = PreparingStage.READING, materialId = "m-2", guide = false)
+    fun `a second material goes straight to the game`() {
+        val second = PreparingUiState(stage = PreparingStage.READING, materialId = "m-2")
 
         assertEquals(PreparingMode.GAME, modeOf(second))
     }
