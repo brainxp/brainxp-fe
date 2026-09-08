@@ -1,5 +1,6 @@
 package com.example.brainxp.feature.questions
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -41,6 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.brainxp.R
 import com.example.brainxp.core.ui.BrainXPTheme
+import com.example.brainxp.core.ui.ConfirmDialog
 import com.example.brainxp.core.ui.Field
 import com.example.brainxp.core.ui.Note
 import com.example.brainxp.core.ui.PillShape
@@ -49,6 +51,28 @@ import com.example.brainxp.core.ui.PrimaryButton
 import com.example.brainxp.core.ui.ScreenNav
 import com.example.brainxp.core.ui.StatusPill
 import com.example.brainxp.core.ui.Tokens
+
+@Composable
+private fun LeaveDialog(
+    state: QuizUiState,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    ConfirmDialog(
+        title = stringResource(R.string.quiz_leave_title),
+        body =
+            if (state.complete) {
+                stringResource(R.string.quiz_leave_body_complete)
+            } else {
+                stringResource(R.string.quiz_leave_body, state.total - state.filled)
+            },
+        confirm = stringResource(R.string.quiz_leave_confirm),
+        dismiss = stringResource(R.string.quiz_leave_dismiss),
+        destructive = false,
+        onConfirm = onConfirm,
+        onDismiss = onDismiss,
+    )
+}
 
 @Composable
 fun QuizScreen(
@@ -62,9 +86,24 @@ fun QuizScreen(
     if (state.questions.isEmpty()) return
 
     var confirming by rememberSaveable { mutableStateOf(false) }
+    var leaving by rememberSaveable { mutableStateOf(false) }
     val pager = rememberPagerState(initialPage = state.index, pageCount = { state.total })
     val shown by rememberUpdatedState(state.index)
     val dispatch by rememberUpdatedState(onEvent)
+
+    if (onBack != null) {
+        BackHandler(enabled = !leaving) { leaving = true }
+        if (leaving) {
+            LeaveDialog(
+                state = state,
+                onConfirm = {
+                    leaving = false
+                    onBack()
+                },
+                onDismiss = { leaving = false },
+            )
+        }
+    }
 
     LaunchedEffect(state.index) {
         if (pager.currentPage != state.index) pager.animateScrollToPage(state.index)
@@ -85,7 +124,7 @@ fun QuizScreen(
                 .padding(horizontal = spacing.screenHorizontal)
                 .padding(bottom = spacing.screenBottom),
     ) {
-        ScreenNav(title = "", onBack = onBack) {
+        ScreenNav(title = "", onBack = onBack?.let { { leaving = true } }) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(spacing.xs),
                 verticalAlignment = Alignment.CenterVertically,
@@ -140,7 +179,7 @@ fun QuizScreen(
                         if (state.complete) {
                             stringResource(R.string.quiz_hint_complete)
                         } else {
-                            stringResource(R.string.quiz_hint_partial, state.total - state.filled)
+                            stringResource(R.string.quiz_hint_partial)
                         },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
