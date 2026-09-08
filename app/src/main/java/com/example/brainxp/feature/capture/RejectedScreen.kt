@@ -29,6 +29,7 @@ fun RejectedScreen(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
+    aboutLevel: Boolean = true,
 ) {
     val spacing = BrainXPTheme.spacing
 
@@ -44,13 +45,18 @@ fun RejectedScreen(
     ) {
         ScreenNav(title = stringResource(R.string.rejected_title), onBack = onBack)
 
-        Note(
-            text = stringResource(R.string.rejected_alert, assessedLevel, declaredLevel),
-            alert = true,
-        )
+        if (aboutLevel) {
+            Note(
+                text = stringResource(R.string.rejected_alert, assessedLevel, declaredLevel),
+                alert = true,
+            )
+        }
 
         Text(
-            text = stringResource(R.string.rejected_headline),
+            text =
+                stringResource(
+                    if (aboutLevel) R.string.rejected_headline else R.string.rejected_headline_other,
+                ),
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(top = spacing.sm),
@@ -61,6 +67,27 @@ fun RejectedScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
+        if (aboutLevel) {
+            LevelRules()
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Text(
+            text = stringResource(R.string.rejected_deleted),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(modifier = Modifier.size(spacing.xs))
+        PrimaryButton(text = stringResource(R.string.rejected_action), onClick = onRetry)
+    }
+}
+
+@Composable
+private fun LevelRules(modifier: Modifier = Modifier) {
+    val spacing = BrainXPTheme.spacing
+
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(spacing.md)) {
         Text(
             text = stringResource(R.string.rejected_rules),
             style = MaterialTheme.typography.labelSmall,
@@ -84,16 +111,6 @@ fun RejectedScreen(
                 destructiveValue = true,
             )
         }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Text(
-            text = stringResource(R.string.rejected_deleted),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(modifier = Modifier.size(spacing.xs))
-        PrimaryButton(text = stringResource(R.string.rejected_action), onClick = onRetry)
     }
 }
 
