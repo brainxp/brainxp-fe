@@ -13,11 +13,24 @@ class SelectableForegroundAppDetector(
     private val choice: StateFlow<DetectorChoice>,
 ) : ForegroundAppDetector {
     @OptIn(ExperimentalCoroutinesApi::class)
-    override val foregroundPackage: Flow<String> = choice.flatMapLatest { selected(it).foregroundPackage }
+    override val foregroundPackage: Flow<String> = choice.flatMapLatest { working(it).foregroundPackage }
 
     override fun isAvailable(): Boolean = selected(choice.value).isAvailable()
 
     override fun missingRequirements(): List<SpecialPermission> = selected(choice.value).missingRequirements()
+
+    private fun working(value: DetectorChoice): ForegroundAppDetector {
+        val chosen = selected(value)
+        if (chosen.isAvailable()) return chosen
+        val spare = selected(other(value))
+        return if (spare.isAvailable()) spare else chosen
+    }
+
+    private fun other(value: DetectorChoice): DetectorChoice =
+        when (value) {
+            DetectorChoice.USAGE_STATS -> DetectorChoice.ACCESSIBILITY
+            DetectorChoice.ACCESSIBILITY -> DetectorChoice.USAGE_STATS
+        }
 
     private fun selected(value: DetectorChoice): ForegroundAppDetector =
         when (value) {
