@@ -49,7 +49,6 @@ import com.example.brainxp.core.ui.brainxpSwitchColors
 import com.example.brainxp.core.ui.levelLabel
 import com.example.brainxp.core.ui.shortDuration
 import com.example.brainxp.data.repo.SubjectPolicy
-import com.example.brainxp.domain.ProtectionControl
 import com.example.brainxp.domain.model.AcademicLevel
 import com.example.brainxp.domain.model.PolicyDraft
 import com.example.brainxp.domain.model.PolicyLimits
@@ -150,9 +149,7 @@ fun SettingsScreen(
             item(title = stringResource(R.string.settings_permissions), onClick = onPermissions)
         }
 
-        if (state.protection == ProtectionControl.OWNED) {
-            protection()
-        }
+        protection()
 
         RowGroup {
             item(title = stringResource(R.string.settings_privacy), onClick = onPrivacyPolicy)

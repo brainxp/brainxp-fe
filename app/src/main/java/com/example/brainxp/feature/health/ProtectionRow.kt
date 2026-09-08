@@ -1,6 +1,5 @@
 package com.example.brainxp.feature.health
 
-import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -9,9 +8,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.brainxp.R
 import com.example.brainxp.blocking.ProtectionStatus
-import com.example.brainxp.core.ui.Note
 import com.example.brainxp.core.ui.RowGroup
-import com.example.brainxp.core.ui.brainxpSwitchColors
 
 @Composable
 fun ProtectionRow(modifier: Modifier = Modifier) {
@@ -29,17 +26,6 @@ fun ProtectionRow(modifier: Modifier = Modifier) {
                         ProtectionStatus.OFF -> R.string.settings_protection_off
                     },
                 ),
-            trailing = {
-                Switch(
-                    checked = state.status != ProtectionStatus.OFF,
-                    onCheckedChange = { viewModel.toggle() },
-                    colors = brainxpSwitchColors(),
-                )
-            },
         )
-    }
-
-    if (state.blocked) {
-        Note(text = stringResource(R.string.protection_managed))
     }
 }

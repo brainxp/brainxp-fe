@@ -23,7 +23,6 @@ class SessionTeardown
                 settings.setRole(DeviceRole.PARENT)
                 settings.setMode(AppMode.UNSET)
                 settings.setOnboardingComplete(false)
-                settings.setProtectionEnabled(false)
                 auth.clear()
             }
         }

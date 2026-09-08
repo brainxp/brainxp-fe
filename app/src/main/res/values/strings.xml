@@ -324,7 +324,7 @@ kehilangan kontak.</string>
     <string name="settings_protection">Perlindungan</string>
     <string name="settings_protection_on">Aplikasi terkunci dijaga terus</string>
     <string name="settings_protection_degraded">Jalan sebagian — izinnya perlu diperbaiki</string>
-    <string name="settings_protection_off">Aplikasi terkunci bisa dibuka bebas</string>
+    <string name="settings_protection_off">Belum ada aplikasi yang dikunci</string>
     <string name="settings_permissions">Izin sistem</string>
     <string name="settings_pending">Perubahan aturan berlaku mulai %1$s. Sampai saat itu aturan lama yang dipakai.</string>
     <string name="settings_sign_out">Keluar dari akun</string>

@@ -27,11 +27,6 @@ enum class ProtectionStatus {
     DEGRADED,
 }
 
-private data class GuardConfig(
-    val enabled: Boolean,
-    val detector: DetectorChoice,
-)
-
 private fun PermissionSnapshot.detectorGap(detector: DetectorChoice): List<SpecialPermission> =
     if (detector == DetectorChoice.ACCESSIBILITY && !isGranted(SpecialPermission.ACCESSIBILITY)) {
         listOf(SpecialPermission.ACCESSIBILITY)
@@ -65,10 +60,10 @@ class ProtectionStateHolder
                 },
                 unlocks.state,
                 permissions.state,
-                settings.settings.map { GuardConfig(it.protectionHeld, it.detector) }.distinctUntilChanged(),
-            ) { packages, unlock, permissionState, config ->
-                val enabled = config.enabled
-                val missing = permissionState.missingRequired + permissionState.detectorGap(config.detector)
+                settings.settings.map { it.detector }.distinctUntilChanged(),
+            ) { packages, unlock, permissionState, detector ->
+                val enabled = protectionHeld(packages.size)
+                val missing = permissionState.missingRequired + permissionState.detectorGap(detector)
                 ProtectionSnapshot(
                     status =
                         when {

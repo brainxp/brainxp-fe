@@ -3,7 +3,7 @@ package com.example.brainxp.blocking
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.ContextCompat
-import com.example.brainxp.data.prefs.SettingsDataStore
+import com.example.brainxp.data.repo.RestrictionRepository
 import com.example.brainxp.di.AppScope
 import com.example.brainxp.domain.protectionHeld
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -19,13 +19,14 @@ class ProtectionController
     @Inject
     constructor(
         @ApplicationContext private val context: Context,
-        private val settings: SettingsDataStore,
+        private val restrictions: RestrictionRepository,
         @AppScope private val scope: CoroutineScope,
     ) {
         fun start() {
             scope.launch {
-                settings.settings
-                    .map { it.protectionHeld }
+                restrictions
+                    .observeRestricted()
+                    .map { apps -> protectionHeld(apps.count { it.enabled }) }
                     .distinctUntilChanged()
                     .collect { enabled -> if (enabled) startService() else stopService() }
             }

@@ -318,7 +318,7 @@
     <string name="settings_protection">Protection</string>
     <string name="settings_protection_on">Locked apps stay guarded</string>
     <string name="settings_protection_degraded">Running in part — permissions need fixing</string>
-    <string name="settings_protection_off">Locked apps open freely</string>
+    <string name="settings_protection_off">No apps locked yet</string>
     <string name="settings_permissions">System permissions</string>
     <string name="settings_pending">The loosened rule takes effect on %1$s. Until then the old rule applies.</string>
     <string name="settings_sign_out">Sign out</string>
