@@ -77,6 +77,7 @@ class MaterialUploadWorker
         @Assisted params: WorkerParameters,
         private val materials: MaterialRepository,
         private val preparation: MaterialPreparation,
+        private val generation: QuestionGenerationQueue,
     ) : CoroutineWorker(context, params) {
         override suspend fun doWork(): Result {
             val path = inputData.getString(KEY_CACHED_PATH) ?: return Result.failure()
@@ -93,6 +94,7 @@ class MaterialUploadWorker
             return when (val result = materials.upload(title, type, path)) {
                 is AppResult.Success -> {
                     file.delete()
+                    generation.enqueue(result.value.id)
                     preparation.watch(result.value.id, title)
                     Result.success()
                 }
