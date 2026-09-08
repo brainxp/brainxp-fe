@@ -49,7 +49,6 @@ import com.example.brainxp.core.ui.PrimaryButton
 import com.example.brainxp.core.ui.ScreenNav
 import com.example.brainxp.core.ui.StatusPill
 import com.example.brainxp.core.ui.Tokens
-import com.example.brainxp.core.ui.multiplierText
 
 @Composable
 fun QuizScreen(
@@ -86,14 +85,14 @@ fun QuizScreen(
                 .padding(horizontal = spacing.screenHorizontal)
                 .padding(bottom = spacing.screenBottom),
     ) {
-        ScreenNav(title = state.title, onBack = onBack) {
+        ScreenNav(title = "", onBack = onBack) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(spacing.xs),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 state.current?.let { question ->
                     StatusPill(
-                        text = "${question.difficulty} ${multiplierText(question.factor)}",
+                        text = question.difficulty,
                         tone = PillTone.BLUE,
                     )
                 }
@@ -464,7 +463,6 @@ private fun QuizPreview() {
         QuizScreen(
             state =
                 QuizUiState(
-                    title = "Sesi belajar",
                     questions =
                         List(PREVIEW_COUNT) { index ->
                             QuizQuestion(
