@@ -264,3 +264,30 @@ interface PendingOperationDao {
         const val DEFAULT_BATCH = 20
     }
 }
+
+@Dao
+interface NotificationDao {
+    @Upsert
+    suspend fun upsert(notification: NotificationEntity)
+
+    @Query("SELECT * FROM notifications ORDER BY createdAt DESC LIMIT :limit")
+    fun observeRecent(limit: Int): Flow<List<NotificationEntity>>
+
+    @Query("SELECT COUNT(*) FROM notifications WHERE readAt IS NULL")
+    fun observeUnreadCount(): Flow<Int>
+
+    @Query("SELECT * FROM notifications WHERE materialId = :materialId AND kind = :kind LIMIT 1")
+    suspend fun findFor(
+        materialId: String,
+        kind: String,
+    ): NotificationEntity?
+
+    @Query("UPDATE notifications SET readAt = :at WHERE id = :id AND readAt IS NULL")
+    suspend fun markRead(
+        id: String,
+        at: Long,
+    )
+
+    @Query("DELETE FROM notifications")
+    suspend fun clearAll()
+}
