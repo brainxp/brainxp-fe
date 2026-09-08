@@ -6,6 +6,7 @@ import com.example.brainxp.core.network.BindingCheckRequestDto
 import com.example.brainxp.core.network.ChildRequestDto
 import com.example.brainxp.core.network.ErrorMapper
 import com.example.brainxp.core.network.FamilyApi
+import com.example.brainxp.core.network.GuardianEventDto
 import com.example.brainxp.core.network.HeartbeatRequestDto
 import com.example.brainxp.core.network.PairRequestDto
 import com.example.brainxp.core.network.PairingCodeDto
@@ -17,6 +18,7 @@ import com.example.brainxp.data.prefs.AuthDataStore
 import com.example.brainxp.domain.model.AcademicLevel
 import com.example.brainxp.domain.model.DeviceBinding
 import com.example.brainxp.domain.model.FamilyChild
+import com.example.brainxp.domain.model.GuardianEvent
 import com.example.brainxp.domain.model.GuardianStatus
 import com.example.brainxp.domain.model.PairingCode
 import javax.inject.Inject
@@ -30,6 +32,7 @@ class NetworkFamilyRepository
         private val binding: InstallBinding,
         private val auth: AuthDataStore,
         private val errors: ErrorMapper,
+        private val teardown: SessionTeardown,
     ) : FamilyRepository {
         override suspend fun children(): AppResult<List<FamilyChild>> = call { api.children().map(SubjectDto::toChild) }
 
@@ -50,9 +53,15 @@ class NetworkFamilyRepository
             }
 
         override suspend fun createSelfSubject(level: AcademicLevel): AppResult<FamilyChild> =
-            call { api.createSelfSubject(SelfSubjectRequestDto(academicLevel = level.wire)).toChild() }
+            call {
+                val subject = api.createSelfSubject(SelfSubjectRequestDto(academicLevel = level.wire))
+                auth.saveSubject(subject.id)
+                subject.toChild()
+            }
 
         override suspend fun removeChild(childId: String): AppResult<Unit> = call { api.deleteSubject(childId) }
+
+        override suspend fun releaseDevice(childId: String): AppResult<Unit> = call { api.releaseDevice(childId) }
 
         override suspend fun pairingCode(childId: String): AppResult<PairingCode> =
             call { api.pairingCode(childId) }.map(PairingCodeDto::toCode)
@@ -67,6 +76,7 @@ class NetworkFamilyRepository
                             modelName = Build.MODEL,
                         ),
                     )
+                teardown.run()
                 auth.saveTokens(token.accessToken, token.refreshToken)
                 auth.saveIdentity(token.subjectId, token.familyId, token.role)
             }
@@ -75,8 +85,18 @@ class NetworkFamilyRepository
             call { api.checkBinding(BindingCheckRequestDto(binding.value())) }
                 .map { DeviceBinding(bound = it.bound, familyMode = it.familyMode, subjectName = it.subjectName) }
 
-        override suspend fun reportHealth(status: GuardianStatus): AppResult<Unit> =
-            call { api.heartbeat(HeartbeatRequestDto(guardianStatus = status.name.lowercase())) }
+        override suspend fun reportHealth(
+            status: GuardianStatus,
+            events: List<GuardianEvent>,
+        ): AppResult<Unit> =
+            call {
+                api.heartbeat(
+                    HeartbeatRequestDto(
+                        guardianStatus = status.name.lowercase(),
+                        events = events.map(GuardianEvent::toDto),
+                    ),
+                )
+            }
 
         private suspend fun <T> call(block: suspend () -> T): AppResult<T> =
             runCatching { block() }
@@ -85,6 +105,13 @@ class NetworkFamilyRepository
                     onFailure = { AppResult.Failure(errors.map(it)) },
                 )
     }
+
+private fun GuardianEvent.toDto(): GuardianEventDto =
+    GuardianEventDto(
+        type = type,
+        permission = permission,
+        required = required,
+    )
 
 private fun SubjectDto.toChild(): FamilyChild =
     FamilyChild(
