@@ -12,7 +12,6 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.example.brainxp.core.ui.ErrorState
 import com.example.brainxp.core.ui.LoadingState
-import com.example.brainxp.core.ui.Note
 import com.example.brainxp.domain.model.AcademicLevel
 import com.example.brainxp.feature.family.BalanceAdjustScreen
 import com.example.brainxp.feature.family.BalanceAdjustViewModel
@@ -58,7 +57,6 @@ private fun FamilyHomeEntry(backStack: NavBackStack<NavKey>) {
         else -> {
             FamilyHomeScreen(
                 state = load.home,
-                onBack = { backStack.popOrIgnore() },
                 onOpenChild = { backStack.add(MainRoute.FamilyChild(it)) },
                 onNewChild = { backStack.add(MainRoute.FamilyNewChild) },
                 onSelfRules = {
@@ -70,7 +68,7 @@ private fun FamilyHomeEntry(backStack: NavBackStack<NavKey>) {
                     }
                 },
                 onJoinRules = { viewModel.claimOwnRules(AcademicLevel.UMUM) },
-                onSettings = { backStack.add(MainRoute.Settings) },
+                onSignOut = viewModel::signOut,
             )
         }
     }
@@ -84,7 +82,7 @@ private fun NewChildEntry(backStack: NavBackStack<NavKey>) {
     LaunchedEffect(load.createdId) {
         val created = load.createdId ?: return@LaunchedEffect
         viewModel.consumeCreated()
-        backStack.add(MainRoute.FamilyPairing(created))
+        backStack.add(MainRoute.FamilyChildPolicy(created, setup = true))
     }
 
     NewChildScreen(
@@ -102,6 +100,7 @@ private fun ChildReportEntry(
     val load by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(key.childId) { viewModel.load(key.childId, "") }
+
     LaunchedEffect(load.removed) { if (load.removed) backStack.popOrIgnore() }
 
     val report = load.report
@@ -122,6 +121,8 @@ private fun ChildReportEntry(
                 onIssueCode = { backStack.add(MainRoute.FamilyPairing(key.childId)) },
                 onAdjustBalance = { backStack.add(MainRoute.FamilyBalance(key.childId)) },
                 onRemove = viewModel::remove,
+                onReleaseDevice = viewModel::releaseDevice,
+                released = load.released,
             )
         }
     }
@@ -137,6 +138,13 @@ private fun ChildPolicyEntry(
 
     LaunchedEffect(key.childId) { viewModel.load(key.childId, "") }
 
+    LaunchedEffect(load.saved) {
+        if (load.saved && key.setup) {
+            backStack.popOrIgnore()
+            backStack.add(MainRoute.FamilyPairing(key.childId))
+        }
+    }
+
     val policy = load.policy
     when {
         load.error != null && policy == null -> {
@@ -148,15 +156,16 @@ private fun ChildPolicyEntry(
         }
 
         else -> {
-            Column {
-                load.error?.let { failure -> ErrorState(error = failure) }
-                load.notice?.let { text -> Note(text = text, alert = true) }
-                PolicyEditorScreen(
-                    state = policy,
-                    onBack = { backStack.popOrIgnore() },
-                    onEvent = viewModel::onEvent,
-                )
-            }
+            PolicyEditorScreen(
+                state = policy,
+                onBack = { backStack.popOrIgnore() },
+                onEvent = viewModel::onEvent,
+                setup = key.setup,
+                saving = load.saving,
+                saved = load.saved && !key.setup,
+                notice = load.notice,
+                failure = load.error,
+            )
         }
     }
 }
