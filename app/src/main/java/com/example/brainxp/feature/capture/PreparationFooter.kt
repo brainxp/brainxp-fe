@@ -41,14 +41,14 @@ fun PreparationFooter(
                 text =
                     when {
                         state.done -> stringResource(R.string.tour_prep_ready)
-                        state.ready -> stringResource(R.string.tour_prep_working, state.readyQuestions)
-                        else -> stringResource(R.string.tour_prep_reading)
+                        state.stage == PreparingStage.READING -> stringResource(R.string.tour_prep_reading)
+                        else -> stringResource(R.string.tour_prep_working)
                     },
                 style = MaterialTheme.typography.labelMedium,
                 color = if (state.done) BrainXPTheme.extendedColors.okInk else scheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
             )
-            if (state.ready) {
+            if (state.done) {
                 TextButton(onClick = onStart) {
                     Text(text = stringResource(R.string.preparing_start))
                 }
