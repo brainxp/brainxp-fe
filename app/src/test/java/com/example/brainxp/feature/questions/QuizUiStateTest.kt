@@ -28,7 +28,7 @@ private fun essay(id: String) =
         rubricCriteria = 3,
     )
 
-private fun state(vararg questions: QuizQuestion) = QuizUiState(title = "Sesi belajar", questions = questions.toList())
+private fun state(vararg questions: QuizQuestion) = QuizUiState(questions = questions.toList())
 
 class QuizUiStateTest {
     @Test
@@ -143,7 +143,6 @@ class QuizUiStateTest {
 
         val resumed = session.toUiState()
 
-        assertEquals("Bab 4", resumed.title)
         assertEquals(1, resumed.chosenFor("a"))
         assertEquals("gaya adalah massa kali percepatan", resumed.draftFor("b"))
         assertEquals(2, resumed.filled)
@@ -174,7 +173,6 @@ class QuizUiStateTest {
 
         assertEquals(1, opened.total)
         assertEquals("a", opened.current?.id)
-        assertEquals("Sesi belajar", opened.title)
     }
 
     @Test
