@@ -31,5 +31,12 @@ fun clock(seconds: Int): String {
 
 fun clock(duration: Duration): String = clock(duration.inWholeSeconds.toInt())
 
+fun fullClock(seconds: Int): String {
+    val parts = durationParts(seconds)
+    return "%02d:%02d:%02d".format(parts.hours, parts.minutes, parts.seconds)
+}
+
+fun fullClock(duration: Duration): String = fullClock(duration.inWholeSeconds.toInt())
+
 private const val SECONDS_PER_HOUR = 3_600
 private const val SECONDS_PER_MINUTE = 60
