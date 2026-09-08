@@ -2,6 +2,7 @@ package com.example.brainxp.domain
 
 import com.example.brainxp.domain.model.DeviceRole
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -54,13 +55,13 @@ class ParentLockWiringTest {
     }
 
     @Test
-    fun `a child device with a pin refuses all three without verification`() {
-        val locked = ChildDeviceLock(role = DeviceRole.CHILD, pinSet = true)
+    fun `a paired child device refuses all three with no way to unlock`() {
+        val locked = ChildDeviceLock(role = DeviceRole.CHILD)
 
         GUARDED_CALL_SITES.keys.forEach { action ->
-            assertTrue(
-                "$action must demand the pin",
-                ParentGate.requiresPin(locked, action),
+            assertFalse(
+                "$action must stay refused on a paired child device",
+                ParentGate.allows(locked, action),
             )
         }
     }
