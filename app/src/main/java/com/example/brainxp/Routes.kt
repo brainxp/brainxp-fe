@@ -26,9 +26,6 @@ sealed interface OnboardingRoute : NavKey {
     data object Level : OnboardingRoute
 
     @Serializable
-    data object SetParentPin : OnboardingRoute
-
-    @Serializable
     data object PermissionSetup : OnboardingRoute
 
     @Serializable
@@ -87,7 +84,7 @@ sealed interface MainRoute : NavKey {
     data object Progress : MainRoute
 
     @Serializable
-    data object ActivityLog : MainRoute
+    data object Notifications : MainRoute
 
     @Serializable
     data object Settings : MainRoute
@@ -106,6 +103,7 @@ sealed interface MainRoute : NavKey {
     @Serializable
     data class FamilyChildPolicy(
         val childId: String,
+        val setup: Boolean = false,
     ) : MainRoute
 
     @Serializable
