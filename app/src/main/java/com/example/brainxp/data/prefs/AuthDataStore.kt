@@ -19,6 +19,7 @@ data class AuthSnapshot(
     val subjectId: String? = null,
     val familyId: String? = null,
     val role: String? = null,
+    val displayName: String? = null,
 ) {
     val isAuthenticated: Boolean get() = accessToken != null
 }
@@ -40,6 +41,7 @@ class AuthDataStore(
                     subjectId = prefs[KEY_SUBJECT],
                     familyId = prefs[KEY_FAMILY],
                     role = prefs[KEY_ROLE],
+                    displayName = prefs[KEY_NAME],
                 )
             }
 
@@ -55,6 +57,10 @@ class AuthDataStore(
         }
     }
 
+    suspend fun saveSubject(subjectId: String) {
+        store.edit { it[KEY_SUBJECT] = subjectId }
+    }
+
     suspend fun saveIdentity(
         subjectId: String?,
         familyId: String?,
@@ -67,6 +73,10 @@ class AuthDataStore(
         }
     }
 
+    suspend fun saveDisplayName(name: String) {
+        store.edit { it[KEY_NAME] = name }
+    }
+
     suspend fun clear() {
         store.edit { it.clear() }
     }
@@ -77,6 +87,7 @@ class AuthDataStore(
         val KEY_SUBJECT = stringPreferencesKey("subject_id")
         val KEY_FAMILY = stringPreferencesKey("family_id")
         val KEY_ROLE = stringPreferencesKey("role")
+        val KEY_NAME = stringPreferencesKey("display_name")
 
         fun from(context: Context): DataStore<Preferences> = context.authStore
     }
