@@ -20,6 +20,8 @@ interface RewardCache {
     val cached: Flow<CachedBalance?>
 
     suspend fun write(balance: CachedBalance)
+
+    suspend fun clear()
 }
 
 class DataStoreRewardCache(
@@ -37,6 +39,13 @@ class DataStoreRewardCache(
         store.edit {
             it[KEY_BALANCE] = balance.balanceSeconds
             it[KEY_UPDATED_AT] = balance.updatedAtWallClock
+        }
+    }
+
+    override suspend fun clear() {
+        store.edit {
+            it.remove(KEY_BALANCE)
+            it.remove(KEY_UPDATED_AT)
         }
     }
 
