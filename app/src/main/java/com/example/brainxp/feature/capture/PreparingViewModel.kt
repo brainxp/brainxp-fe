@@ -6,6 +6,7 @@ import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.upload.MaterialPreparation
 import com.example.brainxp.core.upload.PreparationState
 import com.example.brainxp.core.upload.PreparingStage
+import com.example.brainxp.core.upload.QuestionGenerationQueue
 import com.example.brainxp.data.prefs.GuideStore
 import com.example.brainxp.domain.model.MaterialStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,11 +27,10 @@ data class PreparingUiState(
     val totalQuestions: Int = 0,
     val materialId: String? = null,
     val rejected: Boolean = false,
+    val reasonCode: String? = null,
     val error: ApiError? = null,
     val guide: Boolean = false,
 ) {
-    val ready: Boolean get() = readyQuestions > 0
-
     val done: Boolean get() = stage == PreparingStage.READY
 
     val progress: Float
@@ -42,11 +42,25 @@ data class PreparingUiState(
             }
 }
 
+enum class PreparingMode {
+    TUTORIAL,
+    GAME,
+    START,
+}
+
+fun modeOf(state: PreparingUiState): PreparingMode =
+    when {
+        state.guide -> PreparingMode.TUTORIAL
+        state.done || state.rejected || state.error != null -> PreparingMode.START
+        else -> PreparingMode.GAME
+    }
+
 @HiltViewModel
 class PreparingViewModel
     @Inject
     constructor(
         private val preparation: MaterialPreparation,
+        private val generation: QuestionGenerationQueue,
         private val guides: GuideStore,
     ) : ViewModel() {
         private val guideOpen = MutableStateFlow(false)
@@ -67,7 +81,10 @@ class PreparingViewModel
         }
 
         fun retry() {
-            state.value.materialId?.let { preparation.watch(it, state.value.materialName) }
+            state.value.materialId?.let { materialId ->
+                generation.enqueue(materialId)
+                preparation.watch(materialId, state.value.materialName)
+            }
         }
 
         private companion object {
@@ -99,6 +116,7 @@ internal fun viewOf(state: PreparationState): PreparingUiState =
                 totalQuestions = state.material.questionCount,
                 materialId = state.material.id,
                 rejected = state.material.status == MaterialStatus.FAILED,
+                reasonCode = state.material.gateReason,
             )
         }
 
