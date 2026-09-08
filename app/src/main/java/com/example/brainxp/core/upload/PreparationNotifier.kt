@@ -8,15 +8,12 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.example.brainxp.MainActivity
 import com.example.brainxp.R
-import com.example.brainxp.di.AppScope
+import com.example.brainxp.data.repo.NotificationRepository
+import com.example.brainxp.domain.model.AppNotification
 import com.example.brainxp.domain.model.Material
 import com.example.brainxp.domain.model.MaterialStatus
+import com.example.brainxp.domain.model.NotificationKind
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,25 +22,29 @@ class PreparationNotifier
     @Inject
     constructor(
         @ApplicationContext private val context: Context,
-        private val preparation: MaterialPreparation,
-        @AppScope private val scope: CoroutineScope,
+        private val notifications: NotificationRepository,
     ) {
-        fun start() {
+        suspend fun announce(material: Material) {
+            val ready = material.status == MaterialStatus.READY
+            val recorded =
+                notifications.record(
+                    kind = if (ready) NotificationKind.QUESTIONS_READY else NotificationKind.MATERIAL_REJECTED,
+                    materialId = material.id,
+                    materialTitle = material.title,
+                    questionCount = material.questionCount,
+                ) ?: return
             createChannel()
-            scope.launch {
-                preparation.state
-                    .filterIsInstance<PreparationState.Settled>()
-                    .map { it.material }
-                    .distinctUntilChanged { old, new -> old.id == new.id && old.status == new.status }
-                    .collect(::post)
-            }
+            post(material, recorded)
         }
 
         fun cancel() {
             manager().cancel(ID)
         }
 
-        private fun post(material: Material) {
+        private fun post(
+            material: Material,
+            record: AppNotification,
+        ) {
             val ready = material.status == MaterialStatus.READY
             val builder =
                 NotificationCompat
@@ -70,25 +71,30 @@ class PreparationNotifier
                     ).setAutoCancel(true)
                     .setOnlyAlertOnce(true)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                    .setContentIntent(openIntent(material.id))
+                    .setContentIntent(openIntent(material.id, record.id, ready))
 
             if (ready) {
                 builder.addAction(
                     R.mipmap.ic_launcher,
                     context.getString(R.string.ready_notification_action),
-                    openIntent(material.id),
+                    openIntent(material.id, record.id, ready = true),
                 )
             }
 
             manager().notify(ID, builder.build())
         }
 
-        private fun openIntent(materialId: String): PendingIntent =
+        private fun openIntent(
+            materialId: String,
+            notificationId: String,
+            ready: Boolean,
+        ): PendingIntent =
             PendingIntent.getActivity(
                 context,
                 REQUEST_OPEN,
                 Intent(context, MainActivity::class.java)
-                    .putExtra(EXTRA_READY_MATERIAL, materialId)
+                    .putExtra(if (ready) EXTRA_READY_MATERIAL else EXTRA_REJECTED_MATERIAL, materialId)
+                    .putExtra(EXTRA_NOTIFICATION_ID, notificationId)
                     .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP),
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
             )
@@ -109,6 +115,8 @@ class PreparationNotifier
 
         companion object {
             const val EXTRA_READY_MATERIAL = "ready_material_id"
+            const val EXTRA_REJECTED_MATERIAL = "rejected_material_id"
+            const val EXTRA_NOTIFICATION_ID = "ready_notification_id"
             private const val CHANNEL_ID = "brainxp_questions_ready"
             private const val ID = 1003
             private const val REQUEST_OPEN = 31
