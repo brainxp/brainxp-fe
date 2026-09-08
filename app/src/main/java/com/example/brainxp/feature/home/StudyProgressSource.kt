@@ -3,6 +3,7 @@ package com.example.brainxp.feature.home
 import com.example.brainxp.core.upload.MaterialPreparation
 import com.example.brainxp.core.upload.PreparationState
 import com.example.brainxp.data.repo.MaterialRepository
+import com.example.brainxp.data.repo.NotificationRepository
 import com.example.brainxp.domain.model.Material
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -11,13 +12,13 @@ import javax.inject.Singleton
 
 data class PreparingRow(
     val name: String,
-    val ready: Int,
     val total: Int,
 )
 
 data class StudyProgress(
     val pending: PendingSession? = null,
     val preparing: PreparingRow? = null,
+    val unreadNotifications: Int = 0,
 )
 
 @Singleton
@@ -26,10 +27,19 @@ class StudyProgressSource
     constructor(
         private val materials: MaterialRepository,
         private val preparation: MaterialPreparation,
+        private val notifications: NotificationRepository,
     ) {
         fun observe(): Flow<StudyProgress> =
-            combine(materials.observeCached(), preparation.state) { cached, prep ->
-                StudyProgress(pending = cached.pendingSession(), preparing = prep.row())
+            combine(
+                materials.observeCached(),
+                preparation.state,
+                notifications.unreadCount(),
+            ) { cached, prep, unread ->
+                StudyProgress(
+                    pending = cached.pendingSession(),
+                    preparing = prep.row(),
+                    unreadNotifications = unread,
+                )
             }
 
         suspend fun refresh() {
@@ -51,8 +61,8 @@ private fun List<Material>.pendingSession(): PendingSession? =
 
 private fun PreparationState.row(): PreparingRow? =
     when (this) {
-        is PreparationState.Working -> PreparingRow(name = name, ready = ready, total = total)
-        is PreparationState.Stalled -> PreparingRow(name = "", ready = 0, total = 0)
+        is PreparationState.Working -> PreparingRow(name = name, total = total)
+        is PreparationState.Stalled -> PreparingRow(name = "", total = 0)
         is PreparationState.Settled -> null
         PreparationState.Idle -> null
     }
