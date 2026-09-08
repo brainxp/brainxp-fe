@@ -31,7 +31,7 @@ import com.example.brainxp.core.ui.SegmentedControl
 import com.example.brainxp.core.ui.shortDuration
 
 private const val MIN_NOTE_LENGTH = 3
-private val AMOUNTS = listOf(900, 1_800, 3_600, 7_200)
+private val AMOUNTS = listOf(900, 1_800, 2_700, 3_600, 7_200)
 
 @Composable
 fun BalanceAdjustScreen(
@@ -43,7 +43,6 @@ fun BalanceAdjustScreen(
     onBack: (() -> Unit)? = null,
 ) {
     val spacing = BrainXPTheme.spacing
-    var direction by rememberSaveable { mutableStateOf(AdjustDirection.GRANT) }
     var amount by rememberSaveable { mutableIntStateOf(AMOUNTS[1]) }
     var note by rememberSaveable { mutableStateOf("") }
 
@@ -78,20 +77,6 @@ fun BalanceAdjustScreen(
 
         Column(verticalArrangement = Arrangement.spacedBy(spacing.sm)) {
             Text(
-                text = stringResource(R.string.adjust_kind),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            SegmentedControl(
-                options = AdjustDirection.entries,
-                selected = direction,
-                onSelect = { direction = it },
-                label = { directionLabel(it) },
-            )
-        }
-
-        Column(verticalArrangement = Arrangement.spacedBy(spacing.sm)) {
-            Text(
                 text = stringResource(R.string.adjust_amount),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -116,29 +101,12 @@ fun BalanceAdjustScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         PrimaryButton(
-            text =
-                stringResource(
-                    if (direction == AdjustDirection.GRANT) {
-                        R.string.adjust_apply_grant
-                    } else {
-                        R.string.adjust_apply_redeem
-                    },
-                    shortDuration(amount),
-                ),
-            onClick = { onApply(direction, amount, note.trim()) },
+            text = stringResource(R.string.adjust_apply_grant, shortDuration(amount)),
+            onClick = { onApply(AdjustDirection.GRANT, amount, note.trim()) },
             enabled = note.trim().length >= MIN_NOTE_LENGTH,
         )
     }
 }
-
-@Composable
-private fun directionLabel(direction: AdjustDirection): String =
-    stringResource(
-        when (direction) {
-            AdjustDirection.GRANT -> R.string.adjust_grant
-            AdjustDirection.REDEEM -> R.string.adjust_redeem
-        },
-    )
 
 @Preview(name = "BalanceAdjust", showBackground = true, heightDp = 980)
 @Composable
