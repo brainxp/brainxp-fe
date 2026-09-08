@@ -30,6 +30,11 @@ import com.example.brainxp.core.ui.RowGroup
 import com.example.brainxp.core.ui.ScreenNav
 import com.example.brainxp.core.ui.shortDuration
 
+private enum class ChildAction {
+    RELEASE,
+    REMOVE,
+}
+
 @Composable
 fun ChildReportScreen(
     state: ChildReportUiState,
@@ -37,11 +42,13 @@ fun ChildReportScreen(
     onIssueCode: () -> Unit,
     onAdjustBalance: () -> Unit,
     onRemove: () -> Unit,
+    onReleaseDevice: () -> Unit,
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
+    released: Boolean = false,
 ) {
     val spacing = BrainXPTheme.spacing
-    var confirming by remember { mutableStateOf(false) }
+    var asking by remember { mutableStateOf<ChildAction?>(null) }
 
     Column(
         modifier =
@@ -121,7 +128,19 @@ fun ChildReportScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        if (confirming) {
+        if (asking == ChildAction.RELEASE) {
+            Note(text = stringResource(R.string.report_release_warning, state.subjectName), alert = true)
+            PrimaryButton(
+                text = stringResource(R.string.report_release_confirm, state.subjectName),
+                onClick = onReleaseDevice,
+            )
+            TextButton(onClick = { asking = null }, modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = stringResource(R.string.report_cancel),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
+        } else if (asking == ChildAction.REMOVE) {
             Note(
                 text =
                     if (state.mine) {
@@ -140,23 +159,20 @@ fun ChildReportScreen(
                     },
                 onClick = onRemove,
             )
-            TextButton(onClick = { confirming = false }, modifier = Modifier.fillMaxWidth()) {
+            TextButton(onClick = { asking = null }, modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = stringResource(R.string.report_cancel),
                     style = MaterialTheme.typography.labelLarge,
                 )
             }
         } else {
-            OutlinedButton(
-                onClick = onEditPolicy,
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.medium,
-            ) {
-                Text(
-                    text = stringResource(R.string.report_edit_policy),
-                    style = MaterialTheme.typography.labelLarge,
-                )
+            if (released) {
+                Note(text = stringResource(R.string.report_released, state.subjectName))
             }
+            PrimaryButton(
+                text = stringResource(R.string.report_edit_policy),
+                onClick = onEditPolicy,
+            )
             OutlinedButton(
                 onClick = onAdjustBalance,
                 modifier = Modifier.fillMaxWidth(),
@@ -174,8 +190,17 @@ fun ChildReportScreen(
                         style = MaterialTheme.typography.labelLarge,
                     )
                 }
+                TextButton(
+                    onClick = { asking = ChildAction.RELEASE },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        text = stringResource(R.string.report_release, state.subjectName),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
             }
-            TextButton(onClick = { confirming = true }, modifier = Modifier.fillMaxWidth()) {
+            TextButton(onClick = { asking = ChildAction.REMOVE }, modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text =
                         if (state.mine) {
@@ -207,6 +232,7 @@ private fun ChildReportPreview() {
             onIssueCode = {},
             onAdjustBalance = {},
             onRemove = {},
+            onReleaseDevice = {},
             onBack = {},
         )
     }
