@@ -37,11 +37,22 @@ import com.example.brainxp.domain.model.StepDirection
 import com.example.brainxp.domain.model.UploadMethod
 
 @Composable
+private fun lockedSummary(apps: List<LockedAppEntry>): String {
+    val locked = apps.count { it.locked }
+    return if (locked == 0) {
+        stringResource(R.string.policy_apps_none)
+    } else {
+        stringResource(R.string.policy_apps_count, locked, apps.size)
+    }
+}
+
+@Composable
 fun PolicyEditorScreen(
     state: PolicyUiState,
     onEvent: (PolicyEvent) -> Unit,
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
+    onOpenApps: () -> Unit = {},
     setup: Boolean = false,
     saving: Boolean = false,
     saved: Boolean = false,
@@ -168,36 +179,17 @@ fun PolicyEditorScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        SectionLabel(stringResource(R.string.policy_apps))
+        SectionLabel(stringResource(R.string.policy_apps, state.subjectName))
         if (state.apps.isEmpty()) {
             Note(text = stringResource(R.string.policy_apps_waiting))
         } else {
             RowGroup {
-                state.apps.forEach { app ->
-                    item(
-                        title = app.label,
-                        subtitle =
-                            stringResource(
-                                if (app.locked) R.string.policy_app_locked else R.string.policy_app_free,
-                            ),
-                        onClick = { onEvent(PolicyEvent.ToggleApp(app.packageName)) },
-                        trailing = {
-                            StatusPill(
-                                text =
-                                    stringResource(
-                                        if (app.locked) R.string.policy_locked else R.string.policy_free,
-                                    ),
-                                tone = if (app.locked) PillTone.BLUE else PillTone.NEUTRAL,
-                            )
-                        },
-                    )
-                }
+                item(
+                    title = stringResource(R.string.policy_apps, state.subjectName),
+                    subtitle = lockedSummary(state.apps),
+                    onClick = onOpenApps,
+                )
             }
-            Text(
-                text = stringResource(R.string.policy_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
 
         when {
