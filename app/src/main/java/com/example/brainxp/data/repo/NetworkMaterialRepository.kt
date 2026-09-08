@@ -39,16 +39,22 @@ class NetworkMaterialRepository
         override suspend fun upload(
             title: String,
             type: MaterialType,
-            contentUri: String?,
+            paths: List<String>,
         ): AppResult<Material> {
             val subject = auth.current().subjectId ?: return AppResult.Failure(ApiError.Unauthorized)
-            val path = contentUri ?: return AppResult.Failure(MISSING_FILE)
-            val file = File(path)
-            if (!file.exists()) return AppResult.Failure(MISSING_FILE)
+            val files = paths.map(::File)
+            if (files.isEmpty() || files.any { !it.exists() }) return AppResult.Failure(MISSING_FILE)
 
-            val body = FileStreamRequestBody(file, contentTypeFor(file.name).toMediaTypeOrNull())
-            val part = MultipartBody.Part.createFormData(FIELD_FILE, title.ifBlank { file.name }, body)
-            val accepted = call { api.upload(subject, part, methodFor(type).toRequestBody(PLAIN)) }
+            val names = pageNames(title, files)
+            val parts =
+                files.mapIndexed { index, file ->
+                    MultipartBody.Part.createFormData(
+                        FIELD_FILE,
+                        names[index],
+                        FileStreamRequestBody(file, contentTypeFor(file.name).toMediaTypeOrNull()),
+                    )
+                }
+            val accepted = call { api.upload(subject, parts) }
             return when (accepted) {
                 is AppResult.Failure -> accepted
                 is AppResult.Success -> detailOf(accepted.value.materialId)
@@ -82,8 +88,6 @@ class NetworkMaterialRepository
                     onFailure = { AppResult.Failure(errors.map(it)) },
                 )
 
-        private fun methodFor(type: MaterialType): String = if (type == MaterialType.IMAGE) METHOD_CAMERA else METHOD_DOCUMENT
-
         private fun contentTypeFor(name: String): String =
             when (name.substringAfterLast('.', "").lowercase()) {
                 "pdf" -> "application/pdf"
@@ -96,17 +100,38 @@ class NetworkMaterialRepository
 
         private companion object {
             const val FIELD_FILE = "file"
-            const val METHOD_DOCUMENT = "document"
-            const val METHOD_CAMERA = "camera"
-            val PLAIN = "text/plain".toMediaTypeOrNull()
             val MISSING_FILE = ApiError.Validation(field = "file", message = null)
         }
     }
 
+private val PAGE_SUFFIX = Regex("""\s*\(\d+/\d+\)$""")
+private val EXTRA_SUFFIX = Regex("""\s*\(\+\d+\s+(foto|photo|photos)\)$""", RegexOption.IGNORE_CASE)
+
+internal fun readableTitle(name: String?): String? {
+    var value = name?.trim() ?: return null
+    while (true) {
+        val next = value.replace(PAGE_SUFFIX, "").replace(EXTRA_SUFFIX, "").trim()
+        if (next == value) return value.ifBlank { null }
+        value = next
+    }
+}
+
+internal fun pageNames(
+    title: String,
+    files: List<File>,
+): List<String> {
+    val label = title.ifBlank { files.first().name }
+    return if (files.size == 1) {
+        listOf(label)
+    } else {
+        files.indices.map { page -> "$label (${page + 1}/${files.size})" }
+    }
+}
+
 internal fun MaterialDto.toMaterial(): Material =
     Material(
         id = id,
-        title = originalName ?: topicSummary ?: FALLBACK_TITLE,
+        title = readableTitle(originalName) ?: topicSummary ?: FALLBACK_TITLE,
         type = if (sourceType?.startsWith("image/") == true) MaterialType.IMAGE else MaterialType.DOCUMENT,
         status = statusOf(status),
         createdAt = epochOf(createdAt),
