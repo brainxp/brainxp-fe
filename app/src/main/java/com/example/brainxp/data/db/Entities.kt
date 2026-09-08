@@ -122,3 +122,14 @@ data class PendingOperationEntity(
     val nextAttemptAt: Long,
     val createdAt: Long,
 )
+
+@Entity(tableName = "notifications", indices = [Index("createdAt"), Index("readAt")])
+data class NotificationEntity(
+    @PrimaryKey val id: String,
+    val kind: String,
+    val materialId: String?,
+    val materialTitle: String,
+    val questionCount: Int,
+    val createdAt: Long,
+    val readAt: Long? = null,
+)
