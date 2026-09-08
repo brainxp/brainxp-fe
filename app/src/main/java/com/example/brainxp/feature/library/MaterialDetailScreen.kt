@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.brainxp.R
 import com.example.brainxp.core.ui.BrainXPTheme
+import com.example.brainxp.core.ui.MainHeader
 import com.example.brainxp.core.ui.Note
 import com.example.brainxp.core.ui.PillTone
 import com.example.brainxp.core.ui.PrimaryButton
@@ -57,7 +58,7 @@ fun MaterialDetailScreen(
                 .padding(bottom = spacing.screenBottom),
         verticalArrangement = Arrangement.spacedBy(spacing.md),
     ) {
-        ScreenNav(title = material.title, onBack = onBack) {
+        MainHeader(title = material.title, onBack = onBack) {
             StatusPill(
                 text = stringResource(statusRes(material.status)),
                 tone =
