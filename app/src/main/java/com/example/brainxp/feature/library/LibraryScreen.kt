@@ -8,15 +8,13 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,8 +33,10 @@ import com.example.brainxp.core.ui.BrainXPTheme
 import com.example.brainxp.core.ui.ChoiceRow
 import com.example.brainxp.core.ui.ErrorState
 import com.example.brainxp.core.ui.LoadingState
+import com.example.brainxp.core.ui.MainHeader
 import com.example.brainxp.core.ui.Note
 import com.example.brainxp.core.ui.PillTone
+import com.example.brainxp.core.ui.RevealRow
 import com.example.brainxp.core.ui.ScreenNav
 import com.example.brainxp.core.ui.StatusPill
 import com.example.brainxp.core.ui.multiplierText
@@ -49,21 +49,22 @@ fun LibraryScreen(
     state: LibraryUiState,
     onEvent: (LibraryEvent) -> Unit,
     modifier: Modifier = Modifier,
-    onBack: (() -> Unit)? = null,
 ) {
     val spacing = BrainXPTheme.spacing
     var asking by remember { mutableStateOf<Material?>(null) }
+    var revealed by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier =
             modifier
                 .fillMaxSize()
+                .statusBarsPadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = spacing.screenHorizontal)
                 .padding(bottom = spacing.screenBottom),
         verticalArrangement = Arrangement.spacedBy(spacing.md),
     ) {
-        ScreenNav(title = stringResource(R.string.library_title), onBack = onBack) {
+        MainHeader(title = stringResource(R.string.library_title)) {
             if (state.phase == LibraryUiState.Phase.Ready) {
                 StatusPill(text = state.items.size.toString(), tone = PillTone.OUTLINE)
             }
@@ -83,7 +84,13 @@ fun LibraryScreen(
             }
 
             LibraryUiState.Phase.Ready -> {
-                ReadyLibrary(state = state, onEvent = onEvent, onAsk = { asking = it })
+                ReadyLibrary(
+                    state = state,
+                    onEvent = onEvent,
+                    onAsk = { asking = it },
+                    revealed = revealed,
+                    onReveal = { revealed = it },
+                )
             }
         }
     }
@@ -106,6 +113,8 @@ private fun ReadyLibrary(
     state: LibraryUiState,
     onEvent: (LibraryEvent) -> Unit,
     onAsk: (Material) -> Unit,
+    revealed: String?,
+    onReveal: (String?) -> Unit,
 ) {
     val spacing = BrainXPTheme.spacing
 
@@ -124,6 +133,8 @@ private fun ReadyLibrary(
         state.items.forEach { material ->
             MaterialRow(
                 material = material,
+                open = revealed == material.id,
+                onReveal = { stay -> onReveal(if (stay) material.id else null) },
                 onOpen = { onEvent(LibraryEvent.Study(material.id)) },
                 onAsk = { onAsk(material) },
             )
@@ -141,24 +152,18 @@ private fun ReadyLibrary(
 @Composable
 private fun MaterialRow(
     material: Material,
+    open: Boolean,
+    onReveal: (Boolean) -> Unit,
     onOpen: () -> Unit,
     onAsk: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val swipe = rememberSwipeToDismissBoxState(positionalThreshold = { width -> width * SWIPE_SHARE })
-
-    LaunchedEffect(swipe.currentValue) {
-        if (swipe.currentValue == SwipeToDismissBoxValue.EndToStart) {
-            onAsk()
-            swipe.reset()
-        }
-    }
-
-    SwipeToDismissBox(
-        state = swipe,
+    RevealRow(
+        open = open,
+        onReveal = onReveal,
+        actionLabel = stringResource(R.string.library_remove),
+        onAction = onAsk,
         modifier = modifier,
-        enableDismissFromStartToEnd = false,
-        backgroundContent = { RemoveBackdrop() },
     ) {
         ChoiceRow(
             title = material.title,
@@ -170,24 +175,6 @@ private fun MaterialRow(
                 material.unfinished?.let {
                     { StatusPill(text = stringResource(R.string.library_resume), tone = PillTone.BLUE) }
                 },
-        )
-    }
-}
-
-@Composable
-private fun RemoveBackdrop(modifier: Modifier = Modifier) {
-    Box(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.errorContainer, MaterialTheme.shapes.medium),
-        contentAlignment = Alignment.CenterEnd,
-    ) {
-        Text(
-            text = stringResource(R.string.library_remove),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.error,
-            modifier = Modifier.fillMaxHeight().padding(horizontal = BACKDROP_PADDING),
         )
     }
 }
@@ -246,8 +233,6 @@ private fun subtitleFor(material: Material): String {
 }
 
 private const val SEPARATOR = " · "
-private const val SWIPE_SHARE = 0.4f
-private val BACKDROP_PADDING = 18.dp
 
 private val PREVIEW_MATERIALS =
     listOf(
@@ -282,7 +267,6 @@ private fun LibraryPreview() {
                     items = PREVIEW_MATERIALS,
                 ),
             onEvent = {},
-            onBack = {},
         )
     }
 }
@@ -294,7 +278,6 @@ private fun LibraryEmptyPreview() {
         LibraryScreen(
             state = LibraryUiState(phase = LibraryUiState.Phase.Ready),
             onEvent = {},
-            onBack = {},
         )
     }
 }
