@@ -1,14 +1,19 @@
 package com.example.brainxp.feature.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -20,34 +25,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.composables.icons.lucide.Bell
 import com.composables.icons.lucide.ChartNoAxesColumn
-import com.composables.icons.lucide.Clock
 import com.composables.icons.lucide.FileText
 import com.composables.icons.lucide.Flame
-import com.composables.icons.lucide.Library
 import com.composables.icons.lucide.Lock
 import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.ScrollText
-import com.composables.icons.lucide.Settings
 import com.composables.icons.lucide.Sparkles
 import com.example.brainxp.R
 import com.example.brainxp.blocking.ProtectionStatus
 import com.example.brainxp.core.result.ApiError
+import com.example.brainxp.core.time.fullClock
 import com.example.brainxp.core.ui.BrainXPTheme
 import com.example.brainxp.core.ui.ChoiceRow
 import com.example.brainxp.core.ui.ErrorState
 import com.example.brainxp.core.ui.HeroCard
 import com.example.brainxp.core.ui.HeroTone
 import com.example.brainxp.core.ui.LoadingState
+import com.example.brainxp.core.ui.MainHeader
 import com.example.brainxp.core.ui.Note
 import com.example.brainxp.core.ui.PillTone
-import com.example.brainxp.core.ui.PrimaryButton
 import com.example.brainxp.core.ui.RowGroup
 import com.example.brainxp.core.ui.SegmentedControl
 import com.example.brainxp.core.ui.StatusPill
 import com.example.brainxp.core.ui.shortDuration
 import com.example.brainxp.domain.model.UnlockState
 import com.example.brainxp.feature.health.DegradedBanner
+import java.time.LocalTime
 import kotlin.time.Duration.Companion.minutes
 
 @Composable
@@ -62,11 +66,20 @@ fun HomeScreen(
         modifier =
             modifier
                 .fillMaxSize()
+                .statusBarsPadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = spacing.screenHorizontal, vertical = spacing.lg),
         verticalArrangement = Arrangement.spacedBy(spacing.md),
     ) {
         TopBar(state = state, onEvent = onEvent)
+
+        if (state.displayName.isNotBlank()) {
+            Text(
+                text = stringResource(greetingRes(LocalTime.now().hour), state.displayName),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
 
         if (state.degraded) {
             DegradedBanner(onFixPermissions = { onEvent(HomeEvent.FixPermissions) })
@@ -100,56 +113,79 @@ private fun TopBar(
 ) {
     val spacing = BrainXPTheme.spacing
 
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(
-            text = stringResource(R.string.home_title),
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground,
+    MainHeader(title = stringResource(R.string.home_title), modifier = modifier) {
+        StatusPill(
+            text =
+                stringResource(
+                    if (state.managed) R.string.home_mode_child else R.string.home_mode_self,
+                ),
+            tone = PillTone.OUTLINE,
         )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(spacing.sm),
+        if (state.streakDays > 0) {
+            StatusPill(
+                text = stringResource(R.string.home_streak, state.streakDays),
+                tone = PillTone.BLUE,
+                leading = {
+                    Icon(
+                        imageVector = Lucide.Flame,
+                        contentDescription = null,
+                        modifier = Modifier.size(PILL_ICON),
+                    )
+                },
+            )
+        }
+        IconButton(
+            onClick = { onEvent(HomeEvent.OpenProgress) },
+            modifier = Modifier.size(NAV_TAP),
         ) {
-            if (state.streakDays > 0) {
-                StatusPill(
-                    text = stringResource(R.string.home_streak, state.streakDays),
-                    tone = PillTone.BLUE,
-                    leading = {
-                        Icon(
-                            imageVector = Lucide.Flame,
-                            contentDescription = null,
-                            modifier = Modifier.size(PILL_ICON),
-                        )
+            Icon(
+                imageVector = Lucide.ChartNoAxesColumn,
+                contentDescription = stringResource(R.string.home_progress_open),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        NotificationBell(
+            unread = state.unreadNotifications,
+            onClick = { onEvent(HomeEvent.OpenNotifications) },
+        )
+    }
+}
+
+@Composable
+private fun NotificationBell(
+    unread: Int,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    BadgedBox(
+        modifier = modifier,
+        badge = {
+            if (unread > 0) {
+                Badge(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError,
+                ) {
+                    Text(text = badgeCountOf(unread))
+                }
+            }
+        },
+    ) {
+        IconButton(onClick = onClick, modifier = Modifier.size(NAV_TAP)) {
+            Icon(
+                imageVector = Lucide.Bell,
+                contentDescription =
+                    if (unread > 0) {
+                        stringResource(R.string.notifications_unread, unread)
+                    } else {
+                        stringResource(R.string.notifications_open)
                     },
-                )
-            }
-            IconButton(
-                onClick = { onEvent(HomeEvent.OpenProgress) },
-                modifier = Modifier.size(NAV_TAP),
-            ) {
-                Icon(
-                    imageVector = Lucide.ChartNoAxesColumn,
-                    contentDescription = stringResource(R.string.home_progress_open),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            IconButton(
-                onClick = { onEvent(HomeEvent.OpenSettings) },
-                modifier = Modifier.size(NAV_TAP),
-            ) {
-                Icon(
-                    imageVector = Lucide.Settings,
-                    contentDescription = stringResource(R.string.settings_title),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
+
+private fun badgeCountOf(unread: Int): String = if (unread > BADGE_CEILING) "$BADGE_CEILING+" else unread.toString()
 
 @Composable
 private fun ReadyContent(
@@ -157,45 +193,106 @@ private fun ReadyContent(
     onEvent: (HomeEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val spacing = BrainXPTheme.spacing
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(BrainXPTheme.spacing.xxl),
+    ) {
+        BalanceSection(state = state, onEvent = onEvent)
+        TodaySection(state = state)
+        EarnSection(state = state, onEvent = onEvent)
+        LockedSection(state = state, onEvent = onEvent)
+    }
+}
 
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(spacing.md)) {
+@Composable
+private fun Section(
+    modifier: Modifier = Modifier,
+    label: String? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(BrainXPTheme.spacing.sm),
+    ) {
+        if (label != null) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        content()
+    }
+}
+
+@Composable
+private fun BalanceSection(
+    state: HomeUiState,
+    onEvent: (HomeEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Section(modifier = modifier) {
         Hero(state)
 
         if (state.balanceStale) {
-            Text(
-                text = stringResource(R.string.home_stale_balance),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Caption(text = stringResource(R.string.home_stale_balance))
         }
 
         if (state.capReached) {
-            Text(
+            Caption(
                 text = stringResource(R.string.home_cap_reached, shortDuration(state.secondsUntilReset)),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
-        if (state.canStartSession) {
-            SessionStarter(state = state, onEvent = onEvent)
+        if (state.unlockRunning) {
+            RunningSession(state = state, onEvent = onEvent)
+        } else {
+            Note(text = stringResource(R.string.home_session_explain))
         }
+    }
+}
 
+@Composable
+private fun TodaySection(
+    state: HomeUiState,
+    modifier: Modifier = Modifier,
+) {
+    Section(modifier = modifier, label = stringResource(R.string.home_section_today)) {
+        RowGroup {
+            item(
+                title = stringResource(R.string.home_daily_cap),
+                value = shortDuration(state.dailyCapSeconds),
+            )
+            item(
+                title = stringResource(R.string.home_rest_days),
+                subtitle = stringResource(R.string.home_rest_days_sub),
+                value = stringResource(R.string.home_rest_days_value, state.idleDaysAllowed),
+            )
+        }
+    }
+}
+
+@Composable
+private fun EarnSection(
+    state: HomeUiState,
+    onEvent: (HomeEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (state.preparing == null && state.pending == null) {
+        return
+    }
+
+    Section(modifier = modifier, label = stringResource(R.string.home_section_earn)) {
         state.preparing?.let { preparing ->
             ChoiceRow(
-                title =
-                    stringResource(
-                        if (preparing.ready > 0) R.string.home_preparing_ready else R.string.home_preparing_title,
-                    ),
+                title = stringResource(R.string.home_preparing_title),
                 subtitle =
                     if (preparing.total > 0) {
-                        stringResource(R.string.home_preparing_sub, preparing.ready, preparing.total)
+                        stringResource(R.string.home_preparing_sub)
                     } else {
                         stringResource(R.string.home_preparing_sub_waiting)
                     },
                 icon = Lucide.Sparkles,
-                highlight = preparing.ready > 0,
                 onClick = { onEvent(HomeEvent.OpenPreparing) },
             )
         }
@@ -215,60 +312,37 @@ private fun ReadyContent(
                 onClick = { onEvent(HomeEvent.Resume(pending.materialId)) },
             )
         }
-
-        PrimaryButton(
-            text = stringResource(R.string.home_start_earning),
-            onClick = { onEvent(HomeEvent.StartEarning) },
-        )
-
-        if (state.unlockRunning) {
-            RunningSession(state = state, onEvent = onEvent)
-        }
-
-        if (state.lockedApps.isNotEmpty()) {
-            Text(
-                text =
-                    stringResource(
-                        if (state.appsOpen) R.string.home_apps_open else R.string.home_apps_locked,
-                    ),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = spacing.sm),
-            )
-        }
-
-        LockedApps(state = state, onEvent = onEvent)
-
-        RowGroup {
-            item(
-                title = stringResource(R.string.home_library_title),
-                subtitle = stringResource(R.string.home_library_sub),
-                leading = { Icon(imageVector = Lucide.Library, contentDescription = null) },
-                onClick = { onEvent(HomeEvent.OpenLibrary) },
-            )
-            item(
-                title = stringResource(R.string.history_title),
-                subtitle = stringResource(R.string.home_history_sub),
-                leading = { Icon(imageVector = Lucide.Clock, contentDescription = null) },
-                onClick = { onEvent(HomeEvent.OpenHistory) },
-            )
-            item(
-                title = stringResource(R.string.activity_title),
-                subtitle = stringResource(R.string.home_activity_sub),
-                leading = { Icon(imageVector = Lucide.ScrollText, contentDescription = null) },
-                onClick = { onEvent(HomeEvent.OpenActivity) },
-            )
-            item(
-                title = stringResource(R.string.home_daily_cap),
-                value = shortDuration(state.dailyCapSeconds),
-            )
-            item(
-                title = stringResource(R.string.home_rest_days),
-                subtitle = stringResource(R.string.home_rest_days_sub),
-                value = stringResource(R.string.home_rest_days_value, state.idleDaysAllowed),
-            )
-        }
     }
+}
+
+@Composable
+private fun LockedSection(
+    state: HomeUiState,
+    onEvent: (HomeEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Section(
+        modifier = modifier,
+        label =
+            stringResource(
+                if (state.appsOpen) R.string.home_apps_open else R.string.home_apps_locked,
+            ).takeIf { state.lockedApps.isNotEmpty() },
+    ) {
+        LockedApps(state = state, onEvent = onEvent)
+    }
+}
+
+@Composable
+private fun Caption(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier,
+    )
 }
 
 @Composable
@@ -300,47 +374,6 @@ private fun RunningSession(
 }
 
 @Composable
-private fun SessionStarter(
-    state: HomeUiState,
-    onEvent: (HomeEvent) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val spacing = BrainXPTheme.spacing
-
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(spacing.sm)) {
-        Text(
-            text = stringResource(R.string.home_session_label),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        SegmentedControl(
-            options = state.sessionOptions,
-            selected = state.selectedOption ?: state.sessionOptions.first(),
-            onSelect = { onEvent(HomeEvent.SelectDuration(it)) },
-            label = { shortDuration(it) },
-        )
-        OutlinedButton(
-            onClick = { onEvent(HomeEvent.StartSession) },
-            enabled = !state.starting,
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium,
-        ) {
-            Text(
-                text =
-                    stringResource(
-                        if (state.starting) {
-                            R.string.home_session_starting
-                        } else {
-                            R.string.home_session_start
-                        },
-                    ),
-                style = MaterialTheme.typography.labelLarge,
-            )
-        }
-    }
-}
-
-@Composable
 private fun Hero(state: HomeUiState) {
     val running = state.unlockRunning
     HeroCard(
@@ -348,7 +381,7 @@ private fun Hero(state: HomeUiState) {
             stringResource(
                 if (running) R.string.home_countdown_label else R.string.home_balance_label,
             ),
-        value = if (running) shortDuration(state.remaining) else shortDuration(state.balanceSeconds),
+        value = if (running) fullClock(state.remaining) else fullClock(state.balanceSeconds),
         progress = if (state.dailyCapSeconds > 0) state.spentFraction else null,
         tone = if (state.capReached || state.idleLocked) HeroTone.DARK else HeroTone.PRIMARY,
         footer = {
@@ -383,6 +416,32 @@ private fun Hero(state: HomeUiState) {
 }
 
 @Composable
+private fun AppIcon(app: LockedApp) {
+    val icon = app.icon
+    if (icon == null) {
+        Icon(imageVector = Lucide.Lock, contentDescription = null)
+        return
+    }
+    Image(
+        bitmap = icon,
+        contentDescription = null,
+        modifier = Modifier.size(APP_ICON),
+    )
+}
+
+private fun greetingRes(hour: Int): Int =
+    when (hour) {
+        in MORNING -> R.string.home_greeting_morning
+        in MIDDAY -> R.string.home_greeting_midday
+        in AFTERNOON -> R.string.home_greeting_afternoon
+        else -> R.string.home_greeting_evening
+    }
+
+private val MORNING = 5..10
+private val MIDDAY = 11..14
+private val AFTERNOON = 15..18
+
+@Composable
 private fun LockedApps(
     state: HomeUiState,
     onEvent: (HomeEvent) -> Unit,
@@ -398,7 +457,12 @@ private fun LockedApps(
                     if (state.managed) R.string.home_no_apps_managed else R.string.home_apps_pick_sub,
                 ),
             icon = Lucide.Lock,
-            onClick = { onEvent(HomeEvent.OpenApps) },
+            onClick =
+                if (state.managed) {
+                    null
+                } else {
+                    { onEvent(HomeEvent.OpenApps) }
+                },
         )
         return
     }
@@ -407,27 +471,37 @@ private fun LockedApps(
         state.lockedApps.forEach { app ->
             item(
                 title = app.label,
-                subtitle = app.packageName,
                 value =
                     stringResource(
                         if (state.appsOpen) R.string.home_app_open else R.string.home_app_locked,
                     ),
                 emphasiseValue = state.appsOpen,
+                leading = { AppIcon(app) },
                 onClick = { onEvent(HomeEvent.OpenApp(app.packageName)) },
             )
         }
-        item(
-            title = stringResource(R.string.home_apps_manage),
-            leading = { Icon(imageVector = Lucide.Lock, contentDescription = null) },
-            onClick = { onEvent(HomeEvent.OpenApps) },
+        if (!state.managed) {
+            item(
+                title = stringResource(R.string.home_apps_manage),
+                leading = { Icon(imageVector = Lucide.Lock, contentDescription = null) },
+                onClick = { onEvent(HomeEvent.OpenApps) },
+            )
+        }
+    }
+
+    if (state.managed) {
+        Text(
+            text = stringResource(R.string.home_apps_managed_note),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
 
 private val PILL_ICON = 13.dp
 private val NAV_TAP = 48.dp
+private const val BADGE_CEILING = 9
 
-private val PREVIEW_OPTIONS = listOf(300, 600, 900)
 private const val PREVIEW_BUDGET_MILLIS = 900_000L
 private const val PREVIEW_CONSUMED_MILLIS = 60_000L
 
@@ -452,8 +526,6 @@ private fun HomeLockedPreview() {
                     streakDays = 3,
                     protection = ProtectionStatus.ACTIVE,
                     lockedApps = PREVIEW_APPS,
-                    sessionOptions = PREVIEW_OPTIONS,
-                    selectedOption = PREVIEW_OPTIONS.first(),
                 ),
             onEvent = {},
         )
@@ -550,3 +622,5 @@ private fun HomeErrorPreview() {
         )
     }
 }
+
+private val APP_ICON = 26.dp
