@@ -6,6 +6,7 @@ import com.example.brainxp.domain.model.ActivityEvent
 import com.example.brainxp.domain.model.ConsumptionEntry
 import com.example.brainxp.domain.model.DeviceBinding
 import com.example.brainxp.domain.model.FamilyChild
+import com.example.brainxp.domain.model.GuardianEvent
 import com.example.brainxp.domain.model.GuardianStatus
 import com.example.brainxp.domain.model.LedgerDirection
 import com.example.brainxp.domain.model.LedgerEntry
@@ -91,11 +92,16 @@ interface FamilyRepository {
 
     suspend fun removeChild(childId: String): AppResult<Unit>
 
+    suspend fun releaseDevice(childId: String): AppResult<Unit>
+
     suspend fun pairingCode(childId: String): AppResult<PairingCode>
 
     suspend fun pair(code: String): AppResult<Unit>
 
     suspend fun checkBinding(): AppResult<DeviceBinding>
 
-    suspend fun reportHealth(status: GuardianStatus): AppResult<Unit>
+    suspend fun reportHealth(
+        status: GuardianStatus,
+        events: List<GuardianEvent> = emptyList(),
+    ): AppResult<Unit>
 }
