@@ -2,6 +2,7 @@ package com.example.brainxp.feature.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.brainxp.blocking.AppInventoryPublisher
 import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.result.AppResult
 import com.example.brainxp.data.prefs.SettingsDataStore
@@ -30,6 +31,7 @@ class PairDeviceViewModel
     constructor(
         private val family: FamilyRepository,
         private val settings: SettingsDataStore,
+        private val apps: AppInventoryPublisher,
     ) : ViewModel() {
         private val mutableState = MutableStateFlow(PairDeviceUiState())
         val state: StateFlow<PairDeviceUiState> = mutableState.asStateFlow()
@@ -52,6 +54,7 @@ class PairDeviceViewModel
                 when (val result = family.pair(code)) {
                     is AppResult.Success -> {
                         settings.setRole(DeviceRole.CHILD)
+                        apps.publish()
                         mutableState.update { it.copy(busy = false, paired = true) }
                     }
 
