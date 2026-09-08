@@ -17,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.brainxp.R
 import com.example.brainxp.core.ui.BrainXPTheme
+import com.example.brainxp.core.ui.MainHeader
 import com.example.brainxp.core.ui.Note
 import com.example.brainxp.core.ui.ScreenNav
 
@@ -38,7 +39,7 @@ fun PrivacyPolicyScreen(
                 .padding(bottom = spacing.screenBottom),
         verticalArrangement = Arrangement.spacedBy(spacing.md),
     ) {
-        ScreenNav(title = stringResource(R.string.privacy_title), onBack = onBack)
+        MainHeader(title = stringResource(R.string.privacy_title), onBack = onBack)
 
         Text(
             text = stringResource(R.string.privacy_updated),
@@ -78,8 +79,8 @@ private fun Section(
 }
 
 private data class PolicySection(
-    @StringRes val heading: Int,
-    @StringRes val body: Int,
+    @param:StringRes val heading: Int,
+    @param:StringRes val body: Int,
 )
 
 private val SECTIONS =
