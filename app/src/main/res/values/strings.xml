@@ -220,8 +220,9 @@ kehilangan kontak.</string>
 
     <string name="app_picker_title">Pilih aplikasi</string>
     <string name="app_picker_search">Cari aplikasi</string>
-    <string name="app_picker_loading">Membaca daftar aplikasi</string>
+    <string name="app_picker_hint">Pilih aplikasi yang ingin dikunci atau dilepas</string>
     <string name="app_picker_game">Game</string>
+    <string name="app_picker_loading">Membaca daftar aplikasi</string>
     <string name="app_picker_empty_title">Tidak ada yang cocok</string>
     <string name="app_picker_empty_body">Coba kata lain, atau kosongkan pencarian untuk melihat semuanya.</string>
 
@@ -266,10 +267,7 @@ kehilangan kontak.</string>
     <string name="home_start_earning">Setor materi</string>
     <string name="home_resume_title">Lanjutkan sesi yang tertunda</string>
     <string name="home_resume_sub">%1$s · %2$d dari %3$d terisi</string>
-    <string name="home_session_label">Pakai waktumu sekarang</string>
-    <string name="home_session_start">Mulai waktu bermain</string>
-    <string name="home_session_starting">Menyiapkan…</string>
-    <string name="home_end_early">Selesai sekarang</string>
+    <string name="home_end_early">Kunci lagi sekarang</string>
 
     <string name="home_apps_open">Terbuka selama saldo ada</string>
     <string name="home_apps_locked">Sedang dikunci</string>
@@ -280,11 +278,9 @@ kehilangan kontak.</string>
     <string name="home_apps_pick_sub">Yang kamu pilih cuma bisa dibuka kalau ada waktu bermain</string>
     <string name="home_apps_manage">Atur aplikasi terkunci</string>
     <string name="home_no_apps_managed">Orang tua yang menentukan daftarnya</string>
-
-    <string name="home_library_title">Pustaka materi</string>    <string name="home_library_sub">Soal lama bisa dipelajari ulang</string>
-    <string name="home_history_sub">Sesi dan waktu bermain yang sudah lewat</string>
-    <string name="home_activity_sub">Apa saja yang terjadi di perangkat ini</string>
     <string name="home_daily_cap">Jatah main hari ini</string>
+    <string name="home_section_today">Ringkasan hari ini</string>
+    <string name="home_section_earn">Tambah waktu bermain</string>
 
     <string name="source_title">Setor materi</string>
     <string name="source_hero_label">Sesi ini</string>
@@ -298,30 +294,12 @@ kehilangan kontak.</string>
     <string name="source_note">Materi diproses layanan AI dan tidak dipakai melatih model. Materi yang sama diunggah ulang tetap boleh dipelajari, tapi hadiahnya menurun.</string>
 
     <string name="preparing_title">Menyiapkan soal</string>
-    <string name="preparing_status_working">Sedang disusun</string>
+    <string name="preparing_status_working">Sedang dibuat</string>
     <string name="preparing_status_ready">Semua soal siap</string>
-    <string name="preparing_count_label">soal siap dikerjakan</string>
-    <string name="preparing_count_none">Belum ada soal yang siap</string>
-    <string name="preparing_count_waiting">Soalnya sedang ditulis dari materimu</string>
     <string name="preparing_step_reading">Materi dibaca</string>
     <string name="preparing_step_validating">Diperiksa dan dikalibrasi</string>
-    <string name="preparing_step_partial">Soal pertama siap</string>
-    <string name="preparing_step_ready">Sisa soal disusun</string>
-    <string name="setpin_title">PIN orang tua</string>
-    <string name="setpin_heading">Pasang PIN di HP ini</string>
-    <string name="setpin_body">PIN ini yang menjaga pengaturan di HP anak. Pasang sekarang, selagi kamu yang memegangnya.</string>
-    <string name="setpin_field">PIN 4 angka</string>
-    <string name="setpin_confirm">Ulangi PIN</string>
-    <string name="setpin_note">Tanpa PIN, anak bisa mengubah aplikasi yang dikunci, mengganti mode, dan mematikan perlindungan sendiri.</string>
-    <string name="setpin_save">Pasang PIN</string>
-    <string name="setpin_skip">Nanti saja</string>
-    <string name="pin_body">Pengaturan ini dijaga orang tua. Masukkan PIN untuk melanjutkan.</string>
-    <string name="pin_label">PIN orang tua</string>
-    <string name="pin_wrong">PIN salah. Coba lagi.</string>
-    <string name="pin_confirm">Buka</string>
-    <string name="pin_title_restrictions">Ubah aplikasi yang dikunci</string>
-    <string name="pin_title_mode">Keluar dari mode ini</string>
-    <string name="pin_title_protection">Matikan perlindungan</string>
+    <string name="preparing_step_partial">Soal disusun satu per satu</string>
+    <string name="preparing_step_ready">Semua soal siap</string>
     <string name="pair_failed">Kodenya tidak cocok atau sudah kedaluwarsa. Minta kode baru dari orang tua.</string>
     <string name="done_title">Semua siap</string>
     <string name="done_body">Akunmu sudah dibuat dan penjaga waktu bermain sudah berjalan.</string>
@@ -336,33 +314,16 @@ kehilangan kontak.</string>
     <string name="settings_level">Jenjang</string>
     <string name="settings_language">Bahasa soal</string>
     <string name="settings_questions">Soal per sesi</string>
-    <string name="settings_reset_hour">Hari berganti jam</string>
-    <string name="settings_reset_hour_value">%1$02d.00</string>
     <string name="settings_idle_allowed">Jatah libur</string>
     <string name="settings_protection">Perlindungan</string>
     <string name="settings_protection_on">Aplikasi terkunci dijaga terus</string>
     <string name="settings_protection_degraded">Jalan sebagian — izinnya perlu diperbaiki</string>
     <string name="settings_protection_off">Aplikasi terkunci bisa dibuka bebas</string>
-    <string name="settings_protection_turn_off">Matikan</string>
-    <string name="settings_protection_turn_on">Nyalakan</string>
-    <string name="settings_apps">Aplikasi yang dikunci</string>
     <string name="settings_permissions">Izin sistem</string>
-    <string name="settings_pending">Pelonggaran aturan berlaku mulai %1$s. Sampai saat itu aturan lama yang dipakai.</string>
+    <string name="settings_pending">Perubahan aturan berlaku mulai %1$s. Sampai saat itu aturan lama yang dipakai.</string>
     <string name="settings_sign_out">Keluar dari akun</string>
     <string name="settings_sign_out_confirm">Ya, keluar</string>
     <string name="settings_sign_out_warning">Materi dan waktu bermainmu tetap tersimpan di server. Kamu perlu masuk lagi untuk memakainya.</string>
-    <string name="activity_title">Catatan aktivitas</string>
-    <string name="activity_scope">Hanya kejadian penting yang dicatat. Aplikasi apa yang kamu buka dan tutup tidak pernah masuk ke sini.</string>
-    <string name="activity_empty_title">Belum ada catatan</string>
-    <string name="activity_empty_body">Kejadian penting seperti materi baru, sesi selesai, dan waktu bermain dimulai akan tercatat di sini.</string>
-    <string name="activity_material_added">Materi baru disetor</string>
-    <string name="activity_session_completed">Sesi belajar selesai</string>
-    <string name="activity_reward_earned">Waktu bermain didapat</string>
-    <string name="activity_unlock_started">Waktu bermain dimulai</string>
-    <string name="activity_unlock_ended">Waktu bermain berakhir</string>
-    <string name="activity_protection_disabled">Perlindungan dimatikan</string>
-    <string name="activity_protection_degraded">Perlindungan melemah</string>
-    <string name="activity_protection_anomaly">Ada yang tidak wajar</string>
     <string name="progress_chart_title">Menit dari belajar</string>
     <string name="progress_chart_caption">%1$d hari aktif dalam sepekan terakhir</string>
     <string name="progress_chart_too_early">Grafik muncul setelah kamu belajar di %1$d hari berbeda. Sebelum itu, garisnya cuma akan menipu.</string>
@@ -394,12 +355,57 @@ kehilangan kontak.</string>
     <string name="reject_reason_unreadable">Teksnya tidak terbaca. Coba foto ulang atau kirim berkas aslinya.</string>
     <string name="reject_reason_unknown">Materi ini tidak bisa dipakai membuat soal.</string>
     <string name="reject_level_unknown">belum diketahui</string>
+    <string name="preparing_headline_working">Soalmu sedang dibuat</string>
+    <string name="preparing_headline_ready">Semua soal siap</string>
+    <string name="preparing_sub_working">Materimu sedang dibaca dan diperiksa, kamu akan mendapatkan notifikasi apabila soal telah siap.</string>
+    <string name="preparing_sub_ready">%1$d soal siap dikerjakan</string>
+    <string name="home_preparing_sub">Kami kabari begitu semuanya siap</string>
+    <string name="preparing_status_refused">Ditolak</string>
+    <string name="preparing_headline_refused">Materi ini ditolak</string>
+    <string name="preparing_try_again">Coba lagi</string>
+    <string name="runner_board">Permainan menunggu: lompati distraksi dengan mengetuk area permainan</string>
+    <string name="runner_jump">Lompat</string>
+    <string name="runner_skip">Sembunyikan game</string>
+    <string name="runner_avoided">Distraksi dilewati: %1$d</string>
+    <string name="runner_resume">Main lagi</string>
     <string name="preparing_stalled">Server belum menjawab. Materinya mungkin sudah selesai — coba periksa lagi.</string>
     <string name="preparing_retry">Periksa lagi</string>
-    <string name="preparing_note">Boleh ditinggal. Penyusunannya jalan terus walau kamu pindah ke layar lain, dan kamu dikabari kalau sudah siap.</string>
+    <string name="preparing_note">Sambil menggu soal dibuat, kamu bisa coba permainan menghindari distraksi diatas.</string>
     <string name="preparing_start">Mulai kerjakan</string>
     <string name="preparing_start_count">Mulai kerjakan · %1$d soal</string>
     <string name="preparing_leave">Tinggalkan berjalan</string>
+    <string name="week_mon_short">Sen</string>
+    <string name="week_tue_short">Sel</string>
+    <string name="week_wed_short">Rab</string>
+    <string name="week_thu_short">Kam</string>
+    <string name="week_fri_short">Jum</string>
+    <string name="week_sat_short">Sab</string>
+    <string name="week_sun_short">Min</string>
+    <string name="week_mon">Senin</string>
+    <string name="week_tue">Selasa</string>
+    <string name="week_wed">Rabu</string>
+    <string name="week_thu">Kamis</string>
+    <string name="week_fri">Jumat</string>
+    <string name="week_sat">Sabtu</string>
+    <string name="week_sun">Minggu</string>
+    <string name="week_same">Samakan</string>
+    <string name="week_weekdays">Hari kerja</string>
+    <string name="week_weekend">Akhir pekan</string>
+    <string name="week_all">Semua</string>
+    <string name="week_minutes_value">%1$d menit</string>
+
+    <string name="tab_history">Riwayat</string>
+    <string name="tab_home">Beranda</string>
+    <string name="tab_library">Pustaka</string>
+    <string name="tab_settings">Pengaturan</string>
+
+    <string name="notifications_title">Notifikasi</string>
+    <string name="notifications_open">Buka notifikasi</string>
+    <string name="notifications_read">Sudah dibuka</string>
+    <string name="notifications_unread">%1$d belum dibuka</string>
+    <string name="notifications_empty_title">Belum ada notifikasi</string>
+    <string name="notifications_empty_body">Kabar soal yang sudah siap dan materi yang perlu diperbaiki muncul di sini.</string>
+
     <string name="ready_channel_name">Soal siap</string>
     <string name="ready_channel_description">Kabar begitu soal dari materimu selesai disusun.</string>
     <string name="ready_notification_title">Soalmu siap dikerjakan</string>
@@ -407,10 +413,8 @@ kehilangan kontak.</string>
     <string name="ready_notification_action">Mulai kerjakan</string>
     <string name="ready_notification_rejected_title">Materi belum bisa dipakai</string>
     <string name="ready_notification_rejected_body">%1$s tidak lolos pemeriksaan. Buka untuk lihat alasannya.</string>
-    <string name="home_preparing_title">Soal sedang disusun</string>
-    <string name="home_preparing_ready">Soal pertama sudah siap</string>
-    <string name="home_preparing_sub">%1$d dari %2$d soal</string>
-    <string name="home_preparing_sub_waiting">Materi sedang dibaca</string>
+    <string name="home_preparing_title">Soal sedang dibuat</string>
+    <string name="home_preparing_sub_waiting">Materimu sedang dibaca</string>
 
     <string name="rejected_title">Materi belum bisa dipakai</string>
     <string name="rejected_alert">Materi ini dinilai setara tingkat %1$s, sedangkan jenjangmu %2$s.</string>
@@ -470,7 +474,7 @@ kehilangan kontak.</string>
     <string name="tour_move_body">Geser halaman soalnya ke kiri atau kanan. Coba sekarang — beneran bisa digeser.</string>
     <string name="tour_leave_title">Berhenti kapan saja</string>
     <string name="tour_leave_body">Penyusunan soalnya jalan terus di latar. Tekan Kembali kapan saja — kamu dikabari begitu soalnya siap.</string>
-    <string name="tour_prep_working">Soal masih disusun · %1$d siap</string>
+    <string name="tour_prep_working">Soalmu sedang dibuat</string>
     <string name="tour_prep_reading">Materimu sedang dibaca</string>
     <string name="tour_prep_ready">Semua soal siap</string>
     <string name="tour_receipt_title">Nilainya keluar di akhir</string>
@@ -498,7 +502,7 @@ kehilangan kontak.</string>
     <string name="family_role">Orang tua</string>
     <string name="family_children">Anak terdaftar</string>
     <string name="family_child_sub">Streak %1$d hari · sisa kuota %2$s</string>
-    <string name="family_add_child">Tambah anak</string>
+    <string name="family_add_child">Tambah orang</string>
     <string name="family_add_child_sub">Buat profil, susun aturan, terbitkan kode</string>
     <string name="family_self">Kamu sendiri</string>
     <string name="family_self_sub">Setor materi dan pakai waktumu</string>
@@ -506,7 +510,7 @@ kehilangan kontak.</string>
     <string name="family_self_rules_sub">Pilih aplikasi yang dikunci di HP ini</string>
     <string name="family_self_invite">Aturan yang sama bisa berlaku buat kamu. Aplikasi di HP ini ikut terkunci sampai kamu sendiri yang mengerjakan soalnya.</string>
     <string name="family_self_join">Ikut aturan juga</string>
-    <string name="family_empty">Belum ada anak terdaftar. Tambahkan satu untuk mulai menyusun aturan.</string>
+    <string name="family_empty">Belum ada orang terdaftar. Tambahkan satu untuk mulai menyusun aturan.</string>
 
     <string name="new_child_title">Profil anak baru</string>
     <string name="new_child_step">%1$d dari 3</string>
@@ -539,6 +543,7 @@ kehilangan kontak.</string>
     <string name="policy_locked">Terkunci</string>
     <string name="policy_free">Bebas</string>
     <string name="policy_hint">Ketuk baris aturan untuk mengubah nilainya. Daftar kunci tersimpan seketika.</string>
+    <string name="policy_discard">Kembalikan seperti semula</string>
     <string name="policy_save">Simpan aturan</string>
     <string name="policy_days">%1$d hari</string>
     <string name="policy_hour">%1$02d</string>
@@ -569,27 +574,24 @@ kehilangan kontak.</string>
     <string name="report_privacy_self">Aturan yang kamu longgarkan baru berlaku 24 jam kemudian.</string>
     <string name="report_edit_policy">Ubah aturan</string>
     <string name="report_issue_code">Terbitkan kode pemasangan</string>
-    <string name="report_adjust">Sesuaikan saldo</string>
-    <string name="report_remove">Hapus %1$s</string>
+    <string name="report_adjust">Tambah saldo</string>
+    <string name="report_remove">Hapus profil “%1$s”</string>
     <string name="report_remove_self">Berhenti ikut aturan</string>
     <string name="report_remove_warning">Perangkat %1$s langsung keluar dan profilnya hilang dari daftar. Materi dan riwayatnya tetap tersimpan.</string>
     <string name="report_remove_warning_self">Aturan berhenti berlaku di HP ini dan aplikasinya kebuka semua.</string>
-    <string name="report_remove_confirm">Ya, hapus %1$s</string>
+    <string name="report_remove_confirm">Ya, hapus profil “%1$s”</string>
     <string name="report_remove_confirm_self">Ya, berhenti ikut aturan</string>
     <string name="report_cancel">Batal</string>
 
     <string name="adjust_title">Saldo %1$s</string>
     <string name="adjust_hero">Saldo saat ini</string>
     <string name="adjust_hero_sub">Boleh libur %1$d hari</string>
-    <string name="adjust_kind">Jenis penyesuaian</string>
     <string name="adjust_grant">Tambah waktu</string>
-    <string name="adjust_redeem">Kurangi waktu</string>
-    <string name="adjust_amount">Jumlah</string>
-    <string name="adjust_note">Catatan untuk %1$s</string>
-    <string name="adjust_note_hint">Ditukar hadiah: sepeda</string>
-    <string name="adjust_warning">Catatan wajib diisi dan tampil di riwayat %1$s. Penyesuaian tanpa alasan mudah terasa seperti hukuman.</string>
+    <string name="adjust_amount">Tambah waktu bermain</string>
+    <string name="adjust_note">Keterangan untuk %1$s</string>
+    <string name="adjust_note_hint">Bonus rajin belajar minggu ini</string>
+    <string name="adjust_warning">Keterangan wajib diisi dan tampil di riwayat %1$s, supaya dia tahu dari mana tambahan waktunya.</string>
     <string name="adjust_apply_grant">Tambah %1$s</string>
-    <string name="adjust_apply_redeem">Kurangi %1$s</string>
 
     <string name="lang_id">Indonesia</string>
     <string name="lang_en">Inggris</string>
@@ -669,19 +671,53 @@ kehilangan kontak.</string>
     <string name="accessibility_disclosure_continue">Mengerti, buka pengaturan</string>
 
     <string name="signin_privacy">Kebijakan privasi</string>
-
-    <string name="settings_rules">Aturan sesi</string>
     <string name="settings_reward">Reward per soal</string>
     <string name="settings_essay">Porsi esai</string>
-    <string name="settings_essay_value">%1$d dari %2$d</string>
+    <string name="settings_apps_sub">Pilih aplikasi yang butuh saldo untuk dibuka</string>
     <string name="settings_upload">Cara setor materi</string>
     <string name="settings_upload_photo">Foto catatan</string>
     <string name="settings_upload_document">Kirim berkas</string>
     <string name="settings_upload_on">Dipakai</string>
     <string name="settings_upload_off">Dimatikan</string>
-    <string name="settings_rules_hint">Ketuk sebuah baris untuk mengubah nilainya. Melonggarkan aturan baru berlaku 24 jam kemudian, mengetatkan berlaku seketika.</string>
+    <string name="stepper_decrease">Kurangi</string>
+    <string name="stepper_increase">Tambah</string>
     <string name="policy_reward">Reward per soal</string>
     <string name="policy_reward_sub">Dasar sebelum kalibrasi level dan kebaruan</string>
     <string name="policy_upload">Cara setor materi</string>
     <string name="policy_upload_sub">Setidaknya satu cara harus tetap menyala</string>
+    <string name="home_session_explain">Saldo cuma berkurang selama aplikasi yang dikunci kamu buka. Kerjakan soal sepuasnya, itu tidak memotong apa pun.</string>
+    <string name="capture_material_prefix">Foto catatan</string>
+    <string name="reject_reason_not_study">Isinya tidak terbaca sebagai materi belajar. Foto catatan, halaman buku, atau slide pelajaran supaya soalnya bisa dibuat.</string>
+    <string name="rejected_headline_other">Soal tidak bisa dibuat dari materi ini</string>
+    <string name="policy_step">2 dari 3</string>
+    <string name="policy_issue_code">Terbitkan kode</string>
+    <string name="policy_apps_waiting">Daftar aplikasi muncul setelah HP anak dipasangkan dan mengirim aplikasi yang ada di sana. Setelah itu kamu bisa memilih mana yang dikunci.</string>
+    <string name="settings_managed">Aturan di HP ini disusun orang tua, jadi tidak bisa diubah dari sini. Yang bisa kamu buka cuma izin sistem dan kebijakan privasi.</string>
+    <string name="home_apps_managed_note">Daftar ini disusun orang tuamu. Kamu bisa melihatnya, tapi tidak bisa menambah atau menguranginya.</string>
+    <string name="policy_saved">Aturan tersimpan dan sudah berlaku di HP anak.</string>
+    <string name="settings_upload_photo_sub">Foto catatan atau halaman buku lewat kamera</string>
+    <string name="settings_upload_document_sub">Kirim berkas PDF atau gambar dari HP</string>
+    <string name="policy_save_failed">Aturan gagal disimpan</string>
+    <string name="protection_managed">Perlindungan ini diatur orang tua dan tidak bisa dimatikan dari HP ini.</string>
+    <string name="apps_managed">Daftar aplikasi terkunci diatur orang tua dan tidak bisa diubah dari HP ini.</string>
+    <string name="report_release">Keluarkan HP %1$s</string>
+    <string name="report_release_warning">HP %1$s langsung keluar dari BrainXP dan aplikasinya kebuka semua. Profil, materi, dan riwayatnya tetap tersimpan, dan kamu bisa memasangkannya lagi dengan kode baru.</string>
+    <string name="report_release_confirm">Ya, keluarkan HP %1$s</string>
+    <string name="report_released">HP %1$s sudah dikeluarkan. Terbitkan kode pemasangan kalau mau menyambungkannya lagi.</string>
+    <string name="home_mode_child">Anak</string>
+    <string name="home_mode_self">Mandiri</string>
+    <string name="home_greeting_morning">Selamat pagi, %1$s</string>
+    <string name="home_greeting_midday">Selamat siang, %1$s</string>
+    <string name="home_greeting_afternoon">Selamat sore, %1$s</string>
+    <string name="home_greeting_evening">Selamat malam, %1$s</string>
+    <string name="alert_title">Perlindungan di HP anak terganggu</string>
+    <string name="alert_accessibility_off">Izin aksesibilitas di HP %1$s dimatikan, jadi BrainXP tidak bisa melihat aplikasi yang dibuka.</string>
+    <string name="alert_usage_access_off">Izin akses penggunaan di HP %1$s dimatikan, jadi pemblokiran tidak berjalan.</string>
+    <string name="alert_overlay_off">Izin tampil di atas aplikasi lain di HP %1$s dimatikan, jadi layar pemblokir tidak bisa muncul.</string>
+    <string name="alert_protection_disabled">Perlindungan di HP %1$s dimatikan.</string>
+    <string name="alert_device_silent">HP %1$s berhenti melapor. Aplikasinya mungkin dihentikan paksa atau dihapus.</string>
+    <string name="alert_unknown">Ada masalah perlindungan di HP %1$s.</string>
+    <string name="alert_channel_name">Peringatan perlindungan</string>
+    <string name="alert_channel_description">Memberi tahu saat perlindungan di HP anak terganggu</string>
+    <string name="alert_title_named">Perlindungan di HP %1$s terganggu</string>
 </resources>
