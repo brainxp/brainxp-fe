@@ -1,32 +1,42 @@
 package com.example.brainxp.feature.apps
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Search
 import com.example.brainxp.R
 import com.example.brainxp.blocking.InstalledApp
 import com.example.brainxp.core.ui.BrainXPTheme
 import com.example.brainxp.core.ui.EmptyState
 import com.example.brainxp.core.ui.LoadingState
-import com.example.brainxp.core.ui.ParentPinDialog
+import com.example.brainxp.core.ui.MainHeader
+import com.example.brainxp.core.ui.Note
 import com.example.brainxp.core.ui.PillTone
+import com.example.brainxp.core.ui.RowGroup
 import com.example.brainxp.core.ui.ScreenNav
 import com.example.brainxp.core.ui.StatusPill
 
@@ -46,13 +56,8 @@ fun AppPickerRoute(
         modifier = modifier,
     )
 
-    if (state.pinRequired) {
-        ParentPinDialog(
-            title = stringResource(R.string.pin_title_restrictions),
-            onSubmit = viewModel::submitPin,
-            onDismiss = viewModel::dismissPin,
-            wrong = state.pinWrong,
-        )
+    if (state.blocked) {
+        Note(text = stringResource(R.string.apps_managed))
     }
 }
 
@@ -70,10 +75,11 @@ fun AppPickerScreen(
         modifier =
             modifier
                 .fillMaxSize()
+                .statusBarsPadding()
                 .padding(horizontal = spacing.screenHorizontal),
         verticalArrangement = Arrangement.spacedBy(spacing.md),
     ) {
-        ScreenNav(title = stringResource(R.string.app_picker_title), onBack = onBack)
+        MainHeader(title = stringResource(R.string.app_picker_title), onBack = onBack)
 
         OutlinedTextField(
             value = state.query,
@@ -81,7 +87,27 @@ fun AppPickerScreen(
             singleLine = true,
             shape = MaterialTheme.shapes.medium,
             label = { Text(stringResource(R.string.app_picker_search)) },
+            leadingIcon = {
+                Icon(
+                    imageVector = Lucide.Search,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            },
+            colors =
+                OutlinedTextFieldDefaults.colors(
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                ),
             modifier = Modifier.fillMaxWidth(),
+        )
+
+        Text(
+            text = stringResource(R.string.app_picker_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
         when {
@@ -98,13 +124,14 @@ fun AppPickerScreen(
 
             else -> {
                 LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(spacing.xs),
+                    verticalArrangement = Arrangement.spacedBy(spacing.sm),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     items(state.visible, key = { it.packageName }) { app ->
                         AppRow(
                             app = app,
-                            checked = app.packageName in state.restricted,
+                            icon = state.icons[app.packageName],
+                            locked = app.packageName in state.restricted,
                             onToggle = { onToggle(app.packageName) },
                         )
                     }
@@ -117,37 +144,51 @@ fun AppPickerScreen(
 @Composable
 private fun AppRow(
     app: InstalledApp,
-    checked: Boolean,
+    icon: ImageBitmap?,
+    locked: Boolean,
     onToggle: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val spacing = BrainXPTheme.spacing
-
-    Row(
-        modifier = modifier.fillMaxWidth().padding(vertical = spacing.xs),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(spacing.md),
-    ) {
-        Checkbox(checked = checked, onCheckedChange = { onToggle() })
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = app.label,
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-                text = app.packageName,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-
-        if (app.isGame) {
-            StatusPill(stringResource(R.string.app_picker_game), tone = PillTone.BLUE)
-        }
+    RowGroup(modifier = modifier) {
+        item(
+            title = app.label,
+            leading = { AppMark(app = app, icon = icon) },
+            onClick = onToggle,
+            trailing = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(BrainXPTheme.spacing.xs),
+                ) {
+                    if (app.isGame) {
+                        StatusPill(text = stringResource(R.string.app_picker_game), tone = PillTone.OUTLINE)
+                    }
+                    StatusPill(
+                        text = stringResource(if (locked) R.string.policy_locked else R.string.policy_free),
+                        tone = if (locked) PillTone.BLUE else PillTone.NEUTRAL,
+                    )
+                }
+            },
+        )
     }
 }
+
+@Composable
+private fun AppMark(
+    app: InstalledApp,
+    icon: ImageBitmap?,
+) {
+    if (icon == null) {
+        Text(
+            text = app.label.take(1).uppercase(),
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        return
+    }
+    Image(bitmap = icon, contentDescription = null, modifier = Modifier.size(ICON))
+}
+
+private val ICON = 26.dp
 
 @Preview(name = "App picker", showBackground = true)
 @Composable
