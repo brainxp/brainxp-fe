@@ -4,8 +4,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.provider.Settings
 import android.telecom.TelecomManager
+import androidx.core.graphics.drawable.toBitmap
 import com.example.brainxp.data.repo.AppLabels
 import com.example.brainxp.di.IoDispatcher
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -27,6 +29,14 @@ class InstalledAppsSource
                     val manager = context.packageManager
                     manager.getApplicationLabel(manager.getApplicationInfo(packageName, 0)).toString()
                 }.getOrDefault(packageName)
+            }
+
+        suspend fun icon(packageName: String): Bitmap? =
+            withContext(io) {
+                runCatching {
+                    val manager = context.packageManager
+                    manager.getApplicationIcon(manager.getApplicationInfo(packageName, 0)).toBitmap()
+                }.getOrNull()
             }
 
         suspend fun launchableApps(): List<InstalledApp> =
