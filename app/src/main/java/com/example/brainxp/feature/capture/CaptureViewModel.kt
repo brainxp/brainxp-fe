@@ -97,10 +97,8 @@ class CaptureViewModel
 
         fun uploadAll(titlePrefix: String) {
             val pages = state.value.pages
-            val titles = captureTitles(titlePrefix, stampOf(clock.wallClock()), pages.size)
-            pages.forEachIndexed { index, page ->
-                uploads.enqueue(page.path, titles[index], MaterialType.PHOTO)
-            }
+            if (pages.isEmpty()) return
+            uploads.enqueue(pages.map(CapturedPage::path), "$titlePrefix ${stampOf(clock.wallClock())}", MaterialType.PHOTO)
             store.reorder(emptyList())
         }
 
