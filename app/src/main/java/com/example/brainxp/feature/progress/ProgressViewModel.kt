@@ -21,6 +21,7 @@ data class ProgressUiState(
     val phase: Phase = Phase.Loading,
     val progress: Progress? = null,
     val days: List<DayPoint> = emptyList(),
+    val refreshing: Boolean = false,
 ) {
     val activeDays: Int get() = days.count { it.earnedSeconds > 0 || it.consumedSeconds > 0 }
 
@@ -55,8 +56,13 @@ class ProgressViewModel
             load()
         }
 
-        private fun load() {
-            mutableState.value = ProgressUiState(phase = ProgressUiState.Phase.Loading)
+        fun refresh() {
+            mutableState.value = mutableState.value.copy(refreshing = true)
+            load(quietly = true)
+        }
+
+        private fun load(quietly: Boolean = false) {
+            if (!quietly) mutableState.value = ProgressUiState(phase = ProgressUiState.Phase.Loading)
             viewModelScope.launch {
                 val progress = rewards.progress()
                 val report = rewards.report(PROGRESS_WINDOW_DAYS)
