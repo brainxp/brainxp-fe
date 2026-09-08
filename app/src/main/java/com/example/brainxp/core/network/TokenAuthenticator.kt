@@ -35,14 +35,21 @@ class TokenAuthenticator
                     return response.request.withBearer(current.accessToken)
                 }
 
-                val refreshed = refresher.refresh(current.refreshToken)
-                if (refreshed == null) {
-                    tokenStore.update(null)
-                    return null
-                }
+                return when (val outcome = refresher.refresh(current.refreshToken)) {
+                    is RefreshOutcome.Renewed -> {
+                        tokenStore.update(outcome.tokens)
+                        response.request.withBearer(outcome.tokens.accessToken)
+                    }
 
-                tokenStore.update(refreshed)
-                return response.request.withBearer(refreshed.accessToken)
+                    RefreshOutcome.Rejected -> {
+                        tokenStore.forget()
+                        null
+                    }
+
+                    RefreshOutcome.Unreachable -> {
+                        null
+                    }
+                }
             }
         }
 
