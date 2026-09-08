@@ -29,7 +29,7 @@ fun ChoiceRow(
     title: String,
     subtitle: String,
     icon: ImageVector,
-    onClick: () -> Unit,
+    onClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
     highlight: Boolean = false,
     trailing: @Composable (() -> Unit)? = null,
@@ -37,7 +37,10 @@ fun ChoiceRow(
     val scheme = MaterialTheme.colorScheme
 
     Surface(
-        modifier = modifier.fillMaxWidth().clickable(onClick = onClick),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .then(if (onClick == null) Modifier else Modifier.clickable(onClick = onClick)),
         shape = MaterialTheme.shapes.medium,
         color = scheme.surface,
         border = BorderStroke(HAIRLINE, scheme.outline),
