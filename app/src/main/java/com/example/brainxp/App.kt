@@ -5,6 +5,7 @@ import androidx.hilt.work.HiltWorkerFactory
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.Configuration
 import com.example.brainxp.blocking.AlertWatchScheduler
+import com.example.brainxp.blocking.BindingWatchScheduler
 import com.example.brainxp.blocking.ProtectionController
 import com.example.brainxp.core.permission.PermissionResumeObserver
 import com.example.brainxp.data.repo.SessionRestorer
@@ -30,6 +31,9 @@ class App :
     @Inject
     lateinit var alertWatchScheduler: AlertWatchScheduler
 
+    @Inject
+    lateinit var bindingWatchScheduler: BindingWatchScheduler
+
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder().setWorkerFactory(workerFactory).build()
 
@@ -39,5 +43,6 @@ class App :
         ProcessLifecycleOwner.get().lifecycle.addObserver(permissionResumeObserver)
         protectionController.start()
         alertWatchScheduler.schedule()
+        bindingWatchScheduler.schedule()
     }
 }
