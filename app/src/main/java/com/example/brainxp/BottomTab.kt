@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
@@ -88,7 +89,7 @@ fun MainBottomBar(
     modifier: Modifier = Modifier,
 ) {
     Surface(modifier = modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surface) {
-        Column {
+        Column(modifier = Modifier.navigationBarsPadding()) {
             HorizontalDivider(thickness = HAIRLINE, color = MaterialTheme.colorScheme.outline)
             Row(
                 modifier = Modifier.fillMaxWidth().padding(vertical = BrainXPTheme.spacing.sm),
