@@ -1,5 +1,6 @@
 package com.example.brainxp.blocking
 
+import android.accessibilityservice.AccessibilityService
 import android.app.UiAutomation
 import androidx.test.platform.app.InstrumentationRegistry
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -161,12 +162,57 @@ class BlockOverlayControllerTest {
         awaitWindowCount(0)
     }
 
+    @Test
+    fun backKeepsTheOverlayFocused() {
+        onMain { controller.show(PACKAGE) { _, _ -> } }
+        awaitWindowCount(1)
+        awaitOverlayFocus()
+
+        instrumentation.uiAutomation.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK)
+
+        assertOverlayKeepsFocus()
+        awaitWindowCount(1)
+        assertTrue(controller.isShowing)
+    }
+
+    private fun currentFocus(): String =
+        shell("dumpsys window")
+            .lineSequence()
+            .filter { it.contains("mCurrentFocus") }
+            .joinToString(" ") { it.trim() }
+
+    private fun overlayHasFocus(): Boolean = currentFocus().contains(BlockOverlayController.WINDOW_TITLE)
+
+    private fun awaitOverlayFocus() {
+        val deadline = System.currentTimeMillis() + TIMEOUT_MS
+        while (System.currentTimeMillis() < deadline) {
+            instrumentation.waitForIdleSync()
+            if (overlayHasFocus()) {
+                return
+            }
+            Thread.sleep(POLL_MS)
+        }
+        assertTrue("overlay never took focus, mCurrentFocus = ${currentFocus()}", overlayHasFocus())
+    }
+
+    private fun assertOverlayKeepsFocus() {
+        val deadline = System.currentTimeMillis() + BACK_SETTLE_MS
+        while (System.currentTimeMillis() < deadline) {
+            instrumentation.waitForIdleSync()
+            assertTrue(
+                "back escaped the overlay, mCurrentFocus = ${currentFocus()}",
+                overlayHasFocus(),
+            )
+            Thread.sleep(POLL_MS)
+        }
+    }
+
     private fun onMain(block: () -> Unit) {
         instrumentation.runOnMainSync(block)
     }
 
     private fun matchedLines(): List<String> =
-        shell("dumpsys window windows")
+        shell("dumpsys window")
             .lineSequence()
             .filter { it.contains(BlockOverlayController.WINDOW_TITLE) }
             .map { it.trim() }
@@ -208,6 +254,7 @@ class BlockOverlayControllerTest {
         const val CYCLES = 100
         const val TIMEOUT_MS = 5_000L
         const val POLL_MS = 50L
+        const val BACK_SETTLE_MS = 1_500L
         val WINDOW_ID = Regex("""Window\{([0-9a-f]+)""")
     }
 }
