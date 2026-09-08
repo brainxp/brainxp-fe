@@ -24,7 +24,7 @@ interface MaterialRepository {
     suspend fun upload(
         title: String,
         type: MaterialType,
-        contentUri: String?,
+        paths: List<String>,
     ): AppResult<Material>
 
     suspend fun page(cursor: String?): AppResult<MaterialPage>

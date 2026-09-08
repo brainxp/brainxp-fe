@@ -4,9 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.result.AppResult
+import com.example.brainxp.core.result.valueOrNull
+import com.example.brainxp.data.repo.AppInventoryRepository
 import com.example.brainxp.data.repo.FamilyRepository
 import com.example.brainxp.data.repo.PolicyRepository
 import com.example.brainxp.data.repo.SubjectPolicy
+import com.example.brainxp.domain.model.DeviceApp
 import com.example.brainxp.domain.model.PolicyDraft
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +36,7 @@ class PolicyEditorViewModel
     constructor(
         private val policies: PolicyRepository,
         private val family: FamilyRepository,
+        private val inventory: AppInventoryRepository,
     ) : ViewModel() {
         private val mutableState = MutableStateFlow(PolicyEditorLoad())
         val state: StateFlow<PolicyEditorLoad> = mutableState.asStateFlow()
@@ -105,10 +109,16 @@ class PolicyEditorViewModel
                         .orEmpty()
                 }
             val result = policies.policy(subjectId)
+            val onDevice = inventory.inventoryOf(subjectId).valueOrNull().orEmpty()
             mutableState.update {
                 when (result) {
-                    is AppResult.Success -> it.copy(policy = result.value.toUiState(resolved), loading = false)
-                    is AppResult.Failure -> it.copy(loading = false, error = result.error)
+                    is AppResult.Success -> {
+                        it.copy(policy = result.value.toUiState(resolved, onDevice), loading = false)
+                    }
+
+                    is AppResult.Failure -> {
+                        it.copy(loading = false, error = result.error)
+                    }
                 }
             }
         }
@@ -147,7 +157,10 @@ private fun PolicyUiState.toDraft(): PolicyDraft =
         uploadMethods = uploadMethods,
     )
 
-private fun SubjectPolicy.toUiState(childName: String): PolicyUiState =
+private fun SubjectPolicy.toUiState(
+    childName: String,
+    onDevice: List<DeviceApp>,
+): PolicyUiState =
     PolicyUiState(
         subjectName = childName,
         questionsPerSession = questionsPerSession,
@@ -158,5 +171,27 @@ private fun SubjectPolicy.toUiState(childName: String): PolicyUiState =
         dailyGrantMinutes = dailyGrantSeconds.map { it / SECONDS_PER_MINUTE },
         idleDaysAllowed = idleDaysAllowed,
         dayResetHour = dayResetHour,
-        apps = lockedApps.map { LockedAppEntry(packageName = it, label = it, locked = true) },
+        apps = appEntriesOf(onDevice, lockedApps),
     )
+
+internal fun appEntriesOf(
+    onDevice: List<DeviceApp>,
+    lockedPackages: List<String>,
+): List<LockedAppEntry> {
+    val locked = lockedPackages.toSet()
+    val known = onDevice.map { app -> app.packageName }.toSet()
+    val reported =
+        onDevice.map { app ->
+            LockedAppEntry(
+                packageName = app.packageName,
+                label = app.label,
+                locked = app.locked || app.packageName in locked,
+            )
+        }
+    val strays =
+        locked
+            .filterNot { it in known }
+            .map { LockedAppEntry(packageName = it, label = it, locked = true) }
+
+    return (reported + strays).sortedWith(compareByDescending<LockedAppEntry> { it.locked }.thenBy { it.label })
+}

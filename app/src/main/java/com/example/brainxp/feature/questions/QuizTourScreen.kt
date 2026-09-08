@@ -2,7 +2,9 @@ package com.example.brainxp.feature.questions
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -41,7 +44,6 @@ import com.example.brainxp.core.ui.StatusPill
 import com.example.brainxp.core.ui.Tokens
 import com.svenjacobs.reveal.Reveal
 import com.svenjacobs.reveal.RevealCanvasState
-import com.svenjacobs.reveal.RevealOverlayArrangement
 import com.svenjacobs.reveal.RevealOverlayScope
 import com.svenjacobs.reveal.RevealShape
 import com.svenjacobs.reveal.RevealState
@@ -90,17 +92,11 @@ fun QuizTourScreen(
     onDone: () -> Unit,
     onSkip: () -> Unit,
     modifier: Modifier = Modifier,
-    ready: Boolean = false,
-    onStart: (() -> Unit)? = null,
-    footer: @Composable () -> Unit = {},
 ) {
     TourBody(
         canvas = LocalRevealCanvas.current,
         onDone = onDone,
         onSkip = onSkip,
-        ready = ready,
-        onStart = onStart,
-        footer = footer,
         modifier = modifier,
     )
 }
@@ -110,9 +106,6 @@ private fun TourBody(
     canvas: RevealCanvasState,
     onDone: () -> Unit,
     onSkip: () -> Unit,
-    ready: Boolean,
-    onStart: (() -> Unit)?,
-    footer: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val spacing = BrainXPTheme.spacing
@@ -139,98 +132,114 @@ private fun TourBody(
         onRevealableClick = { key -> if (flow.step.waits) flow.tapped(key) },
         overlayContent = { key ->
             if (key == flow.step.key) {
-                CoachCard(
-                    step = flow.step,
-                    last = flow.last,
-                    ready = ready,
-                    onStart = onStart,
-                    onAdvance = flow::advance,
-                    onSkip = onSkip,
+                Box(
                     modifier =
                         Modifier
-                            .align(
-                                if (flow.step.below) {
-                                    RevealOverlayArrangement.Bottom
-                                } else {
-                                    RevealOverlayArrangement.Top
-                                },
-                            ).padding(BrainXPTheme.spacing.lg),
-                )
+                            .fillMaxSize()
+                            .statusBarsPadding()
+                            .navigationBarsPadding()
+                            .padding(BrainXPTheme.spacing.lg),
+                    contentAlignment =
+                        if (flow.step.below) Alignment.BottomCenter else Alignment.TopCenter,
+                ) {
+                    CoachCard(
+                        step = flow.step,
+                        last = flow.last,
+                        onAdvance = flow::advance,
+                        onSkip = onSkip,
+                    )
+                }
             }
         },
     ) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .statusBarsPadding()
-                    .navigationBarsPadding()
-                    .padding(horizontal = spacing.screenHorizontal)
-                    .padding(bottom = spacing.screenBottom),
-        ) {
-            ScreenNav(title = stringResource(R.string.tour_title)) {
-                StatusPill(
-                    text = stringResource(R.string.tour_step, flow.at + 1, TOUR_STEPS.size),
-                    tone = PillTone.OUTLINE,
-                )
-            }
-
-            Column(modifier = Modifier.spot(TourSpot.DOTS, reveal)) {
-                ProgressStrip(state = state)
-                QuestionDots(state = state, onJump = {})
-            }
-
-            HorizontalPager(
-                state = pager,
-                modifier = Modifier.weight(1f),
-                pageSpacing = spacing.lg,
-                userScrollEnabled = step.swipe,
-                verticalAlignment = Alignment.Top,
-            ) { page ->
-                PracticePage(
-                    question = practice[page],
-                    chosen = flow.picked[practice[page].id],
-                    modifier = Modifier.spot(TourSpot.QUESTION, reveal),
-                )
-            }
-
+        Box(modifier = Modifier.fillMaxSize()) {
             Column(
-                modifier = Modifier.padding(top = spacing.md).spot(TourSpot.FOOTER, reveal),
-                verticalArrangement = Arrangement.spacedBy(spacing.sm),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .statusBarsPadding()
+                        .navigationBarsPadding()
+                        .padding(horizontal = spacing.screenHorizontal)
+                        .padding(bottom = spacing.screenBottom),
             ) {
-                Text(
-                    text =
-                        if (state.complete) {
-                            stringResource(R.string.quiz_hint_complete)
-                        } else {
-                            stringResource(R.string.quiz_hint_partial, state.total - state.filled)
-                        },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.spot(TourSpot.ACTS, reveal),
-                )
-                DoubtButton(
-                    marked = flow.marked,
-                    onClick = {},
-                    modifier = Modifier.spot(TourSpot.DOUBT, reveal),
-                )
-                footer()
+                ScreenNav(title = stringResource(R.string.tour_title)) {
+                    StatusPill(
+                        text = stringResource(R.string.tour_step, flow.at + 1, TOUR_STEPS.size),
+                        tone = PillTone.OUTLINE,
+                    )
+                }
 
-                if (step.swipe) {
+                Column(modifier = Modifier.spot(TourSpot.DOTS, reveal)) {
+                    ProgressStrip(state = state)
+                    QuestionDots(state = state, onJump = {})
+                }
+
+                HorizontalPager(
+                    state = pager,
+                    modifier = Modifier.weight(1f).swipeLane(step.swipe),
+                    pageSpacing = spacing.lg,
+                    userScrollEnabled = step.swipe,
+                    verticalAlignment = Alignment.Top,
+                ) { page ->
+                    PracticePage(
+                        question = practice[page],
+                        chosen = flow.picked[practice[page].id],
+                        modifier = Modifier.spot(TourSpot.QUESTION, reveal),
+                    )
+                }
+
+                Column(
+                    modifier = Modifier.padding(top = spacing.md).spot(TourSpot.FOOTER, reveal),
+                    verticalArrangement = Arrangement.spacedBy(spacing.sm),
+                ) {
+                    Text(
+                        text =
+                            if (state.complete) {
+                                stringResource(R.string.quiz_hint_complete)
+                            } else {
+                                stringResource(R.string.quiz_hint_partial)
+                            },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.spot(TourSpot.ACTS, reveal),
+                    )
+                    DoubtButton(
+                        marked = flow.marked,
+                        onClick = {},
+                        modifier = Modifier.spot(TourSpot.DOUBT, reveal),
+                    )
+                }
+            }
+
+            if (step.swipe) {
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .statusBarsPadding()
+                            .navigationBarsPadding()
+                            .padding(horizontal = spacing.screenHorizontal)
+                            .padding(bottom = spacing.screenBottom),
+                    contentAlignment = Alignment.BottomCenter,
+                ) {
                     CoachCard(
                         step = step,
                         last = flow.last,
-                        ready = ready,
-                        onStart = onStart,
                         onAdvance = flow::advance,
                         onSkip = onSkip,
-                        modifier = Modifier.padding(top = spacing.sm),
                     )
                 }
             }
         }
     }
 }
+
+private fun Modifier.swipeLane(active: Boolean): Modifier =
+    if (active) {
+        border(RING_WIDTH, Tokens.Blue500, RoundedCornerShape(RING_RADIUS)).padding(RING_PADDING)
+    } else {
+        this
+    }
 
 private fun Modifier.spot(
     key: TourSpot,
@@ -275,8 +284,6 @@ private fun PracticePage(
 private fun CoachCard(
     step: TourStep,
     last: Boolean,
-    ready: Boolean,
-    onStart: (() -> Unit)?,
     onAdvance: () -> Unit,
     onSkip: () -> Unit,
     modifier: Modifier = Modifier,
@@ -320,11 +327,7 @@ private fun CoachCard(
                         onClick = onAdvance,
                     )
                 }
-                if (ready && onStart != null) {
-                    TextButton(onClick = onStart, modifier = Modifier.fillMaxWidth()) {
-                        Text(text = stringResource(R.string.preparing_start))
-                    }
-                } else if (!last) {
+                if (!last) {
                     TextButton(onClick = onSkip, modifier = Modifier.fillMaxWidth()) {
                         Text(text = stringResource(R.string.tour_skip))
                     }

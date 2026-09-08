@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,29 +57,61 @@ fun BlockScreen(
                     .safeDrawingPadding(),
         ) {
             val wide = maxWidth >= SIDE_BY_SIDE_WIDTH && maxHeight < STACKED_HEIGHT
-            val body =
-                Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = spacing.xl, vertical = spacing.xl)
 
             if (wide) {
                 Row(
-                    modifier = body,
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(horizontal = spacing.xl, vertical = spacing.xl),
                     horizontalArrangement = Arrangement.spacedBy(spacing.xxl),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Reason(appLabel = appLabel, info = info, modifier = Modifier.weight(REASON_SHARE))
-                    Facts(info = info, onAction = onAction, modifier = Modifier.weight(FACTS_SHARE))
+                    Column(
+                        modifier = Modifier.weight(REASON_SHARE),
+                        verticalArrangement = Arrangement.spacedBy(spacing.md),
+                    ) {
+                        Brand()
+                        Reason(appLabel = appLabel, info = info)
+                    }
+                    Column(
+                        modifier = Modifier.weight(FACTS_SHARE),
+                        verticalArrangement = Arrangement.spacedBy(spacing.md),
+                    ) {
+                        Ledger(info = info)
+                        Actions(info = info, onAction = onAction)
+                    }
                 }
             } else {
                 Column(
-                    modifier = body.widthIn(max = READING_WIDTH),
-                    verticalArrangement =
-                        Arrangement.spacedBy(spacing.xl, alignment = Alignment.CenterVertically),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = spacing.xl)
+                            .padding(top = spacing.xl, bottom = spacing.xxl),
                 ) {
-                    Reason(appLabel = appLabel, info = info)
-                    Facts(info = info, onAction = onAction)
+                    Brand(modifier = Modifier.widthIn(max = READING_WIDTH))
+                    Column(
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .verticalScroll(rememberScrollState())
+                                .widthIn(max = READING_WIDTH),
+                        verticalArrangement =
+                            Arrangement.spacedBy(spacing.xl, alignment = Alignment.CenterVertically),
+                    ) {
+                        Reason(appLabel = appLabel, info = info)
+                        Ledger(info = info)
+                    }
+                    Actions(
+                        info = info,
+                        onAction = onAction,
+                        modifier =
+                            Modifier
+                                .widthIn(max = READING_WIDTH)
+                                .padding(top = spacing.xxxl),
+                    )
                 }
             }
         }
@@ -113,9 +146,18 @@ private fun Reason(
 }
 
 @Composable
-private fun Facts(
+private fun Brand(modifier: Modifier = Modifier) {
+    Text(
+        text = stringResource(R.string.app_name),
+        style = MaterialTheme.typography.titleMedium,
+        color = Color.White,
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun Ledger(
     info: BlockedInfo,
-    onAction: (BlockAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val spacing = BrainXPTheme.spacing
@@ -130,13 +172,34 @@ private fun Facts(
         )
 
         ledgerOf(info).forEach { row -> LedgerLine(row = row, accent = accentOf(info.state)) }
+    }
+}
 
+@Composable
+private fun Actions(
+    info: BlockedInfo,
+    onAction: (BlockAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val spacing = BrainXPTheme.spacing
+
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(spacing.sm)) {
         PrimaryButton(
             text = stringResource(actionOf(info.state)),
             onClick = { onAction(actionKindOf(info.state)) },
-            modifier = Modifier.padding(top = spacing.sm),
             onDark = true,
         )
+
+        TextButton(
+            onClick = { onAction(BlockAction.CLOSE) },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                text = stringResource(R.string.block_screen_close),
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.White.copy(alpha = SECONDARY_INK),
+            )
+        }
 
         Text(
             text = stringResource(noteOf(info.state)),

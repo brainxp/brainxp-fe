@@ -110,11 +110,29 @@ class HomeViewModel
                 return
             }
             when (event) {
-                HomeEvent.Retry -> viewModelScope.launch { reconciler.reconcile() }
-                HomeEvent.EndUnlockEarly -> viewModelScope.launch { unlocks.endEarly() }
-                is HomeEvent.OpenApp -> emit(HomeEffect.LaunchApp(event.packageName))
-                is HomeEvent.Resume -> emit(HomeEffect.OpenQuestions(event.materialId))
-                else -> Unit
+                HomeEvent.Retry -> {
+                    viewModelScope.launch {
+                        mutableState.value = mutableState.value.copy(refreshing = true)
+                        reconciler.reconcile()
+                        mutableState.value = mutableState.value.copy(refreshing = false)
+                    }
+                }
+
+                HomeEvent.EndUnlockEarly -> {
+                    viewModelScope.launch { unlocks.endEarly() }
+                }
+
+                is HomeEvent.OpenApp -> {
+                    emit(HomeEffect.LaunchApp(event.packageName))
+                }
+
+                is HomeEvent.Resume -> {
+                    emit(HomeEffect.OpenQuestions(event.materialId))
+                }
+
+                else -> {
+                    Unit
+                }
             }
         }
 
@@ -146,4 +164,5 @@ private fun HomeUiState.mergedWith(fresh: HomeUiState): HomeUiState =
         pending = pending,
         preparing = preparing,
         displayName = displayName,
+        refreshing = refreshing,
     )

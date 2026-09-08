@@ -18,6 +18,7 @@ fun ConfirmDialog(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
     destructive: Boolean = true,
+    dismiss: String = stringResource(R.string.detail_delete_cancel),
 ) {
     AlertDialog(
         modifier = modifier,
@@ -45,7 +46,7 @@ fun ConfirmDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(text = stringResource(R.string.detail_delete_cancel))
+                Text(text = dismiss)
             }
         },
     )

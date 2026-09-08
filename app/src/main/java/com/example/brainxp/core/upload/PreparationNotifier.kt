@@ -49,7 +49,8 @@ class PreparationNotifier
             val builder =
                 NotificationCompat
                     .Builder(context, CHANNEL_ID)
-                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setSmallIcon(R.drawable.ic_notification)
+                    .setColor(context.getColor(R.color.brand_navy))
                     .setContentTitle(
                         context.getString(
                             if (ready) {
@@ -75,7 +76,7 @@ class PreparationNotifier
 
             if (ready) {
                 builder.addAction(
-                    R.mipmap.ic_launcher,
+                    R.drawable.ic_notification,
                     context.getString(R.string.ready_notification_action),
                     openIntent(material.id, record.id, ready = true),
                 )

@@ -17,6 +17,7 @@ import javax.inject.Inject
 data class HistoryUiState(
     val entries: List<LedgerEntry> = emptyList(),
     val loading: Boolean = true,
+    val refreshing: Boolean = false,
     val error: ApiError? = null,
 ) {
     val empty: Boolean get() = !loading && error == null && entries.isEmpty()
@@ -37,14 +38,21 @@ class HistoryViewModel
 
         fun retry() = load()
 
-        private fun load() {
-            mutableState.update { it.copy(loading = true, error = null) }
+        fun refresh() = load(quietly = true)
+
+        private fun load(quietly: Boolean = false) {
+            mutableState.update { it.copy(loading = !quietly, refreshing = quietly, error = null) }
             viewModelScope.launch {
                 val result = rewards.history()
                 mutableState.update {
                     when (result) {
-                        is AppResult.Success -> it.copy(entries = result.value, loading = false)
-                        is AppResult.Failure -> it.copy(loading = false, error = result.error)
+                        is AppResult.Success -> {
+                            it.copy(entries = result.value, loading = false, refreshing = false)
+                        }
+
+                        is AppResult.Failure -> {
+                            it.copy(loading = false, refreshing = false, error = result.error)
+                        }
                     }
                 }
             }

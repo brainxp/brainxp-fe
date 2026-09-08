@@ -6,6 +6,7 @@ import com.example.brainxp.domain.model.Standing
 enum class BlockAction {
     STUDY,
     START_SESSION,
+    CLOSE,
 }
 
 enum class BlockedState {

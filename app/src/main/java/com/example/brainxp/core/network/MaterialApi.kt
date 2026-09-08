@@ -59,8 +59,7 @@ interface MaterialApi {
     @POST("subjects/{subjectId}/materials")
     suspend fun upload(
         @Path("subjectId") subjectId: String,
-        @Part file: MultipartBody.Part,
-        @Part("method") method: RequestBody,
+        @Part files: List<MultipartBody.Part>,
     ): MaterialAcceptedDto
 
     @GET("subjects/{subjectId}/library")

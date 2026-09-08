@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -172,7 +171,6 @@ private fun MainNavHost(
                 selected = backStack.lastOrNull { it.selectedTab() != null }?.selectedTab(),
                 onSelect = { tab -> backStack.switchTo(tab) },
                 onAddMaterial = { backStack.add(MainRoute.Capture) },
-                modifier = Modifier.navigationBarsPadding(),
             )
         }
     }

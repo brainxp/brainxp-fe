@@ -55,7 +55,8 @@ class ProtectionNotification
 
             return NotificationCompat
                 .Builder(context, if (snapshot.degraded) DEGRADED_CHANNEL_ID else CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setColor(context.getColor(R.color.brand_navy))
                 .setContentTitle(title(snapshot, blocked, running))
                 .setContentText(body(snapshot, running, remaining))
                 .setOngoing(true)

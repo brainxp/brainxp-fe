@@ -30,7 +30,8 @@ class AlertNotifier
             val body = wordingOf(alert)
             return NotificationCompat
                 .Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setColor(context.getColor(R.color.brand_navy))
                 .setContentTitle(context.getString(R.string.alert_title_named, alert.subjectName))
                 .setContentText(body)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(body))

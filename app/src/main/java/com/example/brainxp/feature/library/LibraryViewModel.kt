@@ -54,6 +54,7 @@ class LibraryViewModel
                             mutableState.value.copy(
                                 phase = LibraryUiState.Phase.Ready,
                                 items = result.value.items,
+                                refreshing = false,
                             )
                     }
 
@@ -75,9 +76,22 @@ class LibraryViewModel
 
         fun onEvent(event: LibraryEvent) {
             when (event) {
-                LibraryEvent.Retry -> refresh()
-                is LibraryEvent.Study -> emit(LibraryEffect.OpenMaterial(event.materialId))
-                is LibraryEvent.Remove -> remove(event.materialId)
+                LibraryEvent.Retry -> {
+                    refresh()
+                }
+
+                LibraryEvent.Refresh -> {
+                    mutableState.value = mutableState.value.copy(refreshing = true)
+                    refresh()
+                }
+
+                is LibraryEvent.Study -> {
+                    emit(LibraryEffect.OpenMaterial(event.materialId))
+                }
+
+                is LibraryEvent.Remove -> {
+                    remove(event.materialId)
+                }
             }
         }
 

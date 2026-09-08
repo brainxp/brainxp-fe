@@ -41,6 +41,7 @@ data class HomeUiState(
     val lockedApps: List<LockedApp> = emptyList(),
     val managed: Boolean = false,
     val displayName: String = "",
+    val refreshing: Boolean = false,
     val consumedSeconds: Int = 0,
     val idleDays: Int = 0,
     val idleDaysAllowed: Int = 0,

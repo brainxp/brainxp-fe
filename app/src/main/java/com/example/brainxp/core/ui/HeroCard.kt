@@ -29,6 +29,7 @@ fun HeroCard(
     unit: String? = null,
     tone: HeroTone = HeroTone.PRIMARY,
     progress: Float? = null,
+    badge: @Composable (() -> Unit)? = null,
     footer: @Composable (() -> Unit)? = null,
 ) {
     val spacing = BrainXPTheme.spacing
@@ -59,11 +60,15 @@ fun HeroCard(
                 modifier = Modifier.padding(spacing.xl),
                 verticalArrangement = Arrangement.spacedBy(spacing.sm),
             ) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color.White.copy(alpha = LABEL_ALPHA),
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.White.copy(alpha = LABEL_ALPHA),
+                        modifier = Modifier.weight(1f),
+                    )
+                    badge?.invoke()
+                }
 
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(

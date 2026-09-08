@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
-const val KEY_CACHED_PATH = "cachedPath"
+const val KEY_CACHED_PATHS = "cachedPaths"
 const val KEY_TITLE = "title"
 const val KEY_TYPE = "type"
 
@@ -32,7 +32,7 @@ class UploadQueue
         private val workManager: WorkManager,
     ) {
         fun enqueue(
-            cachedPath: String,
+            cachedPaths: List<String>,
             title: String,
             type: MaterialType,
         ): String {
@@ -40,7 +40,7 @@ class UploadQueue
                 OneTimeWorkRequestBuilder<MaterialUploadWorker>()
                     .setInputData(
                         workDataOf(
-                            KEY_CACHED_PATH to cachedPath,
+                            KEY_CACHED_PATHS to cachedPaths.toTypedArray(),
                             KEY_TITLE to title,
                             KEY_TYPE to type.name,
                         ),
@@ -54,14 +54,14 @@ class UploadQueue
                     .build()
 
             workManager.enqueueUniqueWork(
-                uniqueNameFor(cachedPath),
+                uniqueNameFor(cachedPaths),
                 androidx.work.ExistingWorkPolicy.KEEP,
                 request,
             )
             return request.id.toString()
         }
 
-        private fun uniqueNameFor(cachedPath: String): String = "$TAG:${File(cachedPath).name}"
+        private fun uniqueNameFor(cachedPaths: List<String>): String = "$TAG:${cachedPaths.joinToString(separator = "+") { File(it).name }}"
 
         companion object {
             const val TAG = "material-upload"
@@ -80,9 +80,8 @@ class MaterialUploadWorker
         private val generation: QuestionGenerationQueue,
     ) : CoroutineWorker(context, params) {
         override suspend fun doWork(): Result {
-            val path = inputData.getString(KEY_CACHED_PATH) ?: return Result.failure()
-            val file = File(path)
-            if (!file.exists()) {
+            val files = inputData.getStringArray(KEY_CACHED_PATHS)?.map(::File).orEmpty()
+            if (files.isEmpty() || files.any { !it.exists() }) {
                 return Result.failure(reason(MISSING))
             }
 
@@ -91,9 +90,9 @@ class MaterialUploadWorker
                 runCatching { MaterialType.valueOf(inputData.getString(KEY_TYPE).orEmpty()) }
                     .getOrDefault(MaterialType.DOCUMENT)
 
-            return when (val result = materials.upload(title, type, path)) {
+            return when (val result = materials.upload(title, type, files.map(File::getPath))) {
                 is AppResult.Success -> {
-                    file.delete()
+                    files.forEach { it.delete() }
                     generation.enqueue(result.value.id)
                     preparation.watch(result.value.id, title)
                     Result.success()

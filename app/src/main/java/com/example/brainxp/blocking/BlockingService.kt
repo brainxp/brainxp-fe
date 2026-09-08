@@ -9,19 +9,21 @@ import com.example.brainxp.core.detect.ForegroundAppDetector
 import com.example.brainxp.core.detect.ScreenState
 import com.example.brainxp.core.permission.AccessibilityWatch
 import com.example.brainxp.core.permission.PermissionStateProvider
+import com.example.brainxp.data.prefs.DEFAULT_WARNING_LEAD_SECONDS
 import com.example.brainxp.data.prefs.SettingsDataStore
 import com.example.brainxp.data.repo.RewardReconciler
 import com.example.brainxp.di.DefaultDispatcher
+import com.example.brainxp.domain.PlaytimeCueTracker
 import com.example.brainxp.domain.RestrictionPolicy
 import com.example.brainxp.domain.UnlockSessionManager
 import com.example.brainxp.domain.model.UnlockState
+import com.example.brainxp.domain.thresholdOf
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -38,6 +40,9 @@ class BlockingService : Service() {
 
     @Inject
     lateinit var accessibilityWatch: AccessibilityWatch
+
+    @Inject
+    lateinit var appInventory: AppInventoryPublisher
 
     @Inject
     lateinit var protection: ProtectionStateHolder
@@ -64,6 +69,9 @@ class BlockingService : Service() {
     lateinit var overlay: BlockOverlayController
 
     @Inject
+    lateinit var binding: BindingWatcher
+
+    @Inject
     @DefaultDispatcher
     lateinit var dispatcher: CoroutineDispatcher
 
@@ -72,7 +80,8 @@ class BlockingService : Service() {
     private val foregroundPackage = MutableStateFlow<String?>(null)
     private val blocked = MutableStateFlow(false)
     private var clearTicks = 0
-    private var warnedForUnlock: String? = null
+    private val cues = PlaytimeCueTracker()
+    private var warningLead = DEFAULT_WARNING_LEAD_SECONDS
     private var appLabels: Map<String, String> = emptyMap()
 
     override fun onCreate() {
@@ -83,9 +92,12 @@ class BlockingService : Service() {
         startForeground(ProtectionNotification.ID, render())
         accessibilityWatch.start()
         scope.launch { protection.reloadUnlock() }
+        scope.launch { appInventory.publish() }
         scope.launch { observeUnlockForWarning() }
+        scope.launch { settings.settings.collect { warningLead = it.warningLeadSeconds } }
         scope.launch { appLabels = installedApps.launchableApps().associate { it.packageName to it.label } }
         scope.launch { detector.foregroundPackage.collect { foregroundPackage.value = it } }
+        scope.launch { screenState.isScreenOn.collect { on -> if (on) binding.check() } }
         scope.launch {
             ScreenGatedTicker(screenState.isScreenOn, TICK_INTERVAL_MS).ticks().collect { tick() }
         }
@@ -110,21 +122,17 @@ class BlockingService : Service() {
         unlocks.state.collect { unlock ->
             if (unlock !is UnlockState.Active) {
                 expiryWarning.cancel()
-                warnedForUnlock = null
+                cues.reset()
             }
         }
     }
 
-    private suspend fun maybeWarn(unlock: UnlockState) {
-        if (unlock !is UnlockState.Active || warnedForUnlock == unlock.unlockId) {
+    private fun maybeWarn(unlock: UnlockState) {
+        if (unlock !is UnlockState.Active) {
             return
         }
-        val remainingSeconds = unlocks.remaining().inWholeSeconds
-        val lead = settings.settings.first().warningLeadSeconds
-        if (remainingSeconds in 1..lead) {
-            warnedForUnlock = unlock.unlockId
-            expiryWarning.post(remainingSeconds.toInt())
-        }
+        val cue = cues.cueFor(unlock, warningLead) ?: return
+        expiryWarning.post(cue, thresholdOf(cue, warningLead))
     }
 
     private suspend fun tick() {
@@ -141,6 +149,7 @@ class BlockingService : Service() {
         if (shouldBlock) {
             clearTicks = 0
             blocked.value = true
+            scope.launch { binding.check() }
             val blockedPackage = requireNotNull(current)
             val balance = rewards.state.value
             overlay.show(
@@ -149,8 +158,25 @@ class BlockingService : Service() {
                 info = blockedInfoOf(balance.standing, balance.balanceSeconds),
             ) { pkg, action ->
                 when (action) {
-                    BlockAction.STUDY -> launchEarnTime(pkg)
-                    BlockAction.START_SESSION -> startSessionFrom(pkg)
+                    BlockAction.STUDY -> {
+                        launchEarnTime(pkg)
+                    }
+
+                    BlockAction.START_SESSION -> {
+                        startSessionFrom(pkg)
+                    }
+
+                    BlockAction.CLOSE -> {
+                        clearTicks = 0
+                        blocked.value = false
+                        overlay.hide()
+                        startActivity(
+                            Intent(Intent.ACTION_MAIN).apply {
+                                addCategory(Intent.CATEGORY_HOME)
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            },
+                        )
+                    }
                 }
             }
         } else {

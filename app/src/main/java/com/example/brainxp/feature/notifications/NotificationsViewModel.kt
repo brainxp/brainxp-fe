@@ -3,6 +3,8 @@ package com.example.brainxp.feature.notifications
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brainxp.data.repo.NotificationRepository
+import com.example.brainxp.domain.model.AppNotification
+import com.example.brainxp.domain.model.NotificationKind
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -39,10 +41,7 @@ class NotificationsViewModel
             val opened = state.value.notifications.firstOrNull { it.id == id } ?: return
             viewModelScope.launch {
                 notifications.markRead(id)
-                val material = opened.materialId
-                if (opened.opensQuestions && material != null) {
-                    effectChannel.send(NotificationsEffect.OpenQuestions(material))
-                }
+                destinationOf(opened)?.let { effectChannel.send(it) }
             }
         }
 

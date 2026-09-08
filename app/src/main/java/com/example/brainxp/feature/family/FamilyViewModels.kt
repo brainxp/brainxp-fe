@@ -140,10 +140,12 @@ class PairingCodeViewModel
 data class ChildReportLoad(
     val report: ChildReportUiState? = null,
     val loading: Boolean = true,
+    val refreshing: Boolean = false,
     val removing: Boolean = false,
     val removed: Boolean = false,
     val releasing: Boolean = false,
     val released: Boolean = false,
+    val releaseFailed: ApiError? = null,
     val error: ApiError? = null,
 )
 
@@ -157,13 +159,13 @@ class ChildReportViewModel
         fun releaseDevice() {
             val childId = loadedFor ?: return
             if (mutableState.value.releasing) return
-            mutableState.update { it.copy(releasing = true, error = null, released = false) }
+            mutableState.update { it.copy(releasing = true, releaseFailed = null, released = false) }
             viewModelScope.launch {
                 val result = family.releaseDevice(childId)
                 mutableState.update {
                     when (result) {
                         is AppResult.Success -> it.copy(releasing = false, released = true)
-                        is AppResult.Failure -> it.copy(releasing = false, error = result.error)
+                        is AppResult.Failure -> it.copy(releasing = false, releaseFailed = result.error)
                     }
                 }
             }
@@ -195,7 +197,7 @@ class ChildReportViewModel
         ) {
             if (loadedFor == childId) return
             loadedFor = childId
-            mutableState.update { it.copy(loading = true, error = null) }
+            mutableState.update { it.copy(loading = !it.refreshing, error = null) }
             viewModelScope.launch {
                 val resolved =
                     childName.ifBlank {
@@ -212,6 +214,7 @@ class ChildReportViewModel
                         is AppResult.Success -> {
                             val report = result.value
                             it.copy(
+                                refreshing = false,
                                 report =
                                     ChildReportUiState(
                                         subjectName = resolved,
@@ -228,14 +231,21 @@ class ChildReportViewModel
                         }
 
                         is AppResult.Failure -> {
-                            it.copy(loading = false, error = result.error)
+                            it.copy(loading = false, refreshing = false, error = result.error)
                         }
                     }
                 }
             }
         }
 
-        fun retry() {
+        fun retry() = reload()
+
+        fun refresh() {
+            mutableState.update { it.copy(refreshing = true) }
+            reload()
+        }
+
+        private fun reload() {
             val childId = loadedFor ?: return
             loadedFor = null
             load(

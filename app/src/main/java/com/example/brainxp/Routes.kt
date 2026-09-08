@@ -115,6 +115,11 @@ sealed interface MainRoute : NavKey {
     data object FamilyNewChild : MainRoute
 
     @Serializable
+    data class FamilyChildApps(
+        val childId: String,
+    ) : MainRoute
+
+    @Serializable
     data class FamilyBalance(
         val childId: String,
     ) : MainRoute

@@ -121,19 +121,6 @@ private fun TopBar(
                 ),
             tone = PillTone.OUTLINE,
         )
-        if (state.streakDays > 0) {
-            StatusPill(
-                text = stringResource(R.string.home_streak, state.streakDays),
-                tone = PillTone.BLUE,
-                leading = {
-                    Icon(
-                        imageVector = Lucide.Flame,
-                        contentDescription = null,
-                        modifier = Modifier.size(PILL_ICON),
-                    )
-                },
-            )
-        }
         IconButton(
             onClick = { onEvent(HomeEvent.OpenProgress) },
             modifier = Modifier.size(NAV_TAP),
@@ -384,6 +371,21 @@ private fun Hero(state: HomeUiState) {
         value = if (running) fullClock(state.remaining) else fullClock(state.balanceSeconds),
         progress = if (state.dailyCapSeconds > 0) state.spentFraction else null,
         tone = if (state.capReached || state.idleLocked) HeroTone.DARK else HeroTone.PRIMARY,
+        badge = {
+            if (state.streakDays > 0) {
+                StatusPill(
+                    text = stringResource(R.string.home_streak, state.streakDays),
+                    tone = PillTone.ON_DARK,
+                    leading = {
+                        Icon(
+                            imageVector = Lucide.Flame,
+                            contentDescription = null,
+                            modifier = Modifier.size(PILL_ICON),
+                        )
+                    },
+                )
+            }
+        },
         footer = {
             Text(
                 text =

@@ -57,7 +57,7 @@ class PickSourceViewModel
                 when (val result = withContext(io) { cache.copyIn(uri) }) {
                     is PickResult.Accepted -> {
                         mutablePicked.value = result.file.cachedPath
-                        uploads.enqueue(result.file.cachedPath, result.file.name, MaterialType.DOCUMENT)
+                        uploads.enqueue(listOf(result.file.cachedPath), result.file.name, MaterialType.DOCUMENT)
                         onAccepted()
                     }
 

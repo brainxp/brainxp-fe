@@ -33,6 +33,7 @@ import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.ui.ConfirmDialog
 import com.example.brainxp.core.ui.ErrorState
 import com.example.brainxp.core.ui.LoadingState
+import com.example.brainxp.core.ui.PullRefresh
 import com.example.brainxp.core.ui.apiErrorBody
 import com.example.brainxp.core.ui.levelLabel
 import com.example.brainxp.core.upload.PreparingStage
@@ -47,14 +48,11 @@ import com.example.brainxp.feature.capture.CaptureMethod
 import com.example.brainxp.feature.capture.CaptureViewModel
 import com.example.brainxp.feature.capture.PickSourceScreen
 import com.example.brainxp.feature.capture.PickSourceViewModel
-import com.example.brainxp.feature.capture.PreparationFooter
-import com.example.brainxp.feature.capture.PreparingMode
 import com.example.brainxp.feature.capture.PreparingScreen
 import com.example.brainxp.feature.capture.PreparingViewModel
 import com.example.brainxp.feature.capture.RejectedScreen
 import com.example.brainxp.feature.capture.RejectedViewModel
 import com.example.brainxp.feature.capture.isLevelRejection
-import com.example.brainxp.feature.capture.modeOf
 import com.example.brainxp.feature.capture.rejectionNote
 import com.example.brainxp.feature.capture.rejectionReasonRes
 import com.example.brainxp.feature.family.BalanceAdjustScreen
@@ -75,12 +73,14 @@ import com.example.brainxp.feature.health.ProtectionRow
 import com.example.brainxp.feature.history.HistoryScreen
 import com.example.brainxp.feature.history.HistoryViewModel
 import com.example.brainxp.feature.home.HomeEffect
+import com.example.brainxp.feature.home.HomeEvent
 import com.example.brainxp.feature.home.HomeScreen
 import com.example.brainxp.feature.home.HomeViewModel
 import com.example.brainxp.feature.legal.DeleteAccountScreen
 import com.example.brainxp.feature.legal.DeleteAccountViewModel
 import com.example.brainxp.feature.legal.PrivacyPolicyScreen
 import com.example.brainxp.feature.library.LibraryEffect
+import com.example.brainxp.feature.library.LibraryEvent
 import com.example.brainxp.feature.library.LibraryScreen
 import com.example.brainxp.feature.library.LibraryViewModel
 import com.example.brainxp.feature.library.MaterialDetailScreen
@@ -225,12 +225,17 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(backStack: NavBackStack<Nav
             viewModel.effects.collect { effect -> openHome(effect, backStack, context) }
         }
 
-        Column {
-            HomeScreen(
-                state = homeState,
-                onEvent = viewModel::onEvent,
-                modifier = Modifier.weight(1f),
-            )
+        PullRefresh(
+            refreshing = homeState.refreshing,
+            onRefresh = { viewModel.onEvent(HomeEvent.Retry) },
+        ) {
+            Column {
+                HomeScreen(
+                    state = homeState,
+                    onEvent = viewModel::onEvent,
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
     }
     entry<MainRoute.AppPicker> { AppPickerRoute(onBack = { backStack.popOrIgnore() }) }
@@ -239,11 +244,13 @@ internal fun EntryProviderScope<NavKey>.dailyEntries(backStack: NavBackStack<Nav
         val viewModel: ProgressViewModel = hiltViewModel()
         val progressState by viewModel.state.collectAsStateWithLifecycle()
 
-        ProgressScreen(
-            state = progressState,
-            onRetry = viewModel::retry,
-            onBack = { backStack.popOrIgnore() },
-        )
+        PullRefresh(refreshing = progressState.refreshing, onRefresh = viewModel::refresh) {
+            ProgressScreen(
+                state = progressState,
+                onRetry = viewModel::retry,
+                onBack = { backStack.popOrIgnore() },
+            )
+        }
     }
     entry<MainRoute.Notifications> { NotificationsEntry(backStack) }
     entry<MainRoute.Settings> { SettingsEntry(backStack) }
@@ -341,22 +348,12 @@ internal fun EntryProviderScope<NavKey>.captureEntries(backStack: NavBackStack<N
             Unit
         }
 
-        if (modeOf(state) == PreparingMode.TUTORIAL) {
-            QuizTourScreen(
-                onDone = { viewModel.showGuide(false) },
-                onSkip = { viewModel.showGuide(false) },
-                ready = state.done,
-                onStart = start,
-                footer = { PreparationFooter(state = state, onStart = start) },
-            )
-        } else {
-            PreparingScreen(
-                state = state,
-                onRetry = viewModel::retry,
-                onLeave = { backStack.popOrIgnore() },
-                onStart = start,
-            )
-        }
+        PreparingScreen(
+            state = state,
+            onRetry = viewModel::retry,
+            onLeave = { backStack.popOrIgnore() },
+            onStart = start,
+        )
     }
     entry<MainRoute.Rejected> { key -> RejectedEntry(key, backStack) }
 }
@@ -383,10 +380,15 @@ internal fun EntryProviderScope<NavKey>.learningEntries(backStack: NavBackStack<
             }
         }
 
-        LibraryScreen(
-            state = libraryState,
-            onEvent = viewModel::onEvent,
-        )
+        PullRefresh(
+            refreshing = libraryState.refreshing,
+            onRefresh = { viewModel.onEvent(LibraryEvent.Refresh) },
+        ) {
+            LibraryScreen(
+                state = libraryState,
+                onEvent = viewModel::onEvent,
+            )
+        }
     }
     entry<MainRoute.MaterialDetail> { key -> MaterialDetailEntry(key, backStack) }
     entry<MainRoute.Questions> { key -> QuestionsEntry(key, backStack) }
@@ -559,9 +561,19 @@ private fun HistoryEntry() {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     when {
-        state.error != null -> ErrorState(error = state.error!!, onRetry = viewModel::retry)
-        state.loading -> LoadingState()
-        else -> HistoryScreen(entries = state.entries)
+        state.error != null -> {
+            ErrorState(error = state.error!!, onRetry = viewModel::retry)
+        }
+
+        state.loading -> {
+            LoadingState()
+        }
+
+        else -> {
+            PullRefresh(refreshing = state.refreshing, onRefresh = viewModel::refresh) {
+                HistoryScreen(entries = state.entries)
+            }
+        }
     }
 }
 
@@ -574,6 +586,7 @@ private fun NotificationsEntry(backStack: NavBackStack<NavKey>) {
         viewModel.effects.collect { effect ->
             when (effect) {
                 is NotificationsEffect.OpenQuestions -> backStack.add(MainRoute.Questions(effect.materialId))
+                is NotificationsEffect.OpenRejection -> backStack.add(MainRoute.Rejected(effect.materialId))
             }
         }
     }

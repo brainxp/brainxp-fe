@@ -20,6 +20,4 @@ data class AppNotification(
     val readAt: Long? = null,
 ) {
     val unread: Boolean get() = readAt == null
-
-    val opensQuestions: Boolean get() = kind == NotificationKind.QUESTIONS_READY && materialId != null
 }

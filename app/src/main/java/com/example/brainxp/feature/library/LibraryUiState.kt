@@ -6,6 +6,7 @@ import com.example.brainxp.domain.model.Material
 data class LibraryUiState(
     val phase: Phase = Phase.Loading,
     val items: List<Material> = emptyList(),
+    val refreshing: Boolean = false,
     val removing: String? = null,
 ) {
     sealed interface Phase {
@@ -24,6 +25,8 @@ data class LibraryUiState(
 
 sealed interface LibraryEvent {
     data object Retry : LibraryEvent
+
+    data object Refresh : LibraryEvent
 
     data class Study(
         val materialId: String,
