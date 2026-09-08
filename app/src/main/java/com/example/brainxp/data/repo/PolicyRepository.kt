@@ -53,6 +53,17 @@ class PolicyRepository
             subjectId: String? = null,
         ): AppResult<PolicyChange> = patch(draft.toPatch(), subjectId)
 
+        suspend fun setAppLocked(
+            packageName: String,
+            locked: Boolean,
+            subjectId: String? = null,
+        ): AppResult<Unit> {
+            val subject = subjectId ?: auth.current().subjectId ?: return AppResult.Failure(ApiError.Unauthorized)
+            return call {
+                if (locked) api.lockApp(subject, packageName) else api.unlockApp(subject, packageName)
+            }
+        }
+
         suspend fun setLevel(
             level: AcademicLevel,
             subjectId: String? = null,
