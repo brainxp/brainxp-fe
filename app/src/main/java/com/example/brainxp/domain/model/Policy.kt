@@ -33,7 +33,7 @@ object PolicyLimits {
     val DAY_RESET_HOUR = 0..23
     val IDLE_DAYS_ALLOWED = 0..14
 
-    val REWARD_STEPS = listOf(15, 30, 45, 60, 90, 120, 180, 300)
+    val REWARD_STEPS = listOf(15, 30, 45, 60, 90, 120, 180, 300, 450, 600, 900, 1_200, 1_800)
     val CAP_STEPS = listOf(0, 1_800, 3_600, 5_400, 7_200, 10_800)
     val GRANT_STEPS = listOf(0, 900, 1_800, 3_600)
 
@@ -137,7 +137,81 @@ fun PolicyDraft.stepped(step: PolicyStep): PolicyDraft =
         }
     }
 
-private const val QUESTION_STEP = 2
+enum class StepDirection {
+    UP,
+    DOWN,
+    ;
+
+    val sign: Int get() = if (this == UP) 1 else -1
+}
+
+fun PolicyDraft.nudged(
+    step: PolicyStep,
+    direction: StepDirection,
+): PolicyDraft =
+    when (step) {
+        PolicyStep.Questions -> {
+            val next =
+                (questionsPerSession + direction.sign * QUESTION_STEP)
+                    .coerceIn(PolicyLimits.QUESTIONS_PER_SESSION)
+            copy(questionsPerSession = next, essayCount = essayCount.coerceAtMost(next))
+        }
+
+        PolicyStep.Essays -> {
+            copy(essayCount = (essayCount + direction.sign).coerceIn(0, questionsPerSession))
+        }
+
+        PolicyStep.BaseReward -> {
+            copy(baseRewardSeconds = PolicyLimits.REWARD_STEPS.shifted(baseRewardSeconds, direction))
+        }
+
+        PolicyStep.IdleDays -> {
+            copy(idleDaysAllowed = (idleDaysAllowed + direction.sign).coerceIn(PolicyLimits.IDLE_DAYS_ALLOWED))
+        }
+
+        PolicyStep.ResetHour -> {
+            copy(dayResetHour = (dayResetHour + direction.sign).coerceIn(PolicyLimits.DAY_RESET_HOUR))
+        }
+
+        is PolicyStep.Cap -> {
+            copy(dailyCapSeconds = dailyCapSeconds.nudgedAt(step.day, PolicyLimits.CAP_STEPS, direction))
+        }
+
+        is PolicyStep.Grant -> {
+            copy(dailyGrantSeconds = dailyGrantSeconds.nudgedAt(step.day, PolicyLimits.GRANT_STEPS, direction))
+        }
+
+        is PolicyStep.Upload -> {
+            copy(uploadMethods = uploadMethods.toggling(step.method))
+        }
+    }
+
+fun PolicyDraft.canNudge(
+    step: PolicyStep,
+    direction: StepDirection,
+): Boolean = nudged(step, direction) != this
+
+private const val QUESTION_STEP = 1
+
+private fun List<Int>.shifted(
+    current: Int,
+    direction: StepDirection,
+): Int {
+    val at = indexOf(current)
+    if (at >= 0) {
+        return this[(at + direction.sign).coerceIn(indices)]
+    }
+    return when (direction) {
+        StepDirection.UP -> firstOrNull { step -> step > current } ?: last()
+        StepDirection.DOWN -> lastOrNull { step -> step < current } ?: first()
+    }
+}
+
+private fun List<Int>.nudgedAt(
+    index: Int,
+    steps: List<Int>,
+    direction: StepDirection,
+): List<Int> = mapIndexed { at, value -> if (at == index) steps.shifted(value, direction) else value }
 
 private fun List<Int>.after(current: Int): Int {
     val at = indexOf(current)
