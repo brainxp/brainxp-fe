@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.core.content.ContextCompat
 import com.example.brainxp.data.prefs.SettingsDataStore
 import com.example.brainxp.di.AppScope
+import com.example.brainxp.domain.protectionHeld
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -24,7 +25,7 @@ class ProtectionController
         fun start() {
             scope.launch {
                 settings.settings
-                    .map { it.protectionEnabled }
+                    .map { it.protectionHeld }
                     .distinctUntilChanged()
                     .collect { enabled -> if (enabled) startService() else stopService() }
             }
