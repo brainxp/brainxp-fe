@@ -9,20 +9,31 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.brainxp.R
+import com.example.brainxp.core.result.ApiError
+import com.example.brainxp.core.ui.AlertNote
 import com.example.brainxp.core.ui.BrainXPTheme
+import com.example.brainxp.core.ui.Note
 import com.example.brainxp.core.ui.PillTone
 import com.example.brainxp.core.ui.PrimaryButton
 import com.example.brainxp.core.ui.RowGroup
+import com.example.brainxp.core.ui.RowGroupScope
 import com.example.brainxp.core.ui.ScreenNav
 import com.example.brainxp.core.ui.StatusPill
+import com.example.brainxp.core.ui.Stepper
 import com.example.brainxp.core.ui.WeekBars
+import com.example.brainxp.core.ui.WeekEditor
+import com.example.brainxp.core.ui.apiErrorBody
+import com.example.brainxp.core.ui.brainxpSwitchColors
 import com.example.brainxp.core.ui.shortDuration
+import com.example.brainxp.domain.model.PolicyStep
+import com.example.brainxp.domain.model.StepDirection
 import com.example.brainxp.domain.model.UploadMethod
 
 @Composable
@@ -31,6 +42,11 @@ fun PolicyEditorScreen(
     onEvent: (PolicyEvent) -> Unit,
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
+    setup: Boolean = false,
+    saving: Boolean = false,
+    saved: Boolean = false,
+    notice: String? = null,
+    failure: ApiError? = null,
 ) {
     val spacing = BrainXPTheme.spacing
 
@@ -48,26 +64,24 @@ fun PolicyEditorScreen(
         ScreenNav(
             title = stringResource(R.string.policy_title, state.subjectName),
             onBack = onBack,
+            trailing = {
+                if (setup) {
+                    StatusPill(text = stringResource(R.string.policy_step), tone = PillTone.OUTLINE)
+                }
+            },
         )
 
         SectionLabel(stringResource(R.string.policy_session))
         RowGroup {
-            item(
-                title = stringResource(R.string.policy_reward),
-                subtitle = stringResource(R.string.policy_reward_sub),
-                value = shortDuration(state.baseRewardSeconds),
-                emphasiseValue = true,
-                onClick = { onEvent(PolicyEvent.StepBaseReward) },
-            )
-            item(
+            stepRow(
                 title = stringResource(R.string.policy_questions),
-                subtitle =
-                    stringResource(R.string.policy_questions_sub, MAX_QUESTIONS_PER_SESSION),
+                subtitle = stringResource(R.string.policy_questions_sub, MAX_QUESTIONS_PER_SESSION),
                 value = state.questionsPerSession.toString(),
-                emphasiseValue = true,
-                onClick = { onEvent(PolicyEvent.StepQuestions) },
+                step = PolicyStep.Questions,
+                state = state,
+                onEvent = onEvent,
             )
-            item(
+            stepRow(
                 title = stringResource(R.string.policy_essay),
                 subtitle =
                     stringResource(
@@ -77,34 +91,26 @@ fun PolicyEditorScreen(
                         state.mcqCount,
                     ),
                 value = "${state.essayPercent}%",
-                emphasiseValue = true,
-                onClick = { onEvent(PolicyEvent.StepEssay) },
+                step = PolicyStep.Essays,
+                state = state,
+                onEvent = onEvent,
+            )
+            stepRow(
+                title = stringResource(R.string.policy_reward),
+                subtitle = stringResource(R.string.policy_reward_sub),
+                value = shortDuration(state.baseRewardSeconds),
+                step = PolicyStep.BaseReward,
+                state = state,
+                onEvent = onEvent,
+                emphasise = true,
             )
         }
 
-        SectionLabel(stringResource(R.string.policy_upload))
-        RowGroup {
-            UploadMethod.entries.forEach { method ->
-                val enabled = method in state.uploadMethods
-                item(
-                    title = stringResource(uploadLabelOf(method)),
-                    subtitle = stringResource(R.string.policy_upload_sub),
-                    value =
-                        stringResource(
-                            if (enabled) R.string.settings_upload_on else R.string.settings_upload_off,
-                        ),
-                    emphasiseValue = enabled,
-                    onClick = { onEvent(PolicyEvent.ToggleUploadMethod(method)) },
-                )
-            }
-        }
-
         SectionLabel(stringResource(R.string.policy_caps))
-        WeekBars(
-            values = state.dailyCapMinutes,
-            maxValue = MAX_DAILY_MINUTES,
-            label = { stringResource(R.string.policy_minutes_short, it) },
-            onStep = { onEvent(PolicyEvent.StepCap(it)) },
+        WeekEditor(
+            minutes = state.dailyCapMinutes,
+            onChange = { onEvent(PolicyEvent.SetCaps(it)) },
+            maxMinutes = MAX_DAILY_MINUTES,
         )
 
         SectionLabel(stringResource(R.string.policy_grants))
@@ -113,65 +119,137 @@ fun PolicyEditorScreen(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        WeekBars(
-            values = state.dailyGrantMinutes,
-            maxValue = MAX_DAILY_MINUTES,
-            label = { stringResource(R.string.policy_minutes_short, it) },
-            onStep = { onEvent(PolicyEvent.StepGrant(it)) },
+        WeekEditor(
+            minutes = state.dailyGrantMinutes,
+            onChange = { onEvent(PolicyEvent.SetGrants(it)) },
+            maxMinutes = MAX_DAILY_MINUTES,
         )
 
         SectionLabel(stringResource(R.string.policy_other))
         RowGroup {
-            item(
+            stepRow(
                 title = stringResource(R.string.policy_idle_days),
                 subtitle = stringResource(R.string.policy_idle_days_sub),
                 value = stringResource(R.string.policy_days, state.idleDaysAllowed),
-                emphasiseValue = true,
-                onClick = { onEvent(PolicyEvent.StepIdleDays) },
+                step = PolicyStep.IdleDays,
+                state = state,
+                onEvent = onEvent,
             )
-            item(
+            stepRow(
                 title = stringResource(R.string.policy_reset_hour),
                 subtitle = stringResource(R.string.policy_reset_hour_sub, state.dayResetHour),
                 value = stringResource(R.string.policy_hour, state.dayResetHour),
-                emphasiseValue = true,
-                onClick = { onEvent(PolicyEvent.StepResetHour) },
+                step = PolicyStep.ResetHour,
+                state = state,
+                onEvent = onEvent,
             )
         }
 
-        SectionLabel(stringResource(R.string.policy_apps))
+        SectionLabel(stringResource(R.string.policy_upload))
         RowGroup {
-            state.apps.forEach { app ->
+            UploadMethod.entries.forEach { method ->
+                val on = method in state.uploadMethods
                 item(
-                    title = app.label,
-                    subtitle =
-                        stringResource(
-                            if (app.locked) R.string.policy_app_locked else R.string.policy_app_free,
-                        ),
-                    onClick = { onEvent(PolicyEvent.ToggleApp(app.packageName)) },
+                    title = stringResource(uploadLabelOf(method)),
+                    subtitle = stringResource(uploadHintOf(method)),
                     trailing = {
-                        StatusPill(
-                            text =
-                                stringResource(
-                                    if (app.locked) R.string.policy_locked else R.string.policy_free,
-                                ),
-                            tone = if (app.locked) PillTone.BLUE else PillTone.NEUTRAL,
+                        Switch(
+                            checked = on,
+                            onCheckedChange = { onEvent(PolicyEvent.ToggleUpload(method)) },
+                            colors = brainxpSwitchColors(),
                         )
                     },
                 )
             }
         }
-
         Text(
-            text = stringResource(R.string.policy_hint),
+            text = stringResource(R.string.policy_upload_sub),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+
+        SectionLabel(stringResource(R.string.policy_apps))
+        if (state.apps.isEmpty()) {
+            Note(text = stringResource(R.string.policy_apps_waiting))
+        } else {
+            RowGroup {
+                state.apps.forEach { app ->
+                    item(
+                        title = app.label,
+                        subtitle =
+                            stringResource(
+                                if (app.locked) R.string.policy_app_locked else R.string.policy_app_free,
+                            ),
+                        onClick = { onEvent(PolicyEvent.ToggleApp(app.packageName)) },
+                        trailing = {
+                            StatusPill(
+                                text =
+                                    stringResource(
+                                        if (app.locked) R.string.policy_locked else R.string.policy_free,
+                                    ),
+                                tone = if (app.locked) PillTone.BLUE else PillTone.NEUTRAL,
+                            )
+                        },
+                    )
+                }
+            }
+            Text(
+                text = stringResource(R.string.policy_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        when {
+            failure != null -> {
+                AlertNote(
+                    title = stringResource(R.string.policy_save_failed),
+                    body = apiErrorBody(failure),
+                )
+            }
+
+            notice != null -> {
+                Note(text = notice, alert = true)
+            }
+
+            saved -> {
+                Note(text = stringResource(R.string.policy_saved))
+            }
+        }
+
         PrimaryButton(
-            text = stringResource(R.string.policy_save),
+            text = stringResource(if (setup) R.string.policy_issue_code else R.string.policy_save),
             onClick = { onEvent(PolicyEvent.Save) },
+            loading = saving,
             modifier = Modifier.padding(top = spacing.xs),
         )
     }
+}
+
+@Composable
+private fun RowGroupScope.stepRow(
+    title: String,
+    subtitle: String,
+    value: String,
+    step: PolicyStep,
+    state: PolicyUiState,
+    onEvent: (PolicyEvent) -> Unit,
+    emphasise: Boolean = false,
+) {
+    item(
+        title = title,
+        subtitle = subtitle,
+        trailing = {
+            Stepper(
+                value = value,
+                onDecrease = { onEvent(PolicyEvent.Nudge(step, StepDirection.DOWN)) },
+                onIncrease = { onEvent(PolicyEvent.Nudge(step, StepDirection.UP)) },
+                canDecrease = state.canNudge(step, StepDirection.DOWN),
+                canIncrease = state.canNudge(step, StepDirection.UP),
+                emphasise = emphasise,
+            )
+        },
+    )
 }
 
 @Composable
@@ -196,4 +274,10 @@ private fun uploadLabelOf(method: UploadMethod): Int =
     when (method) {
         UploadMethod.PHOTO -> R.string.settings_upload_photo
         UploadMethod.DOCUMENT -> R.string.settings_upload_document
+    }
+
+private fun uploadHintOf(method: UploadMethod): Int =
+    when (method) {
+        UploadMethod.PHOTO -> R.string.settings_upload_photo_sub
+        UploadMethod.DOCUMENT -> R.string.settings_upload_document_sub
     }
