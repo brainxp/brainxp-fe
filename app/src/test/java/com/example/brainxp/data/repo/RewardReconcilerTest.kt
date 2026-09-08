@@ -98,6 +98,10 @@ private class InMemoryRewardCache : RewardCache {
     fun seed(balance: CachedBalance?) {
         flow.value = balance
     }
+
+    override suspend fun clear() {
+        flow.value = null
+    }
 }
 
 class RewardReconcilerTest {
