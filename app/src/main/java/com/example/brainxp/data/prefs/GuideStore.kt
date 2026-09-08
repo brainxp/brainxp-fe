@@ -9,19 +9,37 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
+const val GUIDE_NO_ACCOUNT = "anon"
+
+fun quizGuideKeyOf(accountId: String?): Preferences.Key<Boolean> =
+    booleanPreferencesKey("guide.quiz.${accountId?.takeIf(String::isNotBlank) ?: GUIDE_NO_ACCOUNT}")
+
+fun interface GuideAccount {
+    suspend fun accountId(): String?
+}
+
+@Singleton
+class AuthGuideAccount
+    @Inject
+    constructor(
+        private val auth: AuthDataStore,
+    ) : GuideAccount {
+        override suspend fun accountId(): String? = auth.auth.first().subjectId
+    }
+
 @Singleton
 class GuideStore
     @Inject
     constructor(
         @Named("deviceStore") private val store: DataStore<Preferences>,
+        private val accounts: GuideAccount,
     ) {
-        suspend fun quizGuideSeen(): Boolean = store.data.first()[QUIZ_GUIDE] == true
+        suspend fun quizGuideSeen(): Boolean = store.data.first()[keyForCurrent()] == true
 
         suspend fun rememberQuizGuide() {
-            store.edit { it[QUIZ_GUIDE] = true }
+            val key = keyForCurrent()
+            store.edit { it[key] = true }
         }
 
-        private companion object {
-            val QUIZ_GUIDE = booleanPreferencesKey("guide.quiz")
-        }
+        private suspend fun keyForCurrent(): Preferences.Key<Boolean> = quizGuideKeyOf(accounts.accountId())
     }
