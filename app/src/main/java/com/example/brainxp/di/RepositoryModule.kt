@@ -5,6 +5,7 @@ import com.example.brainxp.data.repo.ActivityLogRepository
 import com.example.brainxp.data.repo.AppLabels
 import com.example.brainxp.data.repo.ConsumptionReporter
 import com.example.brainxp.data.repo.FamilyRepository
+import com.example.brainxp.data.repo.LocalData
 import com.example.brainxp.data.repo.MaterialRepository
 import com.example.brainxp.data.repo.NetworkFamilyRepository
 import com.example.brainxp.data.repo.NetworkMaterialRepository
@@ -15,6 +16,7 @@ import com.example.brainxp.data.repo.RewardRepository
 import com.example.brainxp.data.repo.RoomActivityLogRepository
 import com.example.brainxp.data.repo.RoomRestrictionRepository
 import com.example.brainxp.data.repo.RoomUnlockRepository
+import com.example.brainxp.data.repo.StoredLocalData
 import com.example.brainxp.data.repo.UnlockRepository
 import dagger.Binds
 import dagger.Module
@@ -24,6 +26,9 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 interface RepositoryModule {
+    @Binds
+    fun bindLocalData(impl: StoredLocalData): LocalData
+
     @Binds
     fun bindMaterialRepository(impl: NetworkMaterialRepository): MaterialRepository
 
