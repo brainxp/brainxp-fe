@@ -180,6 +180,7 @@
     <string name="block_ledger_idle_value">%1$d days ago, %2$d allowed</string>
     <string name="block_locked_label">%1$s · locked</string>
     <string name="block_screen_action">Hand in material</string>
+    <string name="block_screen_close">Close app</string>
 
     <string name="block_screen_idle_title">You have not started your time yet.</string>
     <string name="block_screen_idle_body">Your balance is still there. Open BrainXP and start playtime to use it.</string>
@@ -222,6 +223,8 @@
 
     <string name="warning_channel_name">Playtime almost up</string>
     <string name="warning_channel_description">A heads-up before your playtime ends, so it does not cut off suddenly.</string>
+    <string name="offer_channel_name">Chance to earn more time</string>
+    <string name="offer_channel_description">A nudge to answer questions while there is still enough playtime left to top up.</string>
 
     <string name="degraded_channel_name">Protection trouble</string>
     <string name="degraded_channel_description">Warnings for when a permission BrainXP needs gets revoked.</string>
@@ -233,6 +236,9 @@
 
     <string name="expiry_warning_title">%1$s left</string>
     <string name="expiry_warning_body">Your playtime is nearly up. Finish what you are watching first.</string>
+    <string name="expiry_minutes_title">%1$d minutes left</string>
+    <string name="expiry_wrapup_body">Start wrapping up whatever you are watching or playing.</string>
+    <string name="expiry_offer_body">There is still time to earn more. Answer questions now so this does not end mid-game.</string>
 
     <string name="duration_hours">%1$dh %2$02dm</string>
     <string name="duration_minutes">%1$d min</string>
@@ -359,12 +365,12 @@
     <string name="preparing_try_again">Try again</string>
     <string name="runner_board">Waiting game: tap the play area to jump over distractions</string>
     <string name="runner_jump">Jump</string>
-    <string name="runner_skip">Skip the game</string>
+    <string name="runner_skip">Hide the game</string>
     <string name="runner_avoided">Distractions cleared: %1$d</string>
     <string name="runner_resume">Play again</string>
     <string name="preparing_stalled">The server has not answered. Your material may already be done — check again.</string>
     <string name="preparing_retry">Check again</string>
-    <string name="preparing_note">Feel free to leave. The writing carries on even if you move to another screen, and you will be told when it is ready.</string>
+    <string name="preparing_note">While the questions are being written, you can dodge a few distractions above.</string>
     <string name="preparing_start">Start answering</string>
     <string name="preparing_start_count">Start answering · %1$d questions</string>
     <string name="preparing_leave">Leave it running</string>
@@ -437,7 +443,12 @@
     <string name="quiz_submit_now">Hand it in now</string>
     <string name="quiz_review_again">Check again</string>
     <string name="quiz_confirm_doubts">There are still %1$d questions marked unsure. Once handed in, the answers cannot be changed.</string>
-    <string name="quiz_hint_partial">Saved automatically. %1$d questions left, you can carry on later.</string>
+    <string name="quiz_hint_partial">Swipe left or right to change question, or tap the dots to jump.</string>
+    <string name="quiz_leave_title">Continue later?</string>
+    <string name="quiz_leave_body">Your answers save themselves. The %1$d questions left will be waiting.</string>
+    <string name="quiz_leave_body_complete">All your answers are saved. You can come back and hand it in later.</string>
+    <string name="quiz_leave_confirm">Yes</string>
+    <string name="quiz_leave_dismiss">Keep answering</string>
     <string name="quiz_hint_complete">Everything is filled in. Right and wrong show up after you hand it in.</string>
     <string name="tour_title">A quick practice</string>
     <string name="tour_step">%1$d of %2$d</string>
@@ -467,9 +478,6 @@
     <string name="tour_move_body">Swipe the question page left or right. Try it now — this one really swipes.</string>
     <string name="tour_leave_title">Stop whenever you like</string>
     <string name="tour_leave_body">The questions keep coming together in the background. Press Back whenever you like — we will tell you the moment they are ready.</string>
-    <string name="tour_prep_working">Your questions are being written</string>
-    <string name="tour_prep_reading">Reading your material</string>
-    <string name="tour_prep_ready">All questions ready</string>
     <string name="tour_receipt_title">The marks come at the end</string>
     <string name="tour_receipt_body">Right and wrong, and the playtime you gained, only appear once every question is handed in.</string>
 
@@ -531,7 +539,7 @@
     <string name="policy_idle_days_sub">The balance is held if they go longer than this without studying</string>
     <string name="policy_reset_hour">Day turns over at</string>
     <string name="policy_reset_hour_sub">The daily quota resets at %1$02d:00</string>
-    <string name="policy_apps">Locked apps</string>
+    <string name="policy_apps">Apps on %1$s’s phone</string>
     <string name="policy_app_locked">Needs balance to open</string>
     <string name="policy_app_free">Open any time</string>
     <string name="policy_locked">Locked</string>
@@ -685,7 +693,7 @@
     <string name="rejected_headline_other">Questions cannot be built from this material</string>
     <string name="policy_step">2 of 3</string>
     <string name="policy_issue_code">Issue a code</string>
-    <string name="policy_apps_waiting">The app list appears once the child\'s phone is paired and sends what is installed there. After that you can pick which ones are locked.</string>
+    <string name="policy_apps_waiting">The app list has not arrived yet. The child phone sends it once it is paired and the app is opened.</string>
     <string name="settings_managed">The rules on this phone are set by a parent, so they cannot be changed here. All you can open is system permissions and the privacy policy.</string>
     <string name="home_apps_managed_note">This list is set by your parent. You can see it, but you cannot add to it or take anything off.</string>
     <string name="policy_saved">Rules saved and already in force on the child\'s phone.</string>
@@ -697,6 +705,7 @@
     <string name="report_release">Sign out %1$s’s phone</string>
     <string name="report_release_warning">The phone belonging to %1$s is signed out of BrainXP immediately and every app opens freely. Their profile, material and history stay saved, and you can pair the phone again with a new code.</string>
     <string name="report_release_confirm">Yes, sign out %1$s’s phone</string>
+    <string name="report_release_failed">The phone for %1$s was not released</string>
     <string name="report_released">The phone belonging to %1$s is signed out. Issue a pairing code to connect it again.</string>
     <string name="home_mode_child">Child</string>
     <string name="home_mode_self">Solo</string>
@@ -714,4 +723,15 @@
     <string name="alert_channel_name">Protection alerts</string>
     <string name="alert_channel_description">Tells you when protection on a child phone stops working</string>
     <string name="alert_title_named">Protection on %1$s’s phone is broken</string>
+    <string name="ago_now">just now</string>
+    <string name="ago_minutes">%1$dm ago</string>
+    <string name="ago_hours">%1$dh ago</string>
+    <string name="ago_yesterday">yesterday</string>
+    <string name="notification_ready_row">Questions for %1$s are ready</string>
+    <string name="notification_ready_detail">%1$d questions waiting</string>
+    <string name="notification_rejected_row">%1$s cannot be used yet</string>
+    <string name="notification_rejected_detail">Tap to see why</string>
+    <string name="notification_new_count">%1$d new</string>
+    <string name="policy_apps_count">%1$d of %2$d apps locked</string>
+    <string name="policy_apps_none">Nothing locked yet</string>
 </resources>
