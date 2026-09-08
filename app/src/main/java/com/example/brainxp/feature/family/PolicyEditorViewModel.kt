@@ -61,11 +61,35 @@ class PolicyEditorViewModel
 
         fun onEvent(event: PolicyEvent) {
             val current = mutableState.value.policy ?: return
-            if (event == PolicyEvent.Save) {
-                save(current)
-                return
+            when (event) {
+                PolicyEvent.Save -> save(current)
+                is PolicyEvent.ToggleApp -> toggleApp(current, event.packageName)
+                else -> mutableState.update { it.copy(policy = current.stepped(event), saved = false) }
             }
-            mutableState.update { it.copy(policy = current.stepped(event), saved = false) }
+        }
+
+        private fun toggleApp(
+            current: PolicyUiState,
+            packageName: String,
+        ) {
+            val subject = childId ?: return
+            val wanted =
+                current.apps
+                    .firstOrNull { it.packageName == packageName }
+                    ?.locked
+                    ?.not() ?: return
+            mutableState.update { it.copy(policy = current.stepped(PolicyEvent.ToggleApp(packageName)), notice = null) }
+            viewModelScope.launch {
+                val result = policies.setAppLocked(packageName, wanted, subject)
+                if (result is AppResult.Failure) {
+                    mutableState.update { state ->
+                        state.copy(
+                            policy = state.policy?.stepped(PolicyEvent.ToggleApp(packageName)),
+                            error = result.error,
+                        )
+                    }
+                }
+            }
         }
 
         private suspend fun fetch(
@@ -80,8 +104,9 @@ class PolicyEditorViewModel
                         ?.name
                         .orEmpty()
                 }
+            val result = policies.policy(subjectId)
             mutableState.update {
-                when (val result = policies.policy(subjectId)) {
+                when (result) {
                     is AppResult.Success -> it.copy(policy = result.value.toUiState(resolved), loading = false)
                     is AppResult.Failure -> it.copy(loading = false, error = result.error)
                 }
