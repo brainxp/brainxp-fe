@@ -20,11 +20,19 @@ class HomeModeHeaderTest {
         @StringRes id: Int,
     ) = context.getString(id)
 
-    private fun show(managed: Boolean) {
+    private fun show(
+        managed: Boolean,
+        familyParent: Boolean = false,
+    ) {
         compose.setContent {
             BrainXPTheme {
                 HomeScreen(
-                    state = HomeUiState(phase = HomeUiState.Phase.Ready, managed = managed),
+                    state =
+                        HomeUiState(
+                            phase = HomeUiState.Phase.Ready,
+                            managed = managed,
+                            familyParent = familyParent,
+                        ),
                     onEvent = {},
                 )
             }
@@ -37,6 +45,16 @@ class HomeModeHeaderTest {
 
         compose.onNodeWithText(str(R.string.home_mode_child)).assertIsDisplayed()
         compose.onNodeWithText(str(R.string.home_mode_self)).assertDoesNotExist()
+        compose.onNodeWithText(str(R.string.home_mode_parent)).assertDoesNotExist()
+    }
+
+    @Test
+    fun aFamilyParentPhoneNamesItselfAsTheParent() {
+        show(managed = false, familyParent = true)
+
+        compose.onNodeWithText(str(R.string.home_mode_parent)).assertIsDisplayed()
+        compose.onNodeWithText(str(R.string.home_mode_self)).assertDoesNotExist()
+        compose.onNodeWithText(str(R.string.home_mode_child)).assertDoesNotExist()
     }
 
     @Test
@@ -54,6 +72,7 @@ class HomeModeHeaderTest {
 
         compose.onNodeWithText(str(R.string.home_mode_self)).assertIsDisplayed()
         compose.onNodeWithText(str(R.string.home_mode_child)).assertDoesNotExist()
+        compose.onNodeWithText(str(R.string.home_mode_parent)).assertDoesNotExist()
         compose.onNodeWithText(str(R.string.home_apps_pick_title)).assertIsDisplayed()
     }
 }

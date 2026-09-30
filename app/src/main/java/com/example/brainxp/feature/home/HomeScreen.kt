@@ -117,7 +117,11 @@ private fun TopBar(
         StatusPill(
             text =
                 stringResource(
-                    if (state.managed) R.string.home_mode_child else R.string.home_mode_self,
+                    when {
+                        state.managed -> R.string.home_mode_child
+                        state.familyParent -> R.string.home_mode_parent
+                        else -> R.string.home_mode_self
+                    },
                 ),
             tone = PillTone.OUTLINE,
         )
