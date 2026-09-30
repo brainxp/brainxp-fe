@@ -3,6 +3,9 @@ package com.example.brainxp.data.repo
 import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.result.AppResult
 import com.example.brainxp.core.time.FakeAppClock
+import com.example.brainxp.data.db.PendingOperationDao
+import com.example.brainxp.data.db.PendingOperationEntity
+import com.example.brainxp.data.db.PendingOperationType
 import com.example.brainxp.data.prefs.CachedBalance
 import com.example.brainxp.data.prefs.RewardCache
 import com.example.brainxp.domain.model.BlockReason
@@ -21,6 +24,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import javax.inject.Provider
 
 private fun standing(balanceSeconds: Int) =
     Standing(
@@ -40,6 +44,7 @@ private class StubAppLabels : AppLabels {
 
 private class StubRewardRepository : RewardRepository {
     var result: AppResult<Standing> = AppResult.Success(standing(0))
+    val reported = mutableListOf<List<ConsumptionEntry>>()
 
     override suspend fun standing(): AppResult<Standing> = result
 
@@ -56,7 +61,10 @@ private class StubRewardRepository : RewardRepository {
             ),
         )
 
-    override suspend fun reportConsumption(entries: List<ConsumptionEntry>): AppResult<Standing> = result
+    override suspend fun reportConsumption(entries: List<ConsumptionEntry>): AppResult<Standing> {
+        reported += entries
+        return result
+    }
 
     override suspend fun history(): AppResult<List<LedgerEntry>> = AppResult.Success(emptyList())
 
@@ -86,6 +94,47 @@ private class StubRewardRepository : RewardRepository {
     ): AppResult<Standing> = result
 }
 
+private class InMemoryPendingOperationDao : PendingOperationDao {
+    private var nextId = 1L
+    private val rows = linkedMapOf<Long, PendingOperationEntity>()
+
+    override suspend fun insert(operation: PendingOperationEntity): Long {
+        val id = nextId++
+        rows[id] = operation.copy(id = id)
+        return id
+    }
+
+    override suspend fun findReadyForRetry(
+        now: Long,
+        limit: Int,
+    ): List<PendingOperationEntity> = rows.values.filter { it.nextAttemptAt <= now }.take(limit)
+
+    override suspend fun findReadyForRetryByType(
+        type: PendingOperationType,
+        now: Long,
+    ): List<PendingOperationEntity> = rows.values.filter { it.type == type && it.nextAttemptAt <= now }
+
+    override suspend fun recordAttempt(
+        id: Long,
+        nextAttemptAt: Long,
+    ) {
+        rows[id]?.let { rows[id] = it.copy(attempts = it.attempts + 1, nextAttemptAt = nextAttemptAt) }
+    }
+
+    override suspend fun deleteById(id: Long) {
+        rows.remove(id)
+    }
+
+    override suspend fun count(): Int = rows.size
+
+    override suspend fun deleteExhausted(
+        type: PendingOperationType,
+        maxAttempts: Int,
+    ) {
+        rows.entries.removeAll { it.value.type == type && it.value.attempts >= maxAttempts }
+    }
+}
+
 private class InMemoryRewardCache : RewardCache {
     private val flow = MutableStateFlow<CachedBalance?>(null)
 
@@ -108,7 +157,15 @@ class RewardReconcilerTest {
     private val repository = StubRewardRepository()
     private val cache = InMemoryRewardCache()
     private val clock = FakeAppClock()
-    private val reconciler = RewardReconciler(repository, cache, clock, StubAppLabels())
+    private val pendingDao = InMemoryPendingOperationDao()
+    private val pendingSync =
+        PendingSyncQueue(
+            rewards = Provider { repository },
+            family = Provider { error("not used") },
+            pending = pendingDao,
+            clock = clock,
+        )
+    private val reconciler = RewardReconciler(repository, pendingSync, cache, clock, StubAppLabels())
 
     @Test
     fun `the server balance wins when it disagrees with the cache`() =
@@ -228,6 +285,64 @@ class RewardReconcilerTest {
             reconciler.reconcile()
 
             assertEquals(900, reconciler.state.value.balanceSeconds)
+        }
+
+    @Test
+    fun `failed consumption stays deducted until its ledger row is accepted`() =
+        runTest {
+            repository.result = AppResult.Success(standing(600))
+            reconciler.reconcile()
+            repository.result = AppResult.Failure(ApiError.Network)
+
+            reconciler.report(mapOf("com.game" to 60))
+            val held = reconciler.reconcile()
+
+            assertEquals(540, held.balanceSeconds)
+            assertEquals(BalanceSource.CACHE, held.source)
+            assertTrue(pendingSync.hasPendingConsumption())
+        }
+
+    @Test
+    fun `a rejected consumption response cannot restore spent balance`() =
+        runTest {
+            repository.result = AppResult.Success(standing(600))
+            reconciler.reconcile()
+            repository.result = AppResult.Failure(ApiError.Validation(field = null, message = "rejected"))
+
+            reconciler.report(mapOf("com.game" to 60))
+            repository.result = AppResult.Success(standing(600))
+            val held = reconciler.reconcile()
+
+            assertEquals(540, held.balanceSeconds)
+            assertTrue(pendingSync.hasPendingConsumption())
+        }
+
+    @Test
+    fun `ledger retry preserves the original client event id`() =
+        runTest {
+            repository.result = AppResult.Success(standing(600))
+            reconciler.reconcile()
+            repository.result = AppResult.Failure(ApiError.Network)
+            reconciler.report(mapOf("com.game" to 60))
+            val firstId =
+                repository.reported
+                    .last()
+                    .single()
+                    .clientEventId
+            clock.advance(15_000)
+            repository.result = AppResult.Success(standing(540))
+
+            val reconciled = reconciler.reconcile()
+
+            assertEquals(
+                firstId,
+                repository.reported
+                    .last()
+                    .single()
+                    .clientEventId,
+            )
+            assertEquals(540, reconciled.balanceSeconds)
+            assertFalse(pendingSync.hasPendingConsumption())
         }
 
     private suspend fun flowValue(flow: Flow<CachedBalance?>): CachedBalance? = flow.first()
