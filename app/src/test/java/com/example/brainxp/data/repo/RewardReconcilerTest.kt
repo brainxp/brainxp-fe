@@ -310,7 +310,6 @@ class RewardReconcilerTest {
             repository.result = AppResult.Failure(ApiError.Validation(field = null, message = "rejected"))
 
             reconciler.report(mapOf("com.game" to 60))
-            repository.result = AppResult.Success(standing(600))
             val held = reconciler.reconcile()
 
             assertEquals(540, held.balanceSeconds)
