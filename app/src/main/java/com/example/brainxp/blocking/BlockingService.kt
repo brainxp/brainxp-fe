@@ -9,6 +9,7 @@ import com.example.brainxp.core.detect.ForegroundAppDetector
 import com.example.brainxp.core.detect.ScreenState
 import com.example.brainxp.core.permission.AccessibilityWatch
 import com.example.brainxp.core.permission.PermissionStateProvider
+import com.example.brainxp.core.permission.SpecialPermission
 import com.example.brainxp.data.prefs.DEFAULT_WARNING_LEAD_SECONDS
 import com.example.brainxp.data.prefs.SettingsDataStore
 import com.example.brainxp.data.repo.RewardReconciler
@@ -97,7 +98,19 @@ class BlockingService : Service() {
         scope.launch { settings.settings.collect { warningLead = it.warningLeadSeconds } }
         scope.launch { appLabels = installedApps.launchableApps().associate { it.packageName to it.label } }
         scope.launch { detector.foregroundPackage.collect { foregroundPackage.value = it } }
-        scope.launch { screenState.isScreenOn.collect { on -> if (on) binding.check() } }
+        scope.launch {
+            screenState.isScreenOn.collect { on ->
+                if (on) {
+                    binding.check()
+                } else {
+                    unlocks.pauseMetering()
+                    foregroundPackage.value = null
+                    clearTicks = 0
+                    blocked.value = false
+                    overlay.hide()
+                }
+            }
+        }
         scope.launch {
             ScreenGatedTicker(screenState.isScreenOn, TICK_INTERVAL_MS).ticks().collect { tick() }
         }
@@ -145,8 +158,9 @@ class BlockingService : Service() {
 
         val restriction = snapshot.restriction.copy(unlock = unlock)
         val shouldBlock = current != null && !ours && RestrictionPolicy.isBlocked(current, restriction)
+        val overlayAvailable = permissions.state.value.isGranted(SpecialPermission.OVERLAY)
 
-        if (shouldBlock) {
+        if (shouldBlock && overlayAvailable) {
             clearTicks = 0
             blocked.value = true
             scope.launch { binding.check() }
@@ -181,7 +195,7 @@ class BlockingService : Service() {
             }
         } else {
             clearTicks++
-            if (ours || clearTicks >= CLEAR_TICKS_BEFORE_HIDE) {
+            if (!overlayAvailable || ours || clearTicks >= CLEAR_TICKS_BEFORE_HIDE) {
                 blocked.value = false
                 overlay.hide()
             }
