@@ -708,7 +708,8 @@
     <string name="report_release_failed">The phone for %1$s was not released</string>
     <string name="report_released">The phone belonging to %1$s is signed out. Issue a pairing code to connect it again.</string>
     <string name="home_mode_child">Child</string>
-    <string name="home_mode_self">Solo</string>
+    <string name="home_mode_self">Personal</string>
+    <string name="home_mode_parent">Parent</string>
     <string name="home_greeting_morning">Good morning, %1$s</string>
     <string name="home_greeting_midday">Good afternoon, %1$s</string>
     <string name="home_greeting_afternoon">Good afternoon, %1$s</string>

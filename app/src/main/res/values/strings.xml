@@ -311,7 +311,7 @@ kehilangan kontak.</string>
     <string name="done_body">Akunmu sudah dibuat dan penjaga waktu bermain sudah berjalan.</string>
     <string name="done_step_account">Akun dibuat</string>
     <string name="done_step_level">Jenjang dipilih</string>
-    <string name="done_step_protection">Penjaga aktif</string>
+    <string name="done_step_protection">Perizinan aplikasi aktif</string>
     <string name="done_step_material">Setor materi pertamamu</string>
     <string name="done_protection_partial">Ada izin yang kamu lewati, jadi penjaganya belum penuh. Bisa dilengkapi nanti dari Pengaturan.</string>
     <string name="done_next">Langkah berikutnya: setor satu materi, jawab soalnya, dan waktu bermainmu mulai terkumpul.</string>
@@ -714,7 +714,8 @@ kehilangan kontak.</string>
     <string name="report_release_failed">HP %1$s gagal dikeluarkan</string>
     <string name="report_released">HP %1$s sudah dikeluarkan. Terbitkan kode pemasangan kalau mau menyambungkannya lagi.</string>
     <string name="home_mode_child">Anak</string>
-    <string name="home_mode_self">Mandiri</string>
+    <string name="home_mode_self">Pribadi</string>
+    <string name="home_mode_parent">Orang Tua</string>
     <string name="home_greeting_morning">Selamat pagi, %1$s</string>
     <string name="home_greeting_midday">Selamat siang, %1$s</string>
     <string name="home_greeting_afternoon">Selamat sore, %1$s</string>
