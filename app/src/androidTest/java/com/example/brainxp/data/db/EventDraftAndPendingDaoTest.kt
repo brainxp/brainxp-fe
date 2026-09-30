@@ -93,7 +93,7 @@ class EventDraftAndPendingDaoTest : DbTest() {
             operation(PendingOperationType.SUBMIT_ANSWER, nextAttemptAt = 100, attempts = 5)
             operation(PendingOperationType.UPLOAD_MATERIAL, nextAttemptAt = 100, attempts = 1)
 
-            dao.deleteExhausted(maxAttempts = 5)
+            dao.deleteExhausted(PendingOperationType.SUBMIT_ANSWER, maxAttempts = 5)
 
             assertEquals(1, dao.count())
             assertEquals(PendingOperationType.UPLOAD_MATERIAL, dao.findReadyForRetry(200).single().type)
