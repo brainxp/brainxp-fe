@@ -13,6 +13,9 @@ import android.widget.FrameLayout
 import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
@@ -35,7 +38,7 @@ class BlockOverlayController
         private var configSignature: String? = null
         private var target: String? = null
         private var action: ((String, BlockAction) -> Unit)? = null
-        private var content: BlockContent? = null
+        private var content: BlockContent? by mutableStateOf(null)
 
         val isShowing: Boolean get() = container != null
 
@@ -95,7 +98,15 @@ class BlockOverlayController
             host.setViewTreeSavedStateRegistryOwner(viewOwner)
             host.addView(composeView)
 
-            windowManager.addView(host, layoutParams())
+            try {
+                windowManager.addView(host, layoutParams())
+            } catch (ignored: WindowManager.BadTokenException) {
+                viewOwner.detach()
+                return
+            } catch (ignored: SecurityException) {
+                viewOwner.detach()
+                return
+            }
 
             container = host
             owner = viewOwner
@@ -110,7 +121,13 @@ class BlockOverlayController
             configSignature = null
             target = null
             action = null
-            windowManager.removeView(host)
+            try {
+                windowManager.removeView(host)
+            } catch (ignored: IllegalArgumentException) {
+                Unit
+            } catch (ignored: SecurityException) {
+                Unit
+            }
             owner?.detach()
             owner = null
         }
@@ -133,8 +150,7 @@ class BlockOverlayController
                     WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
-                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
                         WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                     PixelFormat.TRANSLUCENT,
                 ).apply {
