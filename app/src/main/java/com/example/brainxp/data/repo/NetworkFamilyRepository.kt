@@ -21,6 +21,7 @@ import com.example.brainxp.domain.model.FamilyChild
 import com.example.brainxp.domain.model.GuardianEvent
 import com.example.brainxp.domain.model.GuardianStatus
 import com.example.brainxp.domain.model.PairingCode
+import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -111,6 +112,7 @@ private fun GuardianEvent.toDto(): GuardianEventDto =
         type = type,
         permission = permission,
         required = required,
+        at = occurredAtWallClock?.let { Instant.ofEpochMilli(it).toString() },
     )
 
 private fun SubjectDto.toChild(): FamilyChild =

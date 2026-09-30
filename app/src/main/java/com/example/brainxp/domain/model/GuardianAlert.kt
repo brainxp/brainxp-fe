@@ -22,6 +22,7 @@ data class GuardianEvent(
     val type: String,
     val permission: String? = null,
     val required: Boolean = false,
+    val occurredAtWallClock: Long? = null,
 ) {
     companion object {
         const val REVOKED = "permission_revoked"
