@@ -90,7 +90,7 @@ class SessionTeardownTest {
         }
 
     @Test
-    fun `what belongs to the phone rather than the account survives`() =
+    fun `what belongs to the phone rather than the account survives a full teardown`() =
         runTest {
             signedInChild()
             settings.setPermissionSetupComplete(true)
@@ -98,5 +98,93 @@ class SessionTeardownTest {
             teardown.run()
 
             assertTrue(settings.settings.first().permissionSetupComplete)
+        }
+
+    @Test
+    fun `signing off forgets who was signed in`() =
+        runTest {
+            signedInChild()
+
+            teardown.endSession()
+
+            val identity = auth.current()
+            assertNull(identity.accessToken)
+            assertNull(identity.refreshToken)
+            assertNull(identity.subjectId)
+        }
+
+    @Test
+    fun `signing off touches nothing the device carries for its owner`() =
+        runTest {
+            signedInChild()
+
+            teardown.endSession()
+
+            assertEquals(0, local.wipes)
+            val snapshot = settings.settings.first()
+            assertEquals(DeviceRole.CHILD, snapshot.role)
+            assertEquals(AppMode.FAMILY, snapshot.mode)
+            assertTrue(snapshot.onboardingComplete)
+        }
+
+    @Test
+    fun `signing off does not forget whose data is on the device`() =
+        runTest {
+            signedInChild()
+            settings.setLastOwnerId("subject-1")
+
+            teardown.endSession()
+
+            assertEquals("subject-1", settings.settings.first().lastOwnerId)
+        }
+
+    @Test
+    fun `the same owner signing back in keeps everything they set up`() =
+        runTest {
+            signedInChild()
+            settings.setLastOwnerId("subject-1")
+            teardown.endSession()
+
+            val changed = teardown.adoptOwner("subject-1")
+
+            assertFalse(changed)
+            assertEquals(0, local.wipes)
+            val snapshot = settings.settings.first()
+            assertEquals(DeviceRole.CHILD, snapshot.role)
+            assertEquals(AppMode.FAMILY, snapshot.mode)
+            assertTrue(snapshot.onboardingComplete)
+        }
+
+    @Test
+    fun `a different owner signing in takes nothing from the last one`() =
+        runTest {
+            signedInChild()
+            settings.setLastOwnerId("subject-1")
+            teardown.endSession()
+
+            val changed = teardown.adoptOwner("subject-2")
+
+            assertTrue(changed)
+            assertEquals(1, local.wipes)
+            val snapshot = settings.settings.first()
+            assertEquals(DeviceRole.PARENT, snapshot.role)
+            assertEquals(AppMode.UNSET, snapshot.mode)
+            assertFalse(snapshot.onboardingComplete)
+        }
+
+    @Test
+    fun `adopting an owner remembers it for the next sign in`() =
+        runTest {
+            teardown.adoptOwner("subject-9")
+
+            assertEquals("subject-9", settings.settings.first().lastOwnerId)
+        }
+
+    @Test
+    fun `a device with no recorded owner treats the first sign in as new`() =
+        runTest {
+            val changed = teardown.adoptOwner("subject-1")
+
+            assertTrue(changed)
         }
 }
