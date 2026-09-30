@@ -27,26 +27,37 @@ class ChildAppsViewModel
         val state: StateFlow<AppPickerUiState> = mutableState.asStateFlow()
 
         private var childId: String? = null
+        private val pendingPackages = mutableSetOf<String>()
 
         fun load(subjectId: String) {
             if (childId == subjectId) return
             childId = subjectId
-            mutableState.update { it.copy(loading = true) }
+            mutableState.update { it.copy(loading = true, error = null) }
             viewModelScope.launch { fetch(subjectId) }
         }
 
         fun search(query: String) = mutableState.update { it.copy(query = query) }
 
+        fun retry() {
+            val subject = childId ?: return
+            childId = null
+            load(subject)
+        }
+
         fun toggle(packageName: String) {
             val subject = childId ?: return
+            if (!pendingPackages.add(packageName)) return
             val current = mutableState.value
             val wanted = packageName !in current.restricted
-            mutableState.value = current.copy(restricted = current.restricted.flip(packageName))
+            mutableState.value = current.copy(restricted = current.restricted.flip(packageName), error = null)
             viewModelScope.launch {
                 val result = policies.setAppLocked(packageName, wanted, subject)
                 if (result is AppResult.Failure) {
-                    mutableState.update { state -> state.copy(restricted = state.restricted.flip(packageName)) }
+                    mutableState.update { state ->
+                        state.copy(restricted = state.restricted.flip(packageName), error = result.error)
+                    }
                 }
+                pendingPackages.remove(packageName)
             }
         }
 
@@ -63,11 +74,12 @@ class ChildAppsViewModel
                                     .filter { it.locked }
                                     .map { it.packageName }
                                     .toSet(),
+                            error = null,
                         )
                     }
 
                     is AppResult.Failure -> {
-                        state.copy(loading = false)
+                        state.copy(loading = false, error = reported.error)
                     }
                 }
             }

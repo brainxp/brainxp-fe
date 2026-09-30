@@ -148,12 +148,16 @@ private fun ChildAppsEntry(
 
     LaunchedEffect(key.childId) { viewModel.load(key.childId) }
 
-    AppPickerScreen(
-        state = state,
-        onQueryChange = viewModel::search,
-        onToggle = viewModel::toggle,
-        onBack = { backStack.popOrIgnore() },
-    )
+    if (state.error != null) {
+        ErrorState(error = state.error!!, onRetry = viewModel::retry)
+    } else {
+        AppPickerScreen(
+            state = state,
+            onQueryChange = viewModel::search,
+            onToggle = viewModel::toggle,
+            onBack = { backStack.popOrIgnore() },
+        )
+    }
 }
 
 @Composable

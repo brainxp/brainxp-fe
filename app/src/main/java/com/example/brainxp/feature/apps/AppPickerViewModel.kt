@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.brainxp.blocking.InstalledApp
 import com.example.brainxp.blocking.InstalledAppsSource
 import com.example.brainxp.blocking.SystemCriticalFilter
+import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.data.repo.RestrictionRepository
 import com.example.brainxp.domain.GuardedAction
 import com.example.brainxp.domain.ParentLock
@@ -24,6 +25,7 @@ data class AppPickerUiState(
     val icons: Map<String, ImageBitmap> = emptyMap(),
     val restricted: Set<String> = emptySet(),
     val blocked: Boolean = false,
+    val error: ApiError? = null,
 ) {
     val visible: List<InstalledApp>
         get() =
