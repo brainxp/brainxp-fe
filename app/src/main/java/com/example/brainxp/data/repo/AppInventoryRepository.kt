@@ -24,12 +24,10 @@ class NetworkAppInventoryRepository
         private val api: AppInventoryApi,
         private val errors: ErrorMapper,
     ) : AppInventoryRepository {
-        override suspend fun publish(apps: List<DeviceApp>): AppResult<Unit> {
-            if (apps.isEmpty()) return AppResult.Success(Unit)
-            return call {
+        override suspend fun publish(apps: List<DeviceApp>): AppResult<Unit> =
+            call {
                 api.sync(AppInventoryRequestDto(apps = apps.take(SYNC_LIMIT).map(DeviceApp::toDto)))
             }.map { }
-        }
 
         override suspend fun inventoryOf(subjectId: String): AppResult<List<DeviceApp>> =
             call { api.inventory(subjectId) }.map { page -> page.apps.map(InventoryAppDto::toApp) }
