@@ -1,12 +1,16 @@
 package com.example.brainxp.blocking
 
 import com.example.brainxp.core.permission.SpecialPermission
+import com.example.brainxp.core.result.AppResult
+import com.example.brainxp.core.time.AppClock
 import com.example.brainxp.data.repo.ActivityLogRepository
-import com.example.brainxp.data.repo.FamilyRepository
+import com.example.brainxp.data.repo.PendingSyncQueue
 import com.example.brainxp.domain.model.ActivityEvent
 import com.example.brainxp.domain.model.ActivityKind
 import com.example.brainxp.domain.model.GuardianEvent
 import com.example.brainxp.domain.model.GuardianStatus
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -15,24 +19,34 @@ class GuardianHealthReporter
     @Inject
     constructor(
         private val activityLog: ActivityLogRepository,
-        private val family: FamilyRepository,
+        private val pendingSync: PendingSyncQueue,
+        private val clock: AppClock,
     ) {
+        private val mutex = Mutex()
         private var lastMissing: Set<SpecialPermission> = emptySet()
+        private var lastStatus: ProtectionStatus? = null
 
         suspend fun report(
             status: ProtectionStatus,
             missing: List<SpecialPermission> = emptyList(),
-        ) {
-            status.toActivityKind()?.let { kind ->
-                activityLog.record(ActivityEvent(kind = kind, timestamp = System.currentTimeMillis()))
+        ) = mutex.withLock {
+            if (status != lastStatus) {
+                status.toActivityKind()?.let { kind ->
+                    activityLog.record(ActivityEvent(kind = kind, timestamp = clock.wallClock()))
+                }
             }
-            family.reportHealth(status.toGuardianStatus(), eventsFor(missing.toSet()))
+            val currentMissing = missing.toSet()
+            val result = pendingSync.sendHealth(status.toGuardianStatus(), eventsFor(currentMissing))
+            if (result is AppResult.Success || (result is AppResult.Failure && result.error.retryable)) {
+                lastMissing = currentMissing
+                lastStatus = status
+            }
         }
 
         private fun eventsFor(missing: Set<SpecialPermission>): List<GuardianEvent> {
+            val revoked = missing - lastMissing
             val restored = lastMissing - missing
-            lastMissing = missing
-            return missing.map { permission -> event(GuardianEvent.REVOKED, permission, required = true) } +
+            return revoked.map { permission -> event(GuardianEvent.REVOKED, permission, required = true) } +
                 restored.map { permission -> event(GuardianEvent.RESTORED, permission) }
         }
 
@@ -45,6 +59,7 @@ class GuardianHealthReporter
                 type = type,
                 permission = permission.name.lowercase(),
                 required = required,
+                occurredAtWallClock = clock.wallClock(),
             )
     }
 
