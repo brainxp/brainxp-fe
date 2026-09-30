@@ -25,7 +25,11 @@ class LockedAppsSource
                 val labels = installed.launchableApps().associate { it.packageName to it.label }
                 val icons = mutableMapOf<String, ImageBitmap?>()
                 val named =
-                    combine(restrictions.observeRestricted(), parentLock.lock) { apps, lock ->
+                    combine(
+                        restrictions.observeRestricted(),
+                        parentLock.lock,
+                        parentLock.familyParent,
+                    ) { apps, lock, familyParent ->
                         val enabled = apps.filter { it.enabled }
                         enabled.forEach { app ->
                             icons.getOrPut(app.packageName) {
@@ -42,6 +46,7 @@ class LockedAppsSource
                                     )
                                 },
                             managed = lock.locked,
+                            familyParent = familyParent,
                         )
                     }
                 emitAll(named)

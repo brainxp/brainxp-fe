@@ -16,6 +16,7 @@ data class LockedApp(
 data class LockedApps(
     val apps: List<LockedApp> = emptyList(),
     val managed: Boolean = false,
+    val familyParent: Boolean = false,
 )
 
 data class PendingSession(
@@ -40,6 +41,7 @@ data class HomeUiState(
     val protection: ProtectionStatus = ProtectionStatus.OFF,
     val lockedApps: List<LockedApp> = emptyList(),
     val managed: Boolean = false,
+    val familyParent: Boolean = false,
     val displayName: String = "",
     val refreshing: Boolean = false,
     val consumedSeconds: Int = 0,

@@ -96,6 +96,7 @@ class HomeViewModel
                         protection = snapshot.status,
                         lockedApps = locked.apps,
                         managed = locked.managed,
+                        familyParent = locked.familyParent,
                         consumedSeconds = consumedSeconds.toInt(),
                         idleDays = standing?.idleDays ?: 0,
                         idleDaysAllowed = standing?.idleDaysAllowed ?: 0,
