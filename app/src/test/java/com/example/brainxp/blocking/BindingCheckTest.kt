@@ -2,6 +2,7 @@ package com.example.brainxp.blocking
 
 import com.example.brainxp.domain.model.DeviceBinding
 import com.example.brainxp.domain.model.DeviceRole
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -50,6 +51,26 @@ class BindingCheckTest {
     @Test
     fun `leaving family mode alone does not release a still-bound device`() {
         assertFalse(releasesDevice(DeviceBinding(bound = true, familyMode = false, subjectName = null)))
+    }
+
+    @Test
+    fun `policy sync keeps installed selectable packages only`() {
+        val apps =
+            listOf(
+                InstalledApp("com.game", "Game"),
+                InstalledApp("com.settings", "Settings"),
+                InstalledApp("com.chat", "Chat"),
+            )
+        val protected = ProtectedPackages(own = "com.brainxp", settings = "com.settings")
+
+        val synced =
+            syncedRestrictedPackages(
+                listOf("com.game", "com.settings", "com.missing", "com.game"),
+                apps,
+                protected,
+            )
+
+        assertEquals(listOf("com.game"), synced)
     }
 
     private companion object {
