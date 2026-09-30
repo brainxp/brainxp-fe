@@ -35,6 +35,7 @@ data class SettingsSnapshot(
     val detector: DetectorChoice = DetectorChoice.USAGE_STATS,
     val warningLeadSeconds: Int = DEFAULT_WARNING_LEAD_SECONDS,
     val role: DeviceRole = DeviceRole.PARENT,
+    val lastOwnerId: String? = null,
 )
 
 const val DEFAULT_WARNING_LEAD_SECONDS = 60
@@ -60,8 +61,13 @@ class SettingsDataStore(
                             ?: DetectorChoice.USAGE_STATS,
                     warningLeadSeconds = prefs[KEY_WARNING_LEAD] ?: DEFAULT_WARNING_LEAD_SECONDS,
                     role = prefs[KEY_ROLE]?.toEnum(DeviceRole.PARENT) ?: DeviceRole.PARENT,
+                    lastOwnerId = prefs[KEY_LAST_OWNER],
                 )
             }
+
+    suspend fun setLastOwnerId(subjectId: String) {
+        store.edit { it[KEY_LAST_OWNER] = subjectId }
+    }
 
     suspend fun setRole(role: DeviceRole) {
         store.edit { it[KEY_ROLE] = role.name }
@@ -108,6 +114,7 @@ class SettingsDataStore(
         val KEY_DETECTOR = stringPreferencesKey("detector")
         val KEY_WARNING_LEAD = intPreferencesKey("warning_lead_seconds")
         val KEY_ROLE = stringPreferencesKey("device_role")
+        val KEY_LAST_OWNER = stringPreferencesKey("last_owner_id")
 
         fun from(context: Context): DataStore<Preferences> = context.settingsStore
     }
