@@ -86,6 +86,10 @@ class PairingCodeCountdownTest {
                 viewModel.state.value.code
                     ?.secondsLeft ?: 0
             assertTrue("$left", left in 595..600)
+
+            clock.advance(600_000)
+            advanceTimeBy(1_000)
+            runCurrent()
         }
 
     @Test
@@ -109,6 +113,10 @@ class PairingCodeCountdownTest {
                 viewModel.state.value.code
                     ?.secondsLeft,
             )
+
+            clock.advance(600_000)
+            advanceTimeBy(1_000)
+            runCurrent()
         }
 
     @Test
