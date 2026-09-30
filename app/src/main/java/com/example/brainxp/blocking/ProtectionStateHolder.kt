@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -53,7 +54,7 @@ class ProtectionStateHolder
         settings: SettingsDataStore,
         @AppScope private val scope: CoroutineScope,
     ) {
-        val snapshot: StateFlow<ProtectionSnapshot> =
+        private val snapshots =
             combine(
                 restrictions.observeRestricted().map { apps ->
                     apps.filter { it.enabled }.map { it.packageName }.toSet()
@@ -74,7 +75,10 @@ class ProtectionStateHolder
                     restriction = RestrictionState(packages, unlock),
                     missingPermissions = missing,
                 )
-            }.stateIn(scope, SharingStarted.Eagerly, ProtectionSnapshot())
+            }
+
+        val snapshot: StateFlow<ProtectionSnapshot> =
+            snapshots.stateIn(scope, SharingStarted.Eagerly, ProtectionSnapshot())
 
         init {
             reportStatusTransitions()
@@ -83,6 +87,8 @@ class ProtectionStateHolder
         suspend fun reloadUnlock() {
             unlocks.refresh()
         }
+
+        suspend fun current(): ProtectionSnapshot = snapshots.first()
 
         private fun reportStatusTransitions() {
             scope.launch {
