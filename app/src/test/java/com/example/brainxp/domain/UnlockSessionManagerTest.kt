@@ -146,6 +146,20 @@ class UnlockSessionManagerTest {
         }
 
     @Test
+    fun `screen off pause does not count time before the first wake tick`() =
+        runTest {
+            manager.start(60, setOf(GAME))
+            tick(GAME, times = 6)
+            val beforeScreenOff = manager.remaining()
+
+            manager.pauseMetering()
+            clock.advance(30 * 60 * 1_000L)
+            manager.meter(GAME)
+
+            assertEquals(beforeScreenOff, manager.remaining())
+        }
+
+    @Test
     fun `the session expires once the budget is spent`() =
         runTest {
             manager.start(3, setOf(GAME))

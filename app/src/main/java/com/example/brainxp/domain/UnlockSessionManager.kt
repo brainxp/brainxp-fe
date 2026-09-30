@@ -97,6 +97,10 @@ class UnlockSessionManager
                 }
             }
 
+        suspend fun pauseMetering() {
+            mutex.withLock { lastMeteredElapsed = null }
+        }
+
         suspend fun endEarly(): UnlockState = mutex.withLock { finish(UnlockStatus.ENDED, ActivityKind.UNLOCK_ENDED) }
 
         suspend fun refresh(): UnlockState =
