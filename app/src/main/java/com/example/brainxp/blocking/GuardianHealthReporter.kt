@@ -36,7 +36,7 @@ class GuardianHealthReporter
                 }
             }
             val currentMissing = missing.toSet()
-            val result = pendingSync.sendHealth(status.toGuardianStatus(), eventsFor(currentMissing))
+            val result = pendingSync.sendHealth(guardianStatusOf(status, missing), eventsFor(currentMissing))
             if (result is AppResult.Success || (result is AppResult.Failure && result.error.retryable)) {
                 lastMissing = currentMissing
                 lastStatus = status
@@ -70,9 +70,12 @@ private fun ProtectionStatus.toActivityKind(): ActivityKind? =
         ProtectionStatus.ACTIVE -> null
     }
 
-private fun ProtectionStatus.toGuardianStatus(): GuardianStatus =
-    when (this) {
-        ProtectionStatus.ACTIVE -> GuardianStatus.OK
-        ProtectionStatus.DEGRADED -> GuardianStatus.DEGRADED
-        ProtectionStatus.OFF -> GuardianStatus.DISABLED
+internal fun guardianStatusOf(
+    status: ProtectionStatus,
+    missing: List<SpecialPermission>,
+): GuardianStatus =
+    when {
+        missing.isNotEmpty() -> GuardianStatus.DEGRADED
+        status == ProtectionStatus.DEGRADED -> GuardianStatus.DEGRADED
+        else -> GuardianStatus.OK
     }
