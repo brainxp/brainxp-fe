@@ -94,3 +94,18 @@ data class ReceiptDto(
     @SerialName("streak_current") val streakCurrent: Int,
     @SerialName("new_badges") val newBadges: List<String> = emptyList(),
 )
+
+@Serializable
+data class QuestionReportDto(
+    @SerialName("question_id") val questionId: String,
+    val reason: String,
+    val note: String? = null,
+)
+
+@Serializable
+data class QuestionReportSavedDto(
+    val id: Int,
+    @SerialName("question_id") val questionId: String,
+    val reason: String,
+    val message: String,
+)
