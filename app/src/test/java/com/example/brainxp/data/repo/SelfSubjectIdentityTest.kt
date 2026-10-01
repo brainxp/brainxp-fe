@@ -5,6 +5,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
 import com.example.brainxp.core.device.InstallBinding
 import com.example.brainxp.core.network.ApiErrorBodyReader
+import com.example.brainxp.core.network.AuthTokenStore
+import com.example.brainxp.core.network.AuthTokens
 import com.example.brainxp.core.network.BindingCheckDto
 import com.example.brainxp.core.network.BindingCheckRequestDto
 import com.example.brainxp.core.network.ChildRequestDto
@@ -65,6 +67,14 @@ private class NoLocalData : LocalData {
     override suspend fun wipe() = Unit
 }
 
+private class NoTokens : AuthTokenStore {
+    override fun current(): AuthTokens? = null
+
+    override fun update(tokens: AuthTokens?) = Unit
+
+    override fun forget() = Unit
+}
+
 class SelfSubjectIdentityTest {
     private val auth = AuthDataStore(InMemoryPreferences())
     private val errors = ErrorMapper(ApiErrorBodyReader(Json { ignoreUnknownKeys = true }))
@@ -73,7 +83,7 @@ class SelfSubjectIdentityTest {
     private fun repository(api: FamilyApi) =
         NetworkFamilyRepository(
             api = api,
-            auth = auth,
+            auth = DeviceSession(auth, NoTokens()),
             binding = binding,
             errors = errors,
             teardown = SessionTeardown(auth, SettingsDataStore(InMemoryPreferences()), NoLocalData()),
