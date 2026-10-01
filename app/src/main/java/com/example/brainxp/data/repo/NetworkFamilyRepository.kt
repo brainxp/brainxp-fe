@@ -14,7 +14,6 @@ import com.example.brainxp.core.network.SelfSubjectRequestDto
 import com.example.brainxp.core.network.SubjectDto
 import com.example.brainxp.core.result.AppResult
 import com.example.brainxp.core.result.map
-import com.example.brainxp.data.prefs.AuthDataStore
 import com.example.brainxp.domain.model.AcademicLevel
 import com.example.brainxp.domain.model.DeviceBinding
 import com.example.brainxp.domain.model.FamilyChild
@@ -31,7 +30,7 @@ class NetworkFamilyRepository
     constructor(
         private val api: FamilyApi,
         private val binding: InstallBinding,
-        private val auth: AuthDataStore,
+        private val auth: DeviceSession,
         private val errors: ErrorMapper,
         private val teardown: SessionTeardown,
     ) : FamilyRepository {
@@ -78,8 +77,7 @@ class NetworkFamilyRepository
                         ),
                     )
                 teardown.run()
-                auth.saveTokens(token.accessToken, token.refreshToken)
-                auth.saveIdentity(token.subjectId, token.familyId, token.role)
+                auth.adopt(token)
             }
 
         override suspend fun checkBinding(): AppResult<DeviceBinding> =
