@@ -39,9 +39,7 @@ import com.example.brainxp.core.ui.levelLabel
 import com.example.brainxp.core.upload.PreparingStage
 import com.example.brainxp.domain.model.AcademicLevel
 import com.example.brainxp.domain.model.DeviceRole
-import com.example.brainxp.feature.SAMPLE_ESTIMATE_SECONDS
 import com.example.brainxp.feature.SAMPLE_MATERIAL_ID
-import com.example.brainxp.feature.SAMPLE_QUESTION_COUNT
 import com.example.brainxp.feature.apps.AppPickerRoute
 import com.example.brainxp.feature.capture.CameraCaptureScreen
 import com.example.brainxp.feature.capture.CaptureMethod
@@ -95,6 +93,7 @@ import com.example.brainxp.feature.onboarding.PickModeScreen
 import com.example.brainxp.feature.onboarding.PickRoleScreen
 import com.example.brainxp.feature.onboarding.SetupDoneScreen
 import com.example.brainxp.feature.onboarding.SetupMode
+import com.example.brainxp.feature.onboarding.SetupRoute
 import com.example.brainxp.feature.onboarding.SignInScreen
 import com.example.brainxp.feature.onboarding.SignInViewModel
 import com.example.brainxp.feature.onboarding.WelcomeScreen
@@ -105,10 +104,13 @@ import com.example.brainxp.feature.questions.QuizEvent
 import com.example.brainxp.feature.questions.QuizScreen
 import com.example.brainxp.feature.questions.QuizTourScreen
 import com.example.brainxp.feature.questions.QuizViewModel
+import com.example.brainxp.feature.questions.ReportQuestionSheet
+import com.example.brainxp.feature.questions.ReportQuestionViewModel
 import com.example.brainxp.feature.results.ReceiptScreen
 import com.example.brainxp.feature.results.ReceiptViewModel
 import com.example.brainxp.feature.settings.SettingsScreen
 import com.example.brainxp.feature.settings.SettingsViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 internal fun EntryProviderScope<NavKey>.onboardingEntries(
@@ -146,10 +148,10 @@ internal fun EntryProviderScope<NavKey>.onboardingEntries(
         LaunchedEffect(state.signedIn) {
             if (!state.signedIn) return@LaunchedEffect
             viewModel.consumeSignIn()
-            if (key.family) {
-                onSetupComplete()
-            } else {
-                backStack.add(OnboardingRoute.Level)
+            when (state.next) {
+                SetupRoute.HOME -> onSetupComplete()
+                SetupRoute.PERMISSIONS -> backStack.add(OnboardingRoute.PermissionSetup)
+                SetupRoute.LEVEL -> backStack.add(OnboardingRoute.Level)
             }
         }
 
@@ -179,7 +181,7 @@ internal fun EntryProviderScope<NavKey>.onboardingTailEntries(
         LaunchedEffect(state.saved) {
             if (!state.saved) return@LaunchedEffect
             viewModel.consumeSaved()
-            backStack.add(OnboardingRoute.PermissionSetup)
+            if (state.permissionsReady) onSetupComplete() else backStack.add(OnboardingRoute.PermissionSetup)
         }
 
         LevelScreen(
@@ -315,8 +317,6 @@ internal fun EntryProviderScope<NavKey>.captureEntries(backStack: NavBackStack<N
             rejection = rejection?.let { stringResource(it) },
             methods = methods,
             onPicked = { uri -> picker.accept(uri) { backStack.add(MainRoute.Preparing(PENDING_MATERIAL)) } },
-            questionCount = SAMPLE_QUESTION_COUNT,
-            estimatedRewardSeconds = SAMPLE_ESTIMATE_SECONDS,
             onBack = { backStack.popOrIgnore() },
             onPick = { method ->
                 when (method) {
@@ -411,8 +411,16 @@ private fun QuestionsEntry(
 ) {
     val viewModel: QuizViewModel = hiltViewModel()
     val load by viewModel.state.collectAsStateWithLifecycle()
+    val reporter: ReportQuestionViewModel = hiltViewModel()
+    val report by reporter.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(key.materialId) { viewModel.start(key.materialId) }
+
+    LaunchedEffect(report.thanks) {
+        if (report.thanks == null) return@LaunchedEffect
+        delay(REPORT_THANKS_MILLIS)
+        reporter.acknowledge()
+    }
 
     val quiz = load.quiz
     when {
@@ -436,6 +444,8 @@ private fun QuestionsEntry(
                 state = quiz,
                 onBack = { backStack.popOrIgnore() },
                 onGuide = { viewModel.showGuide(true) },
+                onReport = { questionId, number -> load.sessionId?.let { reporter.open(it, questionId, number) } },
+                notice = report.thanks,
                 onEvent = { event ->
                     viewModel.onEvent(event)
                     if (event == QuizEvent.Submit) {
@@ -445,6 +455,13 @@ private fun QuestionsEntry(
                         }
                     }
                 },
+            )
+            ReportQuestionSheet(
+                state = report,
+                onPick = reporter::pick,
+                onWrite = reporter::write,
+                onSend = reporter::send,
+                onDismiss = reporter::dismiss,
             )
         }
     }
@@ -735,3 +752,5 @@ private fun PairDeviceEntry(backStack: NavBackStack<NavKey>) {
             },
     )
 }
+
+private const val REPORT_THANKS_MILLIS = 4_000L
