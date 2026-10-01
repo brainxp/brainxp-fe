@@ -172,7 +172,7 @@ private fun ChildPolicyEntry(
 
     LaunchedEffect(load.saved) {
         if (load.saved && key.setup) {
-            backStack.popOrIgnore()
+            backStack.removeAll { it is MainRoute.FamilyChildPolicy || it == MainRoute.FamilyNewChild }
             backStack.add(MainRoute.FamilyPairing(key.childId))
         }
     }
