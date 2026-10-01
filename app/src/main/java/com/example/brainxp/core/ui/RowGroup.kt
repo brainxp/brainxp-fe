@@ -1,5 +1,6 @@
 package com.example.brainxp.core.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -49,21 +50,28 @@ class RowGroupScope internal constructor() {
         onClick: (() -> Unit)? = null,
         leading: @Composable (() -> Unit)? = null,
         trailing: @Composable (() -> Unit)? = null,
+        expanded: Boolean = false,
+        details: @Composable (() -> Unit)? = null,
     ) {
         if (rendered > 0) {
             HorizontalDivider(thickness = HAIRLINE, color = MaterialTheme.colorScheme.outline)
         }
         rendered++
-        RowGroupItem(
-            title = title,
-            subtitle = subtitle,
-            value = value,
-            emphasiseValue = emphasiseValue,
-            destructiveValue = destructiveValue,
-            leading = leading,
-            trailing = trailing,
-            modifier = if (onClick == null) modifier else modifier.clickable(onClick = onClick),
-        )
+        Column {
+            RowGroupItem(
+                title = title,
+                subtitle = subtitle,
+                value = value,
+                emphasiseValue = emphasiseValue,
+                destructiveValue = destructiveValue,
+                leading = leading,
+                trailing = trailing,
+                modifier = if (onClick == null) modifier else modifier.clickable(onClick = onClick),
+            )
+            if (details != null) {
+                AnimatedVisibility(visible = expanded) { details() }
+            }
+        }
     }
 }
 
