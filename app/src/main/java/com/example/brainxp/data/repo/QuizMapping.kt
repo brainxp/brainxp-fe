@@ -92,6 +92,7 @@ private fun ReceiptRowDto.toLine(): ReceiptLine =
     ReceiptLine(
         ordinal = ordinal,
         label = label,
+        qtype = qtype,
         difficulty = difficulty,
         multiplier = multiplier,
         rewardSeconds = rewardSeconds.toInt(),
