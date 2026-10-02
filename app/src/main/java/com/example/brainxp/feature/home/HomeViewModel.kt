@@ -114,6 +114,7 @@ class HomeViewModel
                 HomeEvent.Retry -> {
                     viewModelScope.launch {
                         mutableState.value = mutableState.value.copy(refreshing = true)
+                        lockedApps.refresh()
                         reconciler.reconcile()
                         mutableState.value = mutableState.value.copy(refreshing = false)
                     }

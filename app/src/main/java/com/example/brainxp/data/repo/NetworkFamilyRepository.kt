@@ -77,6 +77,7 @@ class NetworkFamilyRepository
                         ),
                     )
                 teardown.run()
+                teardown.adoptOwner(token.subjectId)
                 auth.adopt(token)
             }
 
