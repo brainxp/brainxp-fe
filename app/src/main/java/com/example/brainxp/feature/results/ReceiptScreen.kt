@@ -1,35 +1,50 @@
 package com.example.brainxp.feature.results
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.composables.icons.lucide.ChevronDown
+import com.composables.icons.lucide.CircleCheck
+import com.composables.icons.lucide.CircleX
+import com.composables.icons.lucide.Lucide
 import com.example.brainxp.R
-import com.example.brainxp.core.time.clock
+import com.example.brainxp.core.ui.BrainXPTextStyles
 import com.example.brainxp.core.ui.BrainXPTheme
-import com.example.brainxp.core.ui.Note
+import com.example.brainxp.core.ui.HeroCard
 import com.example.brainxp.core.ui.PillTone
 import com.example.brainxp.core.ui.PrimaryButton
-import com.example.brainxp.core.ui.ReceiptCard
-import com.example.brainxp.core.ui.ReceiptLine
+import com.example.brainxp.core.ui.RowGroup
 import com.example.brainxp.core.ui.ScreenNav
 import com.example.brainxp.core.ui.StatusPill
-import com.example.brainxp.core.ui.longDuration
 import com.example.brainxp.core.ui.multiplierText
 import com.example.brainxp.core.ui.shortDuration
+import com.example.brainxp.feature.questions.difficultyLabel
+import com.example.brainxp.feature.questions.questionTypeLabel
 
 data class ReceiptRow(
     val ordinal: Int,
@@ -40,6 +55,7 @@ data class ReceiptRow(
     val voided: Boolean = false,
     val voidReason: String? = null,
     val explanation: String? = null,
+    val qtype: String = "",
 )
 
 data class ReceiptUiState(
@@ -57,9 +73,7 @@ data class ReceiptUiState(
     val balanceSeconds: Int,
     val streakCurrent: Int,
     val newBadges: List<String> = emptyList(),
-) {
-    val missed: List<ReceiptRow> get() = rows.filter { it.voided && it.explanation != null }
-}
+)
 
 @Composable
 fun ReceiptScreen(
@@ -74,51 +88,135 @@ fun ReceiptScreen(
         modifier =
             modifier
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface)
                 .statusBarsPadding()
                 .navigationBarsPadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = spacing.screenHorizontal)
                 .padding(bottom = spacing.screenBottom),
-        verticalArrangement = Arrangement.spacedBy(spacing.md),
+        verticalArrangement = Arrangement.spacedBy(spacing.lg),
     ) {
-        ScreenNav(title = stringResource(R.string.receipt_title)) {
-            StatusPill(
-                text =
-                    stringResource(
-                        R.string.receipt_correct,
-                        state.correctCount,
-                        state.questionCount,
-                    ),
-                tone = PillTone.BLUE,
+        ScreenNav(title = stringResource(R.string.receipt_title))
+
+        Column(verticalArrangement = Arrangement.spacedBy(spacing.xs)) {
+            Text(
+                text = state.title,
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = stringResource(R.string.receipt_intro),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
-        ReceiptCard(
-            header = stringResource(R.string.receipt_header),
-            lines = receiptLines(state),
-            totalLabel = stringResource(R.string.receipt_credited),
-            totalValue = "+${longDuration(state.creditedSeconds)}",
+        HeroCard(
+            label = stringResource(R.string.receipt_reward_hero),
+            value = shortDuration(state.creditedSeconds),
+            badge = {
+                StatusPill(
+                    text =
+                        stringResource(
+                            R.string.receipt_correct,
+                            state.correctCount,
+                            state.questionCount,
+                        ),
+                    tone = PillTone.ON_DARK,
+                )
+            },
+            footer = {
+                Text(
+                    text =
+                        stringResource(
+                            R.string.receipt_balance_now,
+                            shortDuration(state.balanceSeconds),
+                        ),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                )
+            },
         )
 
-        Text(
-            text = "${stringResource(R.string.receipt_new_balance)} · ${shortDuration(state.balanceSeconds)}",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        ResultSectionHeading(
+            title = stringResource(R.string.receipt_review_title),
+            body = stringResource(R.string.receipt_review_body),
         )
 
-        if (state.missed.isNotEmpty()) {
-            Text(
-                text = stringResource(R.string.receipt_missed),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = spacing.sm),
-            )
-            Column(verticalArrangement = Arrangement.spacedBy(spacing.sm)) {
-                state.missed.forEach { row -> MissedCard(row = row) }
+        var opened by rememberSaveable { mutableStateOf(emptySet<Int>()) }
+
+        RowGroup {
+            state.rows.forEach { row ->
+                val explanation = row.explanationText()
+                val open = row.ordinal in opened
+                item(
+                    title = row.displayTitle(),
+                    subtitle = row.resultSummary(open),
+                    onClick = explanation?.let { { opened = opened.toggled(row.ordinal) } },
+                    expanded = open,
+                    details = explanation?.let { { ExplanationText(it) } },
+                    leading = {
+                        Icon(
+                            imageVector = if (row.voided) Lucide.CircleX else Lucide.CircleCheck,
+                            contentDescription = null,
+                            tint =
+                                if (row.voided) {
+                                    MaterialTheme.colorScheme.error
+                                } else {
+                                    BrainXPTheme.extendedColors.ok
+                                },
+                            modifier = Modifier.size(spacing.xl),
+                        )
+                    },
+                    trailing = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            ResultValue(
+                                text = stringResource(R.string.receipt_question_reward, shortDuration(row.rewardSeconds)),
+                                positive = !row.voided,
+                            )
+                            if (explanation != null) {
+                                ExpandChevron(open = open)
+                            }
+                        }
+                    },
+                )
             }
         }
 
-        Note(text = streakNote(state))
+        ResultSectionHeading(
+            title = stringResource(R.string.receipt_calculation_title),
+            body = stringResource(R.string.receipt_calculation_body),
+        )
+
+        RowGroup {
+            item(
+                title = stringResource(R.string.receipt_subtotal),
+                trailing = {
+                    ResultValue(
+                        text = stringResource(R.string.receipt_question_reward, shortDuration(state.subtotalSeconds)),
+                    )
+                },
+            )
+            item(
+                title = stringResource(R.string.receipt_level_title),
+                subtitle = state.levelNote,
+                trailing = { ResultValue(text = multiplierText(state.levelFactor)) },
+            )
+            item(
+                title = stringResource(R.string.receipt_novelty_title),
+                subtitle = state.noveltyNote,
+                trailing = { ResultValue(text = multiplierText(state.noveltyFactor)) },
+            )
+            item(
+                title = stringResource(R.string.receipt_credited),
+                trailing = {
+                    ResultValue(
+                        text = stringResource(R.string.receipt_question_reward, shortDuration(state.creditedSeconds)),
+                        positive = true,
+                    )
+                },
+            )
+        }
 
         PrimaryButton(
             text = stringResource(R.string.receipt_home),
@@ -135,86 +233,105 @@ fun ReceiptScreen(
 }
 
 @Composable
-private fun MissedCard(
-    row: ReceiptRow,
+private fun ResultSectionHeading(
+    title: String,
+    body: String,
     modifier: Modifier = Modifier,
 ) {
     val spacing = BrainXPTheme.spacing
 
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    Column(
+        modifier = modifier.fillMaxWidth().padding(top = spacing.sm),
+        verticalArrangement = Arrangement.spacedBy(spacing.xs),
     ) {
-        Column(
-            modifier = Modifier.padding(spacing.md),
-            verticalArrangement = Arrangement.spacedBy(spacing.xs),
-        ) {
-            Text(
-                text = stringResource(R.string.receipt_missed_row, row.ordinal, row.difficulty),
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-                text = row.explanation.orEmpty(),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            text = body,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
 @Composable
-private fun receiptLines(state: ReceiptUiState): List<ReceiptLine> {
-    val base =
-        ReceiptLine(
-            label = stringResource(R.string.receipt_base),
-            value = clock(state.baseRewardSeconds),
-            heading = true,
-        )
-    val perQuestion =
-        state.rows.map { row ->
-            ReceiptLine(
-                label = "${row.label} ${multiplierText(row.multiplier)}",
-                value =
-                    if (row.voided) {
-                        row.voidReason ?: stringResource(R.string.void_wrong)
-                    } else {
-                        "+${clock(row.rewardSeconds)}"
-                    },
-                voided = row.voided,
-            )
-        }
-    val tail =
-        listOf(
-            ReceiptLine(
-                label = stringResource(R.string.receipt_subtotal),
-                value = "+${clock(state.subtotalSeconds)}",
-                heading = true,
+private fun ResultValue(
+    text: String,
+    modifier: Modifier = Modifier,
+    positive: Boolean = false,
+) {
+    Text(
+        text = text,
+        style =
+            MaterialTheme.typography.titleSmall.copy(
+                fontFeatureSettings = BrainXPTextStyles.TABULAR_FIGURES,
             ),
-            ReceiptLine(
-                label = stringResource(R.string.receipt_level, state.levelNote),
-                value = multiplierText(state.levelFactor),
-            ),
-            ReceiptLine(
-                label = stringResource(R.string.receipt_novelty, state.noveltyNote),
-                value = multiplierText(state.noveltyFactor),
-            ),
-        )
-
-    return listOf(base) + perQuestion + tail
+        color = if (positive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+        modifier = modifier,
+    )
 }
 
 @Composable
-private fun streakNote(state: ReceiptUiState): String {
-    val tail =
-        if (state.newBadges.isEmpty()) {
-            stringResource(R.string.receipt_streak_keep)
-        } else {
-            stringResource(R.string.receipt_new_badges, state.newBadges.joinToString(", "))
-        }
-    return stringResource(R.string.receipt_streak, state.streakCurrent, tail)
+private fun ReceiptRow.displayTitle(): String {
+    val number = stringResource(R.string.receipt_question_fallback, ordinal)
+    val type = questionTypeLabel(qtype)
+    val level = difficultyLabel(difficulty).takeIf { it.isNotBlank() }
+    return when {
+        type != null && level != null -> stringResource(R.string.receipt_row_title_typed_level, number, type, level)
+        type != null -> stringResource(R.string.receipt_row_title_typed, number, type)
+        level != null -> stringResource(R.string.receipt_row_title_level, number, level)
+        else -> number
+    }
 }
+
+@Composable
+private fun ExpandChevron(open: Boolean) {
+    val turn by animateFloatAsState(targetValue = if (open) HALF_TURN else 0f, label = "chevron")
+    Icon(
+        imageVector = Lucide.ChevronDown,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier =
+            Modifier
+                .padding(start = BrainXPTheme.spacing.sm)
+                .size(CHEVRON)
+                .rotate(turn),
+    )
+}
+
+private const val HALF_TURN = 180f
+private val CHEVRON = 18.dp
+
+private fun ReceiptRow.explanationText(): String? = (explanation ?: voidReason)?.takeIf { voided && it.isNotBlank() }
+
+@Composable
+private fun ReceiptRow.resultSummary(open: Boolean): String =
+    when {
+        explanationText() != null -> stringResource(if (open) R.string.receipt_row_hide else R.string.receipt_row_show)
+        voided -> stringResource(R.string.receipt_row_incorrect)
+        else -> stringResource(R.string.receipt_row_correct)
+    }
+
+@Composable
+private fun ExplanationText(text: String) {
+    val spacing = BrainXPTheme.spacing
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(start = spacing.lg + EXPLANATION_INDENT + spacing.md, end = spacing.lg, bottom = spacing.md),
+    )
+}
+
+private fun Set<Int>.toggled(value: Int): Set<Int> = if (value in this) this - value else this + value
+
+private val EXPLANATION_INDENT = 38.dp
 
 private val PREVIEW_RECEIPT =
     ReceiptUiState(
@@ -260,7 +377,7 @@ private val PREVIEW_RECEIPT =
         newBadges = listOf("Penulis"),
     )
 
-@Preview(name = "Receipt", showBackground = true, heightDp = 1300)
+@Preview(name = "Hasil belajar", showBackground = true, heightDp = 1500)
 @Composable
 private fun ReceiptPreview() {
     BrainXPTheme { ReceiptScreen(state = PREVIEW_RECEIPT, onHome = {}, onLibrary = {}) }

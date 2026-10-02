@@ -59,7 +59,7 @@ class AnswerQueue
                     }
                 }
             }
-            pending.deleteExhausted(MAX_ATTEMPTS)
+            pending.deleteExhausted(PendingOperationType.SUBMIT_ANSWER, MAX_ATTEMPTS)
             return sent
         }
 

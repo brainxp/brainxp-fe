@@ -59,7 +59,7 @@ class PersistentAuthTokenStore
 
         override fun forget() {
             cached.set(null)
-            runBlocking { teardown.run() }
+            runBlocking { teardown.endSession() }
         }
     }
 

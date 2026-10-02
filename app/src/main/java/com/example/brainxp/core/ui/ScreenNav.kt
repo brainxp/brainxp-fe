@@ -14,6 +14,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,8 +29,10 @@ fun ScreenNav(
     title: String,
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
+    ink: Color = Color.Unspecified,
     trailing: @Composable (() -> Unit)? = null,
 ) {
+    val content = ink.takeOrElse { MaterialTheme.colorScheme.onSurface }
     Row(
         modifier = modifier.fillMaxWidth().height(BAR),
         verticalAlignment = Alignment.CenterVertically,
@@ -39,14 +43,14 @@ fun ScreenNav(
                 Icon(
                     imageVector = Lucide.ChevronLeft,
                     contentDescription = stringResource(R.string.action_back),
-                    tint = MaterialTheme.colorScheme.onSurface,
+                    tint = content,
                 )
             }
         }
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = content,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),

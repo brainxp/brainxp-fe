@@ -89,7 +89,7 @@ private fun PreparingContent(
                 .padding(bottom = spacing.screenBottom),
         verticalArrangement = Arrangement.spacedBy(spacing.md),
     ) {
-        ScreenNav(title = stringResource(R.string.preparing_title)) {
+        ScreenNav(title = stringResource(R.string.preparing_title), ink = Tokens.Neutral0) {
             StatusPill(
                 text =
                     stringResource(

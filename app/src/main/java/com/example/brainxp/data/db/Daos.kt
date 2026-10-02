@@ -257,8 +257,11 @@ interface PendingOperationDao {
     @Query("SELECT COUNT(*) FROM pending_operations")
     suspend fun count(): Int
 
-    @Query("DELETE FROM pending_operations WHERE attempts >= :maxAttempts")
-    suspend fun deleteExhausted(maxAttempts: Int)
+    @Query("DELETE FROM pending_operations WHERE type = :type AND attempts >= :maxAttempts")
+    suspend fun deleteExhausted(
+        type: PendingOperationType,
+        maxAttempts: Int,
+    )
 
     companion object {
         const val DEFAULT_BATCH = 20

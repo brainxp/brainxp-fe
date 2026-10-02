@@ -288,16 +288,16 @@ kehilangan kontak.</string>
     <string name="home_section_today">Ringkasan hari ini</string>
     <string name="home_section_earn">Tambah waktu bermain</string>
 
-    <string name="source_title">Setor materi</string>
-    <string name="source_hero_label">Sesi ini</string>
-    <string name="source_unit">soal</string>
-    <string name="source_hero_sub">Perkiraan sampai +%1$s</string>
-    <string name="source_pick">Pilih cara menyetor</string>
-    <string name="source_photo">Foto catatan</string>
-    <string name="source_photo_sub">Kamera langsung terbuka. Buku, papan tulis, tulisan tangan.</string>
-    <string name="source_document">Kirim berkas</string>
-    <string name="source_document_sub">PDF, DOCX, PPTX, TXT, atau foto yang sudah ada — sampai 32 MB.</string>
-    <string name="source_note">Materi diproses layanan AI dan tidak dipakai melatih model. Materi yang sama diunggah ulang tetap boleh dipelajari, tapi hadiahnya menurun.</string>
+    <string name="source_title">Tambah materi</string>
+    <string name="source_heading">Materinya ada di mana?</string>
+    <string name="source_body">Foto halaman yang ada di depanmu, atau pilih berkas yang sudah tersimpan.</string>
+    <string name="source_photo">Foto sekarang</string>
+    <string name="source_photo_sub">Untuk buku, catatan, atau papan tulis. Kamu bisa mengambil beberapa halaman.</string>
+    <string name="source_photo_action">Buka kamera</string>
+    <string name="source_document">Pilih berkas</string>
+    <string name="source_document_sub">PDF, DOCX, PPTX, TXT, atau gambar hingga 32 MB.</string>
+    <string name="source_document_action">Pilih dari perangkat</string>
+    <string name="source_note">Materi diproses untuk membuat soal belajarmu. Jumlah soal dan waktu yang didapat baru diketahui setelah materinya selesai diperiksa.</string>
 
     <string name="preparing_title">Menyiapkan soal</string>
     <string name="preparing_status_working">Sedang dibuat</string>
@@ -311,7 +311,7 @@ kehilangan kontak.</string>
     <string name="done_body">Akunmu sudah dibuat dan penjaga waktu bermain sudah berjalan.</string>
     <string name="done_step_account">Akun dibuat</string>
     <string name="done_step_level">Jenjang dipilih</string>
-    <string name="done_step_protection">Penjaga aktif</string>
+    <string name="done_step_protection">Perizinan aplikasi aktif</string>
     <string name="done_step_material">Setor materi pertamamu</string>
     <string name="done_protection_partial">Ada izin yang kamu lewati, jadi penjaganya belum penuh. Bisa dilengkapi nanti dari Pengaturan.</string>
     <string name="done_next">Langkah berikutnya: setor satu materi, jawab soalnya, dan waktu bermainmu mulai terkumpul.</string>
@@ -324,7 +324,7 @@ kehilangan kontak.</string>
     <string name="settings_protection">Perlindungan</string>
     <string name="settings_protection_on">Aplikasi terkunci dijaga terus</string>
     <string name="settings_protection_degraded">Jalan sebagian — izinnya perlu diperbaiki</string>
-    <string name="settings_protection_off">Aplikasi terkunci bisa dibuka bebas</string>
+    <string name="settings_protection_off">Belum ada aplikasi yang dikunci</string>
     <string name="settings_permissions">Izin sistem</string>
     <string name="settings_pending">Perubahan aturan berlaku mulai %1$s. Sampai saat itu aturan lama yang dipakai.</string>
     <string name="settings_sign_out">Keluar dari akun</string>
@@ -446,6 +446,25 @@ kehilangan kontak.</string>
     <string name="quiz_rubric">Dinilai terhadap %1$d kriteria, lolos di atas 60.</string>
     <string name="quiz_doubt">Ragu-ragu</string>
     <string name="quiz_doubt_marked">Ditandai ragu-ragu</string>
+    <string name="quiz_report">Laporkan soal</string>
+    <string name="quiz_report_title">Laporkan soal ini</string>
+    <string name="quiz_report_title_numbered">Laporkan soal %1$d</string>
+    <string name="quiz_report_body">Laporanmu dibaca tim kami untuk memperbaiki soal. Jawabanmu dan waktu bermainmu tidak berubah.</string>
+    <string name="quiz_report_reason_wrong_key">Kunci jawabannya salah</string>
+    <string name="quiz_report_reason_unclear">Soalnya membingungkan</string>
+    <string name="quiz_report_reason_off_material">Tidak ada di materiku</string>
+    <string name="quiz_report_reason_other">Lainnya</string>
+    <string name="quiz_report_note">Catatan (boleh dikosongkan)</string>
+    <string name="quiz_report_note_hint">Ceritakan apa yang salah</string>
+    <string name="quiz_report_send">Kirim laporan</string>
+    <string name="quiz_report_failed">Laporan belum terkirim</string>
+    <string name="difficulty_easy">Mudah</string>
+    <string name="difficulty_medium">Sedang</string>
+    <string name="difficulty_hard">Sulit</string>
+    <string name="question_type_multiple_choice">Pilihan ganda</string>
+    <string name="question_type_essay">Esai</string>
+    <string name="receipt_row_show">Lihat pembahasan</string>
+    <string name="receipt_row_hide">Tutup pembahasan</string>
     <string name="quiz_submit">Kumpulkan sesi</string>
     <string name="quiz_submit_now">Kumpulkan sekarang</string>
     <string name="quiz_review_again">Periksa lagi</string>
@@ -488,20 +507,27 @@ kehilangan kontak.</string>
     <string name="tour_receipt_title">Nilainya keluar di akhir</string>
     <string name="tour_receipt_body">Benar salahnya dan tambahan waktu mainnya baru muncul setelah semua soal dikumpulkan.</string>
 
-    <string name="receipt_title">Sesi selesai</string>
+    <string name="receipt_title">Hasil belajar</string>
+    <string name="receipt_intro">Ini hasil penilaian dan waktu yang kamu dapat dari sesi ini.</string>
     <string name="receipt_correct">%1$d dari %2$d benar</string>
-    <string name="receipt_header">Rincian reward</string>
-    <string name="receipt_base">DASAR PER SOAL</string>
-    <string name="receipt_subtotal">SUBTOTAL</string>
-    <string name="receipt_level">Kalibrasi level · %1$s</string>
-    <string name="receipt_novelty">Kebaruan · %1$s</string>
+    <string name="receipt_reward_hero">Waktu yang kamu dapat</string>
+    <string name="receipt_balance_now">Saldo sekarang %1$s</string>
+    <string name="receipt_review_title">Tinjau jawaban</string>
+    <string name="receipt_review_body">Setiap soal menunjukkan hasil, bagian yang perlu diperbaiki, dan waktu yang didapat.</string>
+    <string name="receipt_question_fallback">Soal %1$d</string>
+    <string name="receipt_row_correct">Jawaban benar</string>
+    <string name="receipt_row_title_typed_level" translatable="false">%1$s, %2$s (%3$s)</string>
+    <string name="receipt_row_title_typed" translatable="false">%1$s, %2$s</string>
+    <string name="receipt_row_title_level" translatable="false">%1$s (%2$s)</string>
+    <string name="receipt_row_incorrect">Belum tepat</string>
+    <string name="receipt_row_incorrect_detail">Belum tepat. %1$s</string>
+    <string name="receipt_question_reward">+%1$s</string>
+    <string name="receipt_calculation_title">Cara waktu dihitung</string>
+    <string name="receipt_calculation_body">Total ditentukan dari hasil penilaian, tingkat materi, dan kebaruan materi.</string>
+    <string name="receipt_subtotal">Dari semua jawaban</string>
+    <string name="receipt_level_title">Tingkat materi</string>
+    <string name="receipt_novelty_title">Kebaruan materi</string>
     <string name="receipt_credited">Masuk ke saldo</string>
-    <string name="receipt_new_balance">Saldo baru</string>
-    <string name="receipt_missed">Yang belum tepat</string>
-    <string name="receipt_missed_row">Soal %1$d · %2$s</string>
-    <string name="receipt_streak">Streak %1$d hari. %2$s</string>
-    <string name="receipt_streak_keep">Terus begitu.</string>
-    <string name="receipt_new_badges">Lencana baru: %1$s.</string>
     <string name="receipt_home">Kembali ke beranda</string>
     <string name="receipt_library">Lihat pustaka</string>
 
@@ -714,7 +740,8 @@ kehilangan kontak.</string>
     <string name="report_release_failed">HP %1$s gagal dikeluarkan</string>
     <string name="report_released">HP %1$s sudah dikeluarkan. Terbitkan kode pemasangan kalau mau menyambungkannya lagi.</string>
     <string name="home_mode_child">Anak</string>
-    <string name="home_mode_self">Mandiri</string>
+    <string name="home_mode_self">Pribadi</string>
+    <string name="home_mode_parent">Orang Tua</string>
     <string name="home_greeting_morning">Selamat pagi, %1$s</string>
     <string name="home_greeting_midday">Selamat siang, %1$s</string>
     <string name="home_greeting_afternoon">Selamat sore, %1$s</string>

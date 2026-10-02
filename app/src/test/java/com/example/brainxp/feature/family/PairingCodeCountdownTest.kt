@@ -1,6 +1,7 @@
 package com.example.brainxp.feature.family
 
 import com.example.brainxp.core.result.AppResult
+import com.example.brainxp.core.time.FakeAppClock
 import com.example.brainxp.data.repo.FamilyRepository
 import com.example.brainxp.domain.model.AcademicLevel
 import com.example.brainxp.domain.model.DeviceBinding
@@ -25,6 +26,7 @@ import java.time.Instant
 
 private class StubFamily(
     private val secondsAhead: Long,
+    private val nowWallClock: Long,
 ) : FamilyRepository {
     override suspend fun children(): AppResult<List<FamilyChild>> =
         AppResult.Success(listOf(FamilyChild(childId = "child-1", name = "Raka", level = AcademicLevel.SMP)))
@@ -46,7 +48,7 @@ private class StubFamily(
             PairingCode(
                 code = "190196",
                 childId = childId,
-                expiresAt = Instant.now().plusSeconds(secondsAhead).toString(),
+                expiresAt = Instant.ofEpochMilli(nowWallClock).plusSeconds(secondsAhead).toString(),
                 attemptsAllowed = 5,
             ),
         )
@@ -74,7 +76,8 @@ class PairingCodeCountdownTest {
     @Test
     fun `the code arrives with about as long left as the server gave it`() =
         runTest(dispatcher) {
-            val viewModel = PairingCodeViewModel(StubFamily(secondsAhead = 600))
+            val clock = FakeAppClock()
+            val viewModel = PairingCodeViewModel(StubFamily(600, clock.wall), clock)
 
             viewModel.load("child-1")
             runCurrent()
@@ -83,12 +86,17 @@ class PairingCodeCountdownTest {
                 viewModel.state.value.code
                     ?.secondsLeft ?: 0
             assertTrue("$left", left in 595..600)
+
+            clock.advance(600_000)
+            advanceTimeBy(1_000)
+            runCurrent()
         }
 
     @Test
     fun `the time left keeps falling while the code is on screen`() =
         runTest(dispatcher) {
-            val viewModel = PairingCodeViewModel(StubFamily(secondsAhead = 600))
+            val clock = FakeAppClock()
+            val viewModel = PairingCodeViewModel(StubFamily(600, clock.wall), clock)
 
             viewModel.load("child-1")
             runCurrent()
@@ -96,6 +104,7 @@ class PairingCodeCountdownTest {
                 viewModel.state.value.code
                     ?.secondsLeft ?: 0
 
+            clock.advance(5_000)
             advanceTimeBy(5_000)
             runCurrent()
 
@@ -104,15 +113,21 @@ class PairingCodeCountdownTest {
                 viewModel.state.value.code
                     ?.secondsLeft,
             )
+
+            clock.advance(600_000)
+            advanceTimeBy(1_000)
+            runCurrent()
         }
 
     @Test
     fun `the countdown stops at zero instead of going negative`() =
         runTest(dispatcher) {
-            val viewModel = PairingCodeViewModel(StubFamily(secondsAhead = 3))
+            val clock = FakeAppClock()
+            val viewModel = PairingCodeViewModel(StubFamily(3, clock.wall), clock)
 
             viewModel.load("child-1")
             runCurrent()
+            clock.advance(30_000)
             advanceTimeBy(30_000)
             runCurrent()
 

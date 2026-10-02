@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.result.AppResult
-import com.example.brainxp.core.result.valueOrNull
 import com.example.brainxp.data.prefs.AuthDataStore
 import com.example.brainxp.data.repo.AlertRepository
 import com.example.brainxp.data.repo.AuthRepository
@@ -82,57 +81,90 @@ class FamilyHomeViewModel
             mutableState.update { it.copy(loading = !quietly, refreshing = quietly, error = null) }
             viewModelScope.launch {
                 when (val listed = family.children()) {
-                    is AppResult.Failure -> {
-                        mutableState.update { it.copy(loading = false, refreshing = false, error = listed.error) }
-                    }
+                    is AppResult.Failure -> finishLoad(AppResult.Failure(listed.error))
+                    is AppResult.Success -> finishLoad(loadHome(listed.value))
+                }
+            }
+        }
 
-                    is AppResult.Success -> {
-                        val own = listed.value.firstOrNull { child -> child.childId == ownSubjectId() }
-                        val children = listed.value.filterNot { child -> child.childId == own?.childId }
-                        val standings = withStandings(children)
-                        val mine = own?.let { subject -> withStandings(listOf(subject)).firstOrNull() }
-                        val raised = alerts.openAlerts().valueOrNull().orEmpty()
-                        mutableState.update {
-                            it.copy(
-                                home =
-                                    FamilyHomeUiState(
-                                        children = standings,
-                                        self = mine,
-                                        alerts = raised,
-                                    ),
-                                loading = false,
-                                refreshing = false,
-                            )
+        private suspend fun loadHome(subjects: List<FamilyChild>): AppResult<FamilyHomeUiState> {
+            val own = subjects.firstOrNull { child -> child.childId == ownSubjectId() }
+            val children = subjects.filterNot { child -> child.childId == own?.childId }
+            val selfResult = own?.let { withStandings(listOf(it)) } ?: AppResult.Success(emptyList())
+            return when (val childMembers = withStandings(children)) {
+                is AppResult.Failure -> {
+                    AppResult.Failure(childMembers.error)
+                }
+
+                is AppResult.Success -> {
+                    when (selfResult) {
+                        is AppResult.Failure -> {
+                            AppResult.Failure(selfResult.error)
+                        }
+
+                        is AppResult.Success -> {
+                            when (val raised = alerts.openAlerts()) {
+                                is AppResult.Failure -> {
+                                    AppResult.Failure(raised.error)
+                                }
+
+                                is AppResult.Success -> {
+                                    AppResult.Success(
+                                        FamilyHomeUiState(
+                                            children = childMembers.value,
+                                            self = selfResult.value.firstOrNull(),
+                                            alerts = raised.value,
+                                        ),
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
         }
 
-        private suspend fun withStandings(children: List<FamilyChild>): List<FamilyMember> =
+        private fun finishLoad(result: AppResult<FamilyHomeUiState>) {
+            mutableState.update { current ->
+                when (result) {
+                    is AppResult.Failure -> {
+                        current.copy(loading = false, refreshing = false, error = result.error)
+                    }
+
+                    is AppResult.Success -> {
+                        current.copy(home = result.value, loading = false, refreshing = false)
+                    }
+                }
+            }
+        }
+
+        private suspend fun withStandings(children: List<FamilyChild>): AppResult<List<FamilyMember>> =
             coroutineScope {
-                children
-                    .map { child ->
-                        async {
-                            val standing = rewards.standingOf(child.childId)
+                val loaded =
+                    children
+                        .map { child ->
+                            async {
+                                child to rewards.standingOf(child.childId)
+                            }
+                        }.map { it.await() }
+                val failure = loaded.firstNotNullOfOrNull { (_, result) -> (result as? AppResult.Failure)?.error }
+                if (failure != null) {
+                    AppResult.Failure(failure)
+                } else {
+                    AppResult.Success(
+                        loaded.mapNotNull { (child, result) ->
+                            val standing = (result as? AppResult.Success)?.value ?: return@mapNotNull null
                             FamilyMember(
                                 id = child.childId,
                                 name = child.name,
                                 level = child.level ?: AcademicLevel.SMP,
-                                balanceSeconds = standing.valueOr { it.balanceSeconds },
-                                streakDays = standing.valueOr { it.streakCurrent },
+                                balanceSeconds = standing.balanceSeconds,
+                                streakDays = standing.streakCurrent,
                                 remainingCapSeconds =
-                                    standing.valueOr {
-                                        (it.dailyCapSeconds - it.spentTodaySeconds).coerceAtLeast(0)
-                                    },
+                                    (standing.dailyCapSeconds - standing.spentTodaySeconds).coerceAtLeast(0),
                             )
-                        }
-                    }.map { it.await() }
+                        },
+                    )
+                }
             }
-    }
-
-private inline fun <T> AppResult<T>.valueOr(pick: (T) -> Int): Int =
-    when (this) {
-        is AppResult.Success -> pick(value)
-        is AppResult.Failure -> 0
     }

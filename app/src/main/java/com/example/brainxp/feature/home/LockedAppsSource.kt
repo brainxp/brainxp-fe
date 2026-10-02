@@ -2,6 +2,7 @@ package com.example.brainxp.feature.home
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import com.example.brainxp.blocking.BindingWatcher
 import com.example.brainxp.blocking.InstalledAppsSource
 import com.example.brainxp.data.repo.RestrictionRepository
 import com.example.brainxp.domain.ParentLock
@@ -19,13 +20,20 @@ class LockedAppsSource
         private val restrictions: RestrictionRepository,
         private val installed: InstalledAppsSource,
         private val parentLock: ParentLock,
+        private val binding: BindingWatcher,
     ) {
+        suspend fun refresh() = binding.check(force = true)
+
         fun observe(): Flow<LockedApps> =
             flow {
                 val labels = installed.launchableApps().associate { it.packageName to it.label }
                 val icons = mutableMapOf<String, ImageBitmap?>()
                 val named =
-                    combine(restrictions.observeRestricted(), parentLock.lock) { apps, lock ->
+                    combine(
+                        restrictions.observeRestricted(),
+                        parentLock.lock,
+                        parentLock.familyParent,
+                    ) { apps, lock, familyParent ->
                         val enabled = apps.filter { it.enabled }
                         enabled.forEach { app ->
                             icons.getOrPut(app.packageName) {
@@ -42,6 +50,7 @@ class LockedAppsSource
                                     )
                                 },
                             managed = lock.locked,
+                            familyParent = familyParent,
                         )
                     }
                 emitAll(named)

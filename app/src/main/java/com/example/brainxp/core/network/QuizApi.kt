@@ -27,4 +27,10 @@ interface QuizApi {
         @Path("sessionId") sessionId: String,
         @Body body: AnswerRequestDto,
     ): AnswerSavedDto
+
+    @POST("quizzes/{sessionId}/reports")
+    suspend fun report(
+        @Path("sessionId") sessionId: String,
+        @Body body: QuestionReportDto,
+    ): QuestionReportSavedDto
 }

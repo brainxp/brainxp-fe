@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.result.AppResult
+import com.example.brainxp.core.time.AppClock
 import com.example.brainxp.data.repo.FamilyRepository
 import com.example.brainxp.data.repo.RewardRepository
 import com.example.brainxp.domain.model.AcademicLevel
@@ -67,12 +68,14 @@ class PairingCodeViewModel
     @Inject
     constructor(
         private val family: FamilyRepository,
+        private val clock: AppClock,
     ) : ViewModel() {
         private val mutableState = MutableStateFlow(PairingCodeLoad())
         val state: StateFlow<PairingCodeLoad> = mutableState.asStateFlow()
 
         private var loadedFor: String? = null
         private var ticker: Job? = null
+        private var expiresAtWallClock: Long? = null
 
         fun load(childId: String) {
             if (loadedFor == childId) return
@@ -90,12 +93,13 @@ class PairingCodeViewModel
                 mutableState.update {
                     when (result) {
                         is AppResult.Success -> {
+                            expiresAtWallClock = parseExpiry(result.value.expiresAt)
                             it.copy(
                                 code =
                                     PairingCodeUiState(
                                         subjectName = named,
                                         code = result.value.code,
-                                        secondsLeft = secondsUntil(result.value.expiresAt),
+                                        secondsLeft = secondsUntil(expiresAtWallClock, clock.wallClock()),
                                     ),
                                 loading = false,
                             )
@@ -116,11 +120,11 @@ class PairingCodeViewModel
                 viewModelScope.launch {
                     while (true) {
                         delay(SECOND_MILLIS)
-                        val left = mutableState.value.code?.secondsLeft ?: return@launch
-                        if (left <= 0) return@launch
+                        val left = secondsUntil(expiresAtWallClock, clock.wallClock())
                         mutableState.update { now ->
-                            now.copy(code = now.code?.copy(secondsLeft = left - 1))
+                            now.copy(code = now.code?.copy(secondsLeft = left))
                         }
+                        if (left <= 0) return@launch
                     }
                 }
         }
@@ -266,12 +270,17 @@ private fun LedgerEntry.toRow(): LedgerRow =
 
 private const val SECOND_MILLIS = 1_000L
 
-private fun secondsUntil(isoTimestamp: String): Int =
+private fun parseExpiry(isoTimestamp: String): Long? =
     runCatching {
-        val expiry = java.time.Instant.parse(isoTimestamp)
-        java.time.Duration
-            .between(java.time.Instant.now(), expiry)
-            .seconds
-            .coerceAtLeast(0L)
-            .toInt()
-    }.getOrDefault(0)
+        java.time.Instant
+            .parse(isoTimestamp)
+            .toEpochMilli()
+    }.getOrNull()
+
+internal fun secondsUntil(
+    expiresAtWallClock: Long?,
+    nowWallClock: Long,
+): Int {
+    val remaining = ((expiresAtWallClock ?: return 0) - nowWallClock).coerceAtLeast(0L)
+    return ((remaining + SECOND_MILLIS - 1) / SECOND_MILLIS).toInt()
+}

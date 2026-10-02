@@ -57,14 +57,14 @@ class AuthRepository
                 runCatching { api.logout(RefreshRequestDto(refresh)) }
             }
             tokens.update(null)
-            teardown.run()
+            teardown.endSession()
         }
 
         private suspend fun call(block: suspend () -> TokenDto): AppResult<Identity> =
             runCatching { block() }
                 .fold(
                     onSuccess = { token ->
-                        teardown.run()
+                        teardown.adoptOwner(token.subjectId)
                         store.saveTokens(token.accessToken, token.refreshToken)
                         store.saveIdentity(token.subjectId, token.familyId, token.role)
                         tokens.update(AuthTokens(token.accessToken, token.refreshToken))

@@ -96,6 +96,7 @@ class HomeViewModel
                         protection = snapshot.status,
                         lockedApps = locked.apps,
                         managed = locked.managed,
+                        familyParent = locked.familyParent,
                         consumedSeconds = consumedSeconds.toInt(),
                         idleDays = standing?.idleDays ?: 0,
                         idleDaysAllowed = standing?.idleDaysAllowed ?: 0,
@@ -113,6 +114,7 @@ class HomeViewModel
                 HomeEvent.Retry -> {
                     viewModelScope.launch {
                         mutableState.value = mutableState.value.copy(refreshing = true)
+                        lockedApps.refresh()
                         reconciler.reconcile()
                         mutableState.value = mutableState.value.copy(refreshing = false)
                     }

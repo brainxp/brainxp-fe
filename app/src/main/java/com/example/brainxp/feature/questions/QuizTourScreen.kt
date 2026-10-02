@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,6 +32,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -50,6 +54,7 @@ import com.svenjacobs.reveal.RevealState
 import com.svenjacobs.reveal.effect.dim.DimRevealOverlayEffect
 import com.svenjacobs.reveal.rememberRevealState
 import com.svenjacobs.reveal.revealable
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 internal enum class TourSpot {
     QUESTION,
@@ -111,6 +116,7 @@ private fun TourBody(
     val spacing = BrainXPTheme.spacing
     val practice = practiceQuestions()
     val reveal = rememberRevealState()
+    val spots = remember { SpotTracker(reveal) }
     val flow = remember(practice) { TourFlow(practice) }
     flow.onDone = onDone
 
@@ -120,8 +126,10 @@ private fun TourBody(
 
     LaunchedEffect(flow.at, flow.index) { reveal.settle(flow.step) }
 
+    LaunchedEffect(flow.at) { spots.follow(flow.step) }
+
     LaunchedEffect(pager) {
-        snapshotFlow { pager.currentPage }.collect { page -> flow.paged(page) }
+        snapshotFlow { pager.settledPage }.collect { page -> flow.paged(page) }
     }
 
     Reveal(
@@ -169,7 +177,7 @@ private fun TourBody(
                     )
                 }
 
-                Column(modifier = Modifier.spot(TourSpot.DOTS, reveal)) {
+                Column(modifier = spots.spot(TourSpot.DOTS)) {
                     ProgressStrip(state = state)
                     QuestionDots(state = state, onJump = {})
                 }
@@ -184,12 +192,12 @@ private fun TourBody(
                     PracticePage(
                         question = practice[page],
                         chosen = flow.picked[practice[page].id],
-                        modifier = Modifier.spot(TourSpot.QUESTION, reveal),
+                        modifier = if (page == flow.index) spots.spot(TourSpot.QUESTION) else Modifier,
                     )
                 }
 
                 Column(
-                    modifier = Modifier.padding(top = spacing.md).spot(TourSpot.FOOTER, reveal),
+                    modifier = Modifier.padding(top = spacing.md).then(spots.spot(TourSpot.FOOTER)),
                     verticalArrangement = Arrangement.spacedBy(spacing.sm),
                 ) {
                     Text(
@@ -201,12 +209,12 @@ private fun TourBody(
                             },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.spot(TourSpot.ACTS, reveal),
+                        modifier = spots.spot(TourSpot.ACTS),
                     )
                     DoubtButton(
                         marked = flow.marked,
                         onClick = {},
-                        modifier = Modifier.spot(TourSpot.DOUBT, reveal),
+                        modifier = spots.spot(TourSpot.DOUBT),
                     )
                 }
             }
@@ -241,17 +249,29 @@ private fun Modifier.swipeLane(active: Boolean): Modifier =
         this
     }
 
-private fun Modifier.spot(
-    key: TourSpot,
-    state: RevealState,
-): Modifier =
-    revealable(
-        key = key,
-        state = state,
-        shape = RevealShape.RoundRect(RING_RADIUS),
-        padding = PaddingValues(RING_PADDING),
-        borderStroke = BorderStroke(RING_WIDTH, Tokens.Blue500),
-    )
+private class SpotTracker(
+    private val reveal: RevealState,
+) {
+    private val bounds = mutableStateMapOf<TourSpot, Rect>()
+
+    fun spot(key: TourSpot): Modifier =
+        Modifier
+            .onGloballyPositioned { bounds[key] = it.boundsInRoot() }
+            .revealable(
+                key = key,
+                state = reveal,
+                shape = RevealShape.RoundRect(RING_RADIUS),
+                padding = PaddingValues(RING_PADDING),
+                borderStroke = BorderStroke(RING_WIDTH, Tokens.Blue500),
+            )
+
+    suspend fun follow(step: TourStep) {
+        if (step.swipe) return
+        snapshotFlow { bounds[step.key] }
+            .distinctUntilChanged()
+            .collect { if (it != null && reveal.currentRevealableKey == step.key) reveal.tryReveal(step.key) }
+    }
+}
 
 @Composable
 private fun PracticePage(

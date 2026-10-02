@@ -108,7 +108,7 @@ fun CameraCaptureScreen(
                 .navigationBarsPadding(),
     ) {
         Box(modifier = Modifier.padding(horizontal = spacing.screenHorizontal)) {
-            ScreenNav(title = stringResource(R.string.camera_title), onBack = onBack) {
+            ScreenNav(title = stringResource(R.string.camera_title), onBack = onBack, ink = Tokens.Neutral0) {
                 if (state.pages.isNotEmpty()) {
                     StatusPill(
                         text = stringResource(R.string.camera_page_count, state.pages.size),

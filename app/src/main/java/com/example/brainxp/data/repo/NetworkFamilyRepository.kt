@@ -14,13 +14,13 @@ import com.example.brainxp.core.network.SelfSubjectRequestDto
 import com.example.brainxp.core.network.SubjectDto
 import com.example.brainxp.core.result.AppResult
 import com.example.brainxp.core.result.map
-import com.example.brainxp.data.prefs.AuthDataStore
 import com.example.brainxp.domain.model.AcademicLevel
 import com.example.brainxp.domain.model.DeviceBinding
 import com.example.brainxp.domain.model.FamilyChild
 import com.example.brainxp.domain.model.GuardianEvent
 import com.example.brainxp.domain.model.GuardianStatus
 import com.example.brainxp.domain.model.PairingCode
+import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -30,7 +30,7 @@ class NetworkFamilyRepository
     constructor(
         private val api: FamilyApi,
         private val binding: InstallBinding,
-        private val auth: AuthDataStore,
+        private val auth: DeviceSession,
         private val errors: ErrorMapper,
         private val teardown: SessionTeardown,
     ) : FamilyRepository {
@@ -77,8 +77,8 @@ class NetworkFamilyRepository
                         ),
                     )
                 teardown.run()
-                auth.saveTokens(token.accessToken, token.refreshToken)
-                auth.saveIdentity(token.subjectId, token.familyId, token.role)
+                teardown.adoptOwner(token.subjectId)
+                auth.adopt(token)
             }
 
         override suspend fun checkBinding(): AppResult<DeviceBinding> =
@@ -111,6 +111,7 @@ private fun GuardianEvent.toDto(): GuardianEventDto =
         type = type,
         permission = permission,
         required = required,
+        at = occurredAtWallClock?.let { Instant.ofEpochMilli(it).toString() },
     )
 
 private fun SubjectDto.toChild(): FamilyChild =

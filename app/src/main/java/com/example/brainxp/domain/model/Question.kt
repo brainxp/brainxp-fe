@@ -75,6 +75,7 @@ data class AnswerSaved(
 data class ReceiptLine(
     val ordinal: Int,
     val label: String,
+    val qtype: String,
     val difficulty: String,
     val multiplier: Double,
     val rewardSeconds: Int,
@@ -100,3 +101,12 @@ data class SessionReceipt(
     val streakCurrent: Int,
     val newBadges: List<String>,
 )
+
+enum class ReportReason(
+    val wire: String,
+) {
+    WRONG_KEY("kunci_salah"),
+    UNCLEAR("soal_tidak_jelas"),
+    OFF_MATERIAL("di_luar_materi"),
+    OTHER("lainnya"),
+}

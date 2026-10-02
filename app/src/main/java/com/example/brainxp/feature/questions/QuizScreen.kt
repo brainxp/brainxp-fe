@@ -81,6 +81,8 @@ fun QuizScreen(
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
     onGuide: (() -> Unit)? = null,
+    onReport: ((String, Int) -> Unit)? = null,
+    notice: String? = null,
 ) {
     val spacing = BrainXPTheme.spacing
     if (state.questions.isEmpty()) return
@@ -109,7 +111,7 @@ fun QuizScreen(
         if (pager.currentPage != state.index) pager.animateScrollToPage(state.index)
     }
     LaunchedEffect(pager) {
-        snapshotFlow { pager.currentPage }.collect { page ->
+        snapshotFlow { pager.settledPage }.collect { page ->
             if (page != shown) dispatch(QuizEvent.Jump(page))
         }
     }
@@ -125,20 +127,11 @@ fun QuizScreen(
                 .padding(bottom = spacing.screenBottom),
     ) {
         ScreenNav(title = "", onBack = onBack?.let { { leaving = true } }) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(spacing.xs),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                state.current?.let { question ->
-                    StatusPill(
-                        text = question.difficulty,
-                        tone = PillTone.BLUE,
-                    )
-                }
-                if (onGuide != null) {
-                    GuideButton(onClick = onGuide)
-                }
-            }
+            QuizTools(
+                question = state.current,
+                onReport = onReport?.let { report -> { id -> report(id, state.index + 1) } },
+                onGuide = onGuide,
+            )
         }
 
         ProgressStrip(state = state)
@@ -174,16 +167,7 @@ fun QuizScreen(
                     Text(text = stringResource(R.string.quiz_review_again))
                 }
             } else {
-                Text(
-                    text =
-                        if (state.complete) {
-                            stringResource(R.string.quiz_hint_complete)
-                        } else {
-                            stringResource(R.string.quiz_hint_partial)
-                        },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                QuizHint(complete = state.complete, notice = notice)
                 state.current?.let { question ->
                     DoubtButton(
                         marked = question.id in state.doubts,
@@ -199,6 +183,44 @@ fun QuizScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun QuizHint(
+    complete: Boolean,
+    notice: String?,
+) {
+    if (notice != null) {
+        Note(text = notice)
+        return
+    }
+    Text(
+        text = stringResource(if (complete) R.string.quiz_hint_complete else R.string.quiz_hint_partial),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+@Composable
+private fun QuizTools(
+    question: QuizQuestion?,
+    onReport: ((String) -> Unit)?,
+    onGuide: (() -> Unit)?,
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(BrainXPTheme.spacing.xs),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        question?.let {
+            StatusPill(text = difficultyLabel(it.difficulty), tone = PillTone.BLUE)
+        }
+        if (question != null && onReport != null) {
+            ReportButton(onClick = { onReport(question.id) })
+        }
+        if (onGuide != null) {
+            GuideButton(onClick = onGuide)
         }
     }
 }

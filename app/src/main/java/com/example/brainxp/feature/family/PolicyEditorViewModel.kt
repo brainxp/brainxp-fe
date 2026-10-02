@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.result.AppResult
-import com.example.brainxp.core.result.valueOrNull
 import com.example.brainxp.data.repo.AppInventoryRepository
 import com.example.brainxp.data.repo.FamilyRepository
 import com.example.brainxp.data.repo.PolicyRepository
@@ -42,6 +41,7 @@ class PolicyEditorViewModel
         val state: StateFlow<PolicyEditorLoad> = mutableState.asStateFlow()
 
         private var childId: String? = null
+        private val pendingPackages = mutableSetOf<String>()
 
         fun load(
             subjectId: String,
@@ -82,6 +82,7 @@ class PolicyEditorViewModel
                     .firstOrNull { it.packageName == packageName }
                     ?.locked
                     ?.not() ?: return
+            if (!pendingPackages.add(packageName)) return
             mutableState.update { it.copy(policy = current.stepped(PolicyEvent.ToggleApp(packageName)), notice = null) }
             viewModelScope.launch {
                 val result = policies.setAppLocked(packageName, wanted, subject)
@@ -93,6 +94,7 @@ class PolicyEditorViewModel
                         )
                     }
                 }
+                pendingPackages.remove(packageName)
             }
         }
 
@@ -100,16 +102,19 @@ class PolicyEditorViewModel
             subjectId: String,
             childName: String,
         ) {
-            val resolved =
-                childName.ifBlank {
-                    (family.children() as? AppResult.Success)
-                        ?.value
-                        ?.firstOrNull { child -> child.childId == subjectId }
-                        ?.name
-                        .orEmpty()
-                }
+            val resolved = resolveChildName(subjectId, childName) ?: return
             val result = policies.policy(subjectId)
-            val onDevice = inventory.inventoryOf(subjectId).valueOrNull().orEmpty()
+            val onDevice =
+                when (val inventoryResult = inventory.inventoryOf(subjectId)) {
+                    is AppResult.Success -> {
+                        inventoryResult.value
+                    }
+
+                    is AppResult.Failure -> {
+                        mutableState.update { it.copy(loading = false, error = inventoryResult.error) }
+                        return
+                    }
+                }
             mutableState.update {
                 when (result) {
                     is AppResult.Success -> {
@@ -119,6 +124,26 @@ class PolicyEditorViewModel
                     is AppResult.Failure -> {
                         it.copy(loading = false, error = result.error)
                     }
+                }
+            }
+        }
+
+        private suspend fun resolveChildName(
+            subjectId: String,
+            childName: String,
+        ): String? {
+            if (childName.isNotBlank()) return childName
+            return when (val children = family.children()) {
+                is AppResult.Success -> {
+                    children.value
+                        .firstOrNull { it.childId == subjectId }
+                        ?.name
+                        .orEmpty()
+                }
+
+                is AppResult.Failure -> {
+                    mutableState.update { it.copy(loading = false, error = children.error) }
+                    null
                 }
             }
         }

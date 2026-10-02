@@ -2,6 +2,7 @@ package com.example.brainxp.feature.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.brainxp.core.permission.PermissionStateProvider
 import com.example.brainxp.core.result.ApiError
 import com.example.brainxp.core.result.AppResult
 import com.example.brainxp.data.prefs.AuthDataStore
@@ -27,6 +28,7 @@ data class LevelUiState(
     val busy: Boolean = false,
     val error: ApiError? = null,
     val saved: Boolean = false,
+    val permissionsReady: Boolean = false,
 )
 
 @HiltViewModel
@@ -36,6 +38,7 @@ class LevelViewModel
         private val policies: PolicyRepository,
         private val family: FamilyRepository,
         private val auth: AuthDataStore,
+        private val permissions: PermissionStateProvider,
     ) : ViewModel() {
         private val _state = MutableStateFlow(LevelUiState())
         val state: StateFlow<LevelUiState> = _state.asStateFlow()
@@ -49,11 +52,16 @@ class LevelViewModel
                 val outcome = runStep(level)
                 _state.update {
                     when (outcome) {
-                        is AppResult.Success<*> -> it.copy(busy = false, saved = true)
+                        is AppResult.Success<*> -> it.copy(busy = false, saved = true, permissionsReady = permissionsReady())
                         is AppResult.Failure -> it.copy(busy = false, error = outcome.error)
                     }
                 }
             }
+        }
+
+        private fun permissionsReady(): Boolean {
+            permissions.refresh()
+            return permissions.state.value.protectionReady
         }
 
         private suspend fun runStep(level: AcademicLevel): AppResult<*> =

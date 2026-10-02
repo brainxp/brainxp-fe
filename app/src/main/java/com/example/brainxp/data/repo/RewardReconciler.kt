@@ -45,6 +45,7 @@ class RewardReconciler
     @Inject
     constructor(
         private val rewards: RewardRepository,
+        private val pendingSync: PendingSyncQueue,
         private val cache: RewardCache,
         private val clock: AppClock,
         private val appLabels: AppLabels,
@@ -54,6 +55,17 @@ class RewardReconciler
         val state: StateFlow<ReconciledBalance> = mutableState.asStateFlow()
 
         suspend fun reconcile(): ReconciledBalance {
+            pendingSync.flush()
+            if (pendingSync.hasPendingConsumption()) {
+                val cached = cache.cached.first()
+                val held =
+                    ReconciledBalance(
+                        balanceSeconds = cached?.balanceSeconds ?: 0,
+                        source = if (cached == null) BalanceSource.NONE else BalanceSource.CACHE,
+                    )
+                mutableState.value = held
+                return held
+            }
             val reconciled =
                 when (val result = rewards.standing()) {
                     is AppResult.Success -> fromServer(result.value)
@@ -76,7 +88,7 @@ class RewardReconciler
             if (entries.isEmpty()) {
                 return AppResult.Success(mutableState.value)
             }
-            return when (val result = rewards.reportConsumption(entries)) {
+            return when (val result = pendingSync.sendConsumption(entries)) {
                 is AppResult.Success -> {
                     val reconciled = fromServer(result.value)
                     mutableState.value = reconciled

@@ -41,7 +41,6 @@ class DataStoreTest {
             assertEquals(AppMode.UNSET, snapshot.mode)
             assertEquals(DetectorChoice.USAGE_STATS, snapshot.detector)
             assertFalse(snapshot.onboardingComplete)
-            assertFalse(snapshot.protectionEnabled)
         }
 
     @Test
@@ -52,13 +51,11 @@ class DataStoreTest {
             settings.setMode(AppMode.FAMILY)
             settings.setOnboardingComplete(true)
             settings.setDetector(DetectorChoice.ACCESSIBILITY)
-            settings.setProtectionEnabled(true)
 
             val snapshot = settings.settings.first()
             assertEquals(AppMode.FAMILY, snapshot.mode)
             assertEquals(DetectorChoice.ACCESSIBILITY, snapshot.detector)
             assertTrue(snapshot.onboardingComplete)
-            assertTrue(snapshot.protectionEnabled)
         }
 
     @Test
